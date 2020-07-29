@@ -5,9 +5,11 @@
 //terre/dur (plusieurs surfaces dans les splines)
 //chrono avec comptage des tours si on passe bien par les carrés
 //procedural generation pour le décore
-//trajectoir optimal
+//trajectoire optimal
 //IA opti
 //retenir plusieurs circuits
+//3D
+//TrackMania
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -17,8 +19,7 @@
 #include <math.h>
 #include "jeu.h"
 
-#define frames_per_seconde 60
-#define pi 3.141592653589
+#define FRAMES_PER_SECONDE 60
 
 int main()
 {
@@ -55,10 +56,14 @@ int main()
 	//init struct Camera;
 	struct Camera cam;
 	SDL_GetWindowSize(window, &(cam.winSize_w), &(cam.winSize_h));
-	cam.winSize_w = 1800;
-	cam.winSize_h = 1000;
+	if (cam.winSize_w == 1000 && cam.winSize_h == 1000)
+	{	
+		cam.winSize_w = 1850;
+		cam.winSize_h = 1050;
+	}
 	cam.x = car.pos_initx - cam.winSize_w / 2;
 	cam.y = car.pos_inity - cam.winSize_h / 2;
+	cam.zoom = 1;
 
 	//init struct Road;
 	struct Road road;
@@ -85,7 +90,7 @@ int main()
 	{
 		//limited fps
 		currentTime = SDL_GetTicks();
-		if (currentTime > lastTime + 1000/frames_per_seconde) 
+		if (currentTime > lastTime + 1000/FRAMES_PER_SECONDE) 
 		{
 			while (SDL_PollEvent(&event))//events
 			{
@@ -95,16 +100,16 @@ int main()
 						gameRunning = False;
 						break; 
 					case SDL_KEYDOWN:
-						manage_key(event, key, True, &car);	
+						manage_key(event, key, True, &car, &cam);	
 						break;
 					case SDL_KEYUP:
-						manage_key(event, key, False, &car);	
+						manage_key(event, key, False, &car, &cam);	
 						break;
 					case SDL_MOUSEBUTTONDOWN://clique souris
 						switch(event.button.button)
 						{
 							case SDL_BUTTON_LEFT:
-								add_checkPoint(&road, event, cam);
+								add_checkPoint(&road, event, cam, car);
 								break;
 							case SDL_BUTTON_MIDDLE:
 								del_checkPoint(road, event, cam);
