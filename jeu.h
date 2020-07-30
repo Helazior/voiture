@@ -42,6 +42,10 @@ struct Road
 	SDL_Rect tab_checkPoints[NB_SQUARE];//bien vérifier qu'on ne dépasse pas 100.
 	int long_tab_checkPoints;
 	int square_width;
+	int num_clos_check;
+	Bool select;
+	int selectx;
+	int selecty;
 };
 
 struct Keys_pressed
@@ -67,6 +71,7 @@ struct Camera
 	float zoom;
 };
 
+int distance(int x1, int y1, int x2, int y2);
 //drift
 void manage_skid_marks(struct Entity* car, struct Keys_pressed key);
 //car
@@ -78,14 +83,14 @@ void add_checkPoint(struct Road* road, SDL_Event event, struct Camera cam, struc
 //del a checkpoint:
 void del_checkPoint(struct Road road, SDL_Event event, struct Camera cam);
 //found the closest checkpoint to the clic:
-int closest_checkpoint(struct Road road, SDL_Event event, struct Camera cam);
+void closest_checkpoint(struct Road* road, SDL_Event event, struct Camera cam, struct Entity car);
 //manage a checkpoint:
-void manage_checkpoint(struct Road road, SDL_Event event, struct Camera cam);
+void manage_checkpoint(struct Road* road, SDL_Event event, struct Camera cam, struct Entity car);
 
 void render_car(SDL_Renderer *renderer, struct Entity* car, struct Camera cam);//_car display_
-void render_road(SDL_Renderer *renderer, struct Road* road, struct Camera cam, struct Entity car);//_road display_
+void render_road(SDL_Renderer *renderer, struct Road* road, struct Camera cam, struct Entity car, SDL_Event event);//_road display_
 void render_drift(SDL_Renderer *renderer, struct Entity car, struct Camera cam);//_drift display_
-void display(SDL_Renderer *renderer, struct Entity car, struct Road road, struct Camera cam);// display all
+void display(SDL_Renderer *renderer, struct Entity* car, struct Road* road, struct Camera cam, SDL_Event event);// display all
 void clear(SDL_Renderer *renderer);
 
 

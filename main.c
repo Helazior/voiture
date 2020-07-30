@@ -1,5 +1,4 @@
 //déplacer/effacer/editer avec souris
-//zoom/dézoom
 //spline
 //roule mieux sur spline que sur herbe
 //terre/dur (plusieurs surfaces dans les splines)
@@ -69,6 +68,7 @@ int main()
 	struct Road road;
 	road.long_tab_checkPoints = 0;
 	road.square_width = 40;
+	road.select = False;
 	//init struct Keys_pressed;
 	struct Keys_pressed* key = (struct Keys_pressed* )malloc(sizeof(struct Keys_pressed));
 	if (!key)
@@ -115,8 +115,20 @@ int main()
 								del_checkPoint(road, event, cam);
 								break;
 							case SDL_BUTTON_RIGHT:
-								manage_checkpoint(road, event, cam);
+								if (road.long_tab_checkPoints)// if it exist at least 1 checkpoint
+								{
+									manage_checkpoint(&road, event, cam, car);
+								}
 								break;
+							
+							default:
+								break;
+						}
+						break;
+					case SDL_MOUSEBUTTONUP:
+						if (event.button.button == SDL_BUTTON_RIGHT)
+						{
+								road.select = False;
 						}
 						break;
 					default:
@@ -125,7 +137,7 @@ int main()
 			}
 			move_car(&car, key, &cam);
 			clear(renderer);
-			display(renderer, car, road, cam);
+			display(renderer, &car, &road, cam, event);
 			lastTime = currentTime;
 		}
 	}
