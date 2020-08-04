@@ -1,5 +1,5 @@
-//déplacer/effacer/editer avec souris
-//spline
+// TO DO : LOOK IF CHECKPOINTS IS IN SCREEN !!!
+//spline large
 //roule mieux sur spline que sur herbe
 //terre/dur (plusieurs surfaces dans les splines)
 //chrono avec comptage des tours si on passe bien par les carrés
@@ -27,6 +27,7 @@ int main()
 	//init du temps
 	unsigned int lastTime, currentTime;
 	lastTime = 0;
+	currentTime = 0;
 	//init SDL	
 	SDL_Window *window = NULL;
 	SDL_Renderer *renderer = NULL;
@@ -69,6 +70,7 @@ int main()
 	road.long_tab_checkPoints = 0;
 	road.square_width = 40;
 	road.select = False;
+	road.size = 500;
 	//init struct Keys_pressed;
 	struct Keys_pressed* key = (struct Keys_pressed* )malloc(sizeof(struct Keys_pressed));
 	if (!key)
@@ -83,6 +85,9 @@ int main()
 	key->drift = none;
 
 	//__________________Start________________
+	unsigned int remaind_time;
+	remaind_time = lastTime + 1000/FRAMES_PER_SECONDE - currentTime;
+	remaind_time *= (remaind_time > 0);
 	Bool gameRunning = True;
 	
 	SDL_Event event;
@@ -90,56 +95,56 @@ int main()
 	{
 		//limited fps
 		currentTime = SDL_GetTicks();
-		if (currentTime > lastTime + 1000/FRAMES_PER_SECONDE) 
+		SDL_Delay(remaind_time);
+		while (SDL_PollEvent(&event))//events
 		{
-			while (SDL_PollEvent(&event))//events
+		   switch(event.type)
 			{
-			   switch(event.type)
-				{
-					case SDL_QUIT:
-						gameRunning = False;
-						break; 
-					case SDL_KEYDOWN:
-						manage_key(event, key, True, &car, &cam);	
-						break;
-					case SDL_KEYUP:
-						manage_key(event, key, False, &car, &cam);	
-						break;
-					case SDL_MOUSEBUTTONDOWN://clique souris
-						switch(event.button.button)
-						{
-							case SDL_BUTTON_LEFT:
-								add_checkPoint(&road, event, cam, car);
-								break;
-							case SDL_BUTTON_MIDDLE:
-								del_checkPoint(road, event, cam);
-								break;
-							case SDL_BUTTON_RIGHT:
-								if (road.long_tab_checkPoints)// if it exist at least 1 checkpoint
-								{
-									manage_checkpoint(&road, event, cam, car);
-								}
-								break;
-							
-							default:
-								break;
-						}
-						break;
-					case SDL_MOUSEBUTTONUP:
-						if (event.button.button == SDL_BUTTON_RIGHT)
-						{
-								road.select = False;
-						}
-						break;
-					default:
-						break;
-				}
+				case SDL_QUIT:
+					gameRunning = False;
+					break; 
+				case SDL_KEYDOWN:
+					manage_key(&event, key, True, &car, &cam);	
+					break;
+				case SDL_KEYUP:
+					manage_key(&event, key, False, &car, &cam);	
+					break;
+				case SDL_MOUSEBUTTONDOWN://clique souris
+					switch(event.button.button)
+					{
+						case SDL_BUTTON_LEFT:
+							add_checkPoint(&road, &event, &cam, &car);
+							break;
+						case SDL_BUTTON_MIDDLE:
+							if (road.long_tab_checkPoints > 0)
+								del_checkPoint(&road, &event, &cam, &car);
+							break;
+						case SDL_BUTTON_RIGHT:
+							if (road.long_tab_checkPoints)// if it exist at least 1 checkpoint
+							{
+								manage_checkpoint(&road, &event, &cam, &car);
+							}
+							break;
+						
+						default:
+							break;
+					}
+					break;
+				case SDL_MOUSEBUTTONUP:
+					if (event.button.button == SDL_BUTTON_RIGHT)
+					{
+							road.select = False;
+					}
+					break;
+				default:
+					break;
 			}
-			move_car(&car, key, &cam);
-			clear(renderer);
-			display(renderer, &car, &road, cam, event);
-			lastTime = currentTime;
 		}
+		move_car(&car, key, &cam);
+		clear(renderer);
+		display(renderer, &car, &road, &cam, &event);
+		lastTime = currentTime;
+		//printf("%ld			\r", SDL_GetPerformanceCounter());	//performances
 	}
     status = EXIT_SUCCESS;
 Quit:
