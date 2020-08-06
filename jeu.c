@@ -11,8 +11,8 @@
 #define BLACK 0, 0, 0, 255
 #define ORANGE 150, 50, 0, 255
 #define RED 100, 0, 0, 255
-#define GREEN 50, 100, 0, 255
-#define ROAD 255, 200, 200, 255
+//#define GREEN 50, 100, 0, 255
+#define WHITE 255, 200, 175, 255
 
 #define NB_PIX_DRIFT 800
 #define NB_SQUARE 400
@@ -23,7 +23,7 @@
 #define TURN_DRIFT 7.
 #define REAR_CAMERA 20.
 
-#define NB_PTS 400.
+#define NB_PTS 50.
 
 int init(SDL_Window **window, SDL_Renderer **renderer, int w, int h)
 {
@@ -256,8 +256,7 @@ void render_car(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam)
 	car->frame.w = w_prev;
 }
 
-void render_checkPoints(SDL_Renderer *renderer, struct Road* road, struct Camera* cam, struct Entity* car, SDL_Event* event)
-{
+void render_checkPoints(SDL_Renderer *renderer, struct Road* road, struct Camera* cam, struct Entity* car, SDL_Event* event){
 	int i;
 	int x;
 	int y;
@@ -309,8 +308,7 @@ void render_checkPoints(SDL_Renderer *renderer, struct Road* road, struct Camera
 	}	
 }
 
-void render_drift(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam)
-{
+void render_drift(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam){
 	int w, h;
 	w = car->frame.w * cam->zoom;
 	h = car->frame.h * cam->zoom;
@@ -330,14 +328,12 @@ void render_drift(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam
 	unsigned int i;
 	unsigned int j;
 	double angle_marks;
-	for (i = 0; i < car->count_pos_tab; i++)
-	{
+	for (i = 0; i < car->count_pos_tab; i++){
 		marks_x = car->tab_skid_marks_x[i] + w / 2;
 		marks_y = car->tab_skid_marks_y[i] + h / 2;
 		angle = car->tab_skid_marks_angle[i];
 		//devil eyes
-		for (j = 0; j < 4; j ++)
-		{
+		for (j = 0; j < 4; j ++){
 			angle_marks = angle - 0.2 + (j >= 2) * 0.5 - (j == 1 || j == 3) * 0.1;
 			x[j] = (int)(marks_x - dist * cos(angle_marks) / cam->zoom);
 			x[j] -= cam->x;
@@ -350,16 +346,34 @@ void render_drift(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam
 		}
 	}
 }
-void calcul_spline(struct Entity* car, struct Camera* cam, struct Road* road, float* x, float* y, float t){
+void calcul_spline(struct Entity* car, struct Camera* cam, struct Road* road, float* x, float* y, float* pt, short* draw){
+	float t = *pt; 
 	int centre_x = car->frame.x - cam->x;
 	int centre_y = car->frame.y - cam->y;
 	int p0, p1, p2, p3;	
 	p0 = (int)t;
 	p1 = p0 + 1;
 	p2 = p1 + 1;
+	
+	//if checkpoint not in the screen, go to next
+	int s = road->size * cam->zoom / 2;
+	int cx = road->tab_checkPoints[p1].x - cam->x;
+	cx = (1 - cam->zoom) * centre_x + cam->zoom * cx;
+	int cy = road->tab_checkPoints[p1].y - cam->y;
+	cy = (1 - cam->zoom) * centre_y + cam->zoom * cy;
+	int cx2 = road->tab_checkPoints[p2].x - cam->x;
+	cx2 = (1 - cam->zoom) * centre_x + cam->zoom * cx2;
+	int cy2 = road->tab_checkPoints[p2].y - cam->y;
+	cy2 = (1 - cam->zoom) * centre_y + cam->zoom * cy2;
+	if ((cx + s < 0 && cx2 + s < 0) || (cy + s < 0 && cy2 + s < 0) || (cx - s > cam->winSize_w && cx2 - s > cam->winSize_w) || (cy - s > cam->winSize_h && cy2 - s > cam->winSize_h)){
+		*draw = 0;// then don't draw
+		*pt = (float)p1;
+		return;	
+	}//end
+
 	p3 = p2 + 1;
 	t = t - (int)t;
-
+	*draw += 3* (*draw == 0)  - (*draw == 2) - (*draw == 3);
 	float tt = t * t;
 	float ttt = tt * t;
 
@@ -381,49 +395,44 @@ void calcul_road(struct Camera* cam, struct Road* road, float* x, float* y, floa
 	float distx = *prevx - *x;
 	float disty = *prevy - *y;
 	float dist = 2 * distance(*prevx, *prevy, *x, *y);
-	//printf("%f	%f\n", distx, disty);
 	tabx[2] = *x + (disty * road->size * cam->zoom) / dist;
-	tabx[3] = 2 * *x - tabx[2];
-	taby[2] = *y - (distx * road->size * cam->zoom) / dist;		
-	taby[3] = 2 * *y - taby[2];
+	taby[2] = *y - (distx * road->size * cam->zoom) / dist;			
+	tabx[3] = *x - (disty * road->size * cam->zoom) / dist;
+	taby[3] = *y + (distx * road->size * cam->zoom) / dist;
 }	
 void render_road(struct Entity* car, SDL_Renderer *renderer, struct Camera* cam, struct Road* road){
-	// TO DO : LOOK IF CHECKPOINTS IS IN SCREEN !!!
 	// Draw Spline
 	float t;
 	float x, y;
 	float prevx = 0, prevy = 0;
 	float tabx[4] = {0., 0.};
 	float taby[4] = {0., 0.};
-	SDL_SetRenderDrawColor(renderer, ROAD);
+	short draw = 0;
+	SDL_SetRenderDrawColor(renderer, BLACK);
 	for (t = 0; t < (float)road->long_tab_checkPoints - 3.0f; t += 1. / (NB_PTS * cam->zoom)){
-		calcul_spline(car, cam, road, &x, &y, t);
+		calcul_spline(car, cam, road, &x, &y, &t, &draw);
 
-		if (x  + road->size * cam->zoom >= 0 && x < cam->winSize_w  + road->size * cam->zoom && y + road->size * cam->zoom >= 0 && y < cam->winSize_h + road->size * cam->zoom){
+		if (x  + road->size * cam->zoom / 2 >= 0 && x < cam->winSize_w  + road->size * cam->zoom / 2 && y + road->size * cam->zoom / 2 >= 0 && y < cam->winSize_h + road->size * cam->zoom / 2){
 			//SDL_RenderDrawPoint(renderer, (int)x, (int)y);//original spline
-			if (prevx != 0 || prevy != 0){
-				if (distance(prevx, prevy, x, y) > 1){
-					calcul_road(cam, road, &x, &y, &prevx, &prevy, tabx, taby);//calcul 2 points of the road
-					//display road:
-					//test
-					//SDL_RenderDrawPoint(renderer, (int)tabx[2], (int)taby[2]);//original road
-					//SDL_RenderDrawPoint(renderer, (int)tabx[3], (int)taby[3]);
-					SDL_RenderDrawLine(renderer, (int)tabx[2], (int)taby[2], (int)tabx[3], (int)taby[3]);
-					if (tabx[0] != 0 || tabx[1] != 0 || taby[0] != 0 || taby[1] != 0){
-						//fill
-					}
-					prevx = x; prevy = y;
-				}
-			} else {
-				prevx = x; prevy = y;
+			calcul_road(cam, road, &x, &y, &prevx, &prevy, tabx, taby);//calcul 2 points of the road
+			//display road:
+			//test
+			//SDL_RenderDrawPoint(renderer, (int)tabx[2], (int)taby[2]);//original road
+			//SDL_RenderDrawPoint(renderer, (int)tabx[3], (int)taby[3]);
+			//SDL_RenderDrawLine(renderer, (int)tabx[2], (int)taby[2], (int)tabx[3], (int)taby[3]);
+			if (draw == 1){
+				//fill
+				SDL_RenderDrawLine(renderer, (int)tabx[0], (int)taby[0], (int)tabx[2], (int)taby[2]);
+				SDL_RenderDrawLine(renderer, (int)tabx[1], (int)taby[1], (int)tabx[3], (int)taby[3]);
+				//SDL_RenderDrawLine(renderer, (int)prevx, (int)prevy, (int)x, (int)y);
 			}
+			prevx = x; prevy = y;
+
 			//end
 			tabx[0] = tabx[2]; taby[0] = taby[2];
 			tabx[1] = tabx[3]; taby[1] = taby[3];
 		} else {
-			prevx = 0; prevy = 0;
-			tabx[0] = 0; taby[0] = 0;
-			tabx[1] = 0; taby[1] = 0;
+			draw = 0;
 		}
 	}
 }
@@ -437,7 +446,7 @@ void display(SDL_Renderer *renderer, struct Entity* car, struct Road* road, stru
 	//_____drift display_____
 	render_drift(renderer, car, cam);
 	
-	SDL_SetRenderDrawColor(renderer, GREEN);//drift's black pixel
+	SDL_SetRenderDrawColor(renderer, WHITE);//drift's black pixel
 	//_____car display____
 	render_car(renderer, car, cam);
 	SDL_RenderPresent(renderer); 

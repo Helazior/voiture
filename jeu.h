@@ -90,7 +90,7 @@ void manage_checkpoint(struct Road* road, SDL_Event* event, struct Camera* cam, 
 void render_car(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam);//_car display_
 void render_checkPoints(SDL_Renderer *renderer, struct Road* road, struct Camera* cam, struct Entity* car, SDL_Event* event);//_road display_
 void render_drift(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam);//_drift display_
-void calcul_spline(struct Entity* car, struct Camera* cam, struct Road* road, float* x, float* y, float t);
+void calcul_spline(struct Entity* car, struct Camera* cam, struct Road* road, float* x, float* y, float* pt, short* draw);
 void calcul_road(struct Camera* cam, struct Road* road, float* x, float* y, float* prevx, float* prevy, float* tabx, float* taby);
 void render_road(struct Entity* car, SDL_Renderer *renderer, struct Camera* cam, struct Road* road);
 void display(SDL_Renderer *renderer, struct Entity* car, struct Road* road, struct Camera* cam, SDL_Event* event);// display all

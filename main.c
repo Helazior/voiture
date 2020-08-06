@@ -1,5 +1,6 @@
-// TO DO : LOOK IF CHECKPOINTS IS IN SCREEN !!!
-//spline large
+// affiche vitesse
+// caméra limité au bout du circuit
+// 
 //roule mieux sur spline que sur herbe
 //terre/dur (plusieurs surfaces dans les splines)
 //chrono avec comptage des tours si on passe bien par les carrés
@@ -56,11 +57,9 @@ int main()
 	//init struct Camera;
 	struct Camera cam;
 	SDL_GetWindowSize(window, &(cam.winSize_w), &(cam.winSize_h));
-	if (cam.winSize_w == 1000 && cam.winSize_h == 1000)
-	{	
-		cam.winSize_w = 1850;
-		cam.winSize_h = 1050;
-	}
+	cam.winSize_w = 1851;
+	cam.winSize_h = 1050;
+
 	cam.x = car.pos_initx - cam.winSize_w / 2;
 	cam.y = car.pos_inity - cam.winSize_h / 2;
 	cam.zoom = 1;
@@ -143,12 +142,12 @@ int main()
 		move_car(&car, key, &cam);
 		clear(renderer);
 		display(renderer, &car, &road, &cam, &event);
+		//printf("%d\n", (int)car.speed);
 		lastTime = currentTime;
 		//printf("%ld			\r", SDL_GetPerformanceCounter());	//performances
 	}
     status = EXIT_SUCCESS;
 Quit:
-	//free(car);
 	free(key);
     if(NULL != renderer)
         SDL_DestroyRenderer(renderer);
