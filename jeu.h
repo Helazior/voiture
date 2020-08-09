@@ -5,10 +5,13 @@
 
 #define NB_PIX_DRIFT 800
 #define NB_SQUARE 400
+unsigned int startLapTime;
+
 typedef enum
 {
 	False = 0,
-	True = 1
+	True = 1,
+	Start = 2
 }Bool;
 
 
@@ -40,7 +43,9 @@ struct Entity
 struct Road
 {
 	SDL_Rect tab_checkPoints[NB_SQUARE];//bien vérifier qu'on ne dépasse pas 100.
+	Bool tab_valid_checkPoints[NB_SQUARE];
 	int long_tab_checkPoints;
+	int nb_valid_checkPoints;
 	int square_width;
 	int num_clos_check;
 	Bool select;
@@ -73,12 +78,15 @@ struct Camera
 };
 
 float distance(float x1, float y1, float x2, float y2);
+void reset_valid_tab(struct Road* road);
 //drift
 void manage_skid_marks(struct Entity* car, struct Keys_pressed* key);
 //car
 void move_car(struct Entity *car, struct Keys_pressed* key, struct Camera* cam);
 //key
 void manage_key(SDL_Event* event, struct Keys_pressed* key, Bool stat, struct Entity* car, struct Camera* cam);
+//put the 3 last checkpoints into the 3 first:
+void close_circuit(struct Road road);
 //add a checkpoint:
 void add_checkPoint(struct Road* road, SDL_Event* event, struct Camera* cam, struct Entity* car);
 //del a checkpoint:

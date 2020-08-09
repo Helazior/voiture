@@ -21,6 +21,8 @@
 
 #define FRAMES_PER_SECONDE 60
 
+extern unsigned int startLapTime;
+
 int main()
 {
     int status = EXIT_FAILURE;
@@ -67,6 +69,7 @@ int main()
 	//init struct Road;
 	struct Road road;
 	road.long_tab_checkPoints = 0;
+	road.nb_valid_checkPoints = 0;
 	road.square_width = 40;
 	road.select = False;
 	road.size = 500;
