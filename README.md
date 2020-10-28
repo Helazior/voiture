@@ -1,2 +1,2 @@
 # voiture
-voiture game with splines and camera.
+Car game with splines and camera.
