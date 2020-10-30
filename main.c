@@ -1,102 +1,11 @@
-/*autre*/
-// pouvoir modifier les FPS sans changer la vitesse du jeu (fait ?)
-// commenter chaque fonction/struct
-// affiche vitesse
-// caméra limité au bout du circuit
-//roule mieux sur spline que sur herbe
-//terre/dur (plusieurs surfaces dans les splines)
-//procedural generation pour le décore
-
-/*À faire*/
-// barre et touche pour agrandir la largeur de route
-// barre pour gerer la vitesse/acceleration/frottement/virage/derapage
-// case à cocher pour qu'il ne suive plus la voiture, dans ce cas, on peut se déplacer avec les flêches ou avec la souris au bord de l'écran
-// case à cocher pour mettre/ enlever l'IA
-
-//trajectoire optimal sans dérapage
-//trajectoire optimal sans sortir de la route
-//trajectoire optimal avec dérapage
-// pouvoir mettre des obstacles sur la route (mur etc.)
-//IA opti
-//jeu pause
-//fantome de la course
-//retenir plusieurs circuits
-
-// plusieurs bots
-// plusieurs joueurs en local
-// plusieurs joueurs en ligne
-
-// faire un truc très beau et très très visuel
-//3D
-//TrackMania
-
-/*
- *
-Voilà comment sera la version final:
-Un fichier config avec tous les réglages enregistrés (modifiables en jeu)
-On démarre avec une fenêtre qui s'adapte à notre écran
-on a à gauche (modifiable, resizable et enlevable) un panneau de controle qui permet de tout modifier (un racourci clavier pourra remplacer chaque bouton)
-
-Options raccourcis clavier:
-	Le panneau peut s'agrandir (ou alors plusieurs onglets) pour donner encore plus de possibilités:
-	On pourra ainsi modifier les racourcis clavier, mais plus important, avoir des raccourcis pour remplacer une souris sur un ordi portable.
-	Le clique peut donc placer des CP, les enlever/modifier, mais aussi dans un mode plus édition BOUGER LA VOITURE de place
-
-Options jeu:
-	je veux pouvour régler:
-	GRAPHIQUES: 
-		-affichage simu (voir plus bas)
-		-affichage info (vitesse, touche appuyé actuellement etc.)
-		-texture route
-		-nb de points pour la route etc.
-		-couleur fond etc.
-
-	-vitesse de jeu ([*0;*8]avec un curseur qui se bloque sur des emplacements et un -+ à côté)
-	-FPS ([1; 120] qui n'influent pas sur la vitesse de jeu)
-	-grosseur voiture ?
-	-largeur route (curseur)
-	-caméra (4 cam: 
-		0 fixe sur tout le circuit, 
-		1 fixe resizable && movable, 
-		2 classique: suit la voiture mais ne tourne pas)
-		3 tourne avec la voiture (sauf dérapage)
-		4 3D, pour l'instant juste la perspective avec tout en 2D
-
-	-collision ? OUI; NON
-	-toutes les carac de jeu (speed, acceleration, turn, frottement etc.)
-	-mais aussi 
-
-Options mode de jeu:
-	-jouable manuel (l'IA peut reprendre à tout moment)
-	-IA (qu'on peut bouger à tout moment (donc doit recalculer sa trajectoire si on a touché à une commande))
-	-joueur à plusieurs voitures... (avec ou sans collision)
-	-Mode replay avec une barre du temps pour se déplacer. On doit pouvoir avoir toutes les options dispo dans ce mode, mais on ne peut pas jouer. Par contre on peut repprendre la partie à un moment donné.
-
-Options simu:
-	En manuel ou auto:
-	-montre la traj optimal (donc en manuel va devoir recalculer à chaque instant, sauf dans le cas 1 traj au début)
-		-ligne avec couleur (oui, non)
-		-voiture en transparant (oui, non)
-		-iniquement au CP ou tout le temps (régler le temps en 'ms').
-		-efface la traj quand passé dessus (oui, non)
-		-efface l'ancienne trace si la traj à changer (oui, non)
-	-laisse une trace derrière elle
-		- ligne de couleur (rouge quand freine et vert quand acclère; bleu à doite, jaune à gauche (dessus ou à côté (doite/gauche)?))
-		-voiture en transparant
-_____________________________________________________
+/*main.c*/
+/*Jeu de course ayant 3 buts:
+ * Jouer à un jeu de course
+ * Voir comment fonctionne l'IA de la voiture avec des annimations
+ * Créer un univers (3D ?) de façon procédurale, et pouvoir le visiter avec plusieurs caméras
+ * Le tout parametrable à volonté, à tout moment*/
 
 
-*/
-
-
-
-/*Dans IA:
-	remplir ia->next_cp_bord[0].x = ...;
-	lorsque dans calcul_road
-	x = ia->next_cp.x;
-...
-	ne pas oublier de rajouter struct Ia* ia en parametre
-*/
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
