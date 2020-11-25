@@ -18,7 +18,7 @@
 #define WHITE 255, 200, 175, 255
 #define YELLOW 200, 150, 0, 255
 
-#define NB_PIX_DRIFT 800
+#define NB_PIX_DRIFT 600
 #define NB_SQUARE 400
 
 #define ACCELERATION 10.
@@ -29,8 +29,7 @@
 
 #define NB_PTS 50.
 
-int init(SDL_Window **window, SDL_Renderer **renderer, int w, int h)
-{
+int init(SDL_Window **window, SDL_Renderer **renderer, int w, int h){
     if(0 != SDL_Init(SDL_INIT_VIDEO)){
         fprintf(stderr, "Erreur SDL_Init : %s", SDL_GetError());
         return -1;
@@ -58,8 +57,7 @@ int setWindowColor(SDL_Renderer *renderer, SDL_Color color){
     return 0;  
 }
 
-SDL_Texture* loadTexture(SDL_Renderer *renderer, const char* p_filePath)
-{
+SDL_Texture* loadTexture(SDL_Renderer *renderer, const char* p_filePath){
 	SDL_Texture* texture = NULL;
 	texture = IMG_LoadTexture(renderer, p_filePath);
 
@@ -68,13 +66,11 @@ SDL_Texture* loadTexture(SDL_Renderer *renderer, const char* p_filePath)
 	return texture;
 }
 
-float distance(float x1, float y1, float x2, float y2)
-{
+float distance(float x1, float y1, float x2, float y2){
 	return sqrt(pow((float)x1 - (float)x2, 2) + pow(((float)y1 - (float)y2), 2));
 }
 
-void manage_skid_marks(struct Entity* car, struct Keys_pressed* key)
-{
+void manage_skid_marks(struct Entity* car, struct Keys_pressed* key){
 	if (key->drift)
 	{
 		car->tab_skid_marks_x[car->pos_tab] = car->posx;
@@ -86,8 +82,7 @@ void manage_skid_marks(struct Entity* car, struct Keys_pressed* key)
 	}
 }
 
-void move_car(struct Entity *car, struct Keys_pressed* key, struct Camera* cam) 
-{
+void move_car(struct Entity *car, struct Keys_pressed* key, struct Camera* cam) {
 	manage_skid_marks(car, key);
 	//keys_to_struct
 	if (car->speed < 0.5 && key->drift)
@@ -120,8 +115,7 @@ void move_car(struct Entity *car, struct Keys_pressed* key, struct Camera* cam)
 	cam->y = (int)((9.*(float)cam->y + new_cam_y) / 10.);
 }
 
-void manage_key(SDL_Event* event, struct Keys_pressed* key, Bool stat, struct Entity* car, struct Camera* cam, struct Road* road)
-{
+void manage_key(SDL_Event* event, struct Keys_pressed* key, Bool stat, struct Entity* car, struct Camera* cam, struct Road* road){
 	switch(event->key.keysym.sym)
 	{
 		case SDLK_UP:
@@ -254,8 +248,7 @@ void clear(SDL_Renderer *renderer){
 	SDL_RenderClear(renderer);
 }
 
-void render_car(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam)
-{
+void render_car(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam){
 	SDL_Rect src;
 	src.x = 0;
 	src.y = 0;
@@ -488,6 +481,7 @@ void render_road(struct Entity* car, SDL_Renderer *renderer, struct Camera* cam,
 void display(SDL_Renderer *renderer, struct Entity* car, struct Road* road, struct Camera* cam, SDL_Event* event, struct Ia* ia){
 	//____spline display____
 	render_road(car, renderer, cam, road);
+
 	//____road display____
 	render_checkPoints(renderer, road, cam, car, event, ia);
 
@@ -499,4 +493,3 @@ void display(SDL_Renderer *renderer, struct Entity* car, struct Road* road, stru
 	render_car(renderer, car, cam);
 	SDL_RenderPresent(renderer); 
 }
-
