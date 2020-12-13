@@ -1,3 +1,5 @@
+/*jeu.c*/
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
@@ -7,19 +9,8 @@
 #include "jeu.h"
 #include "ia.h"
 
-#define PI 3.141592653589
-
+/*dans un fichier */
 #define IA_MODE 1
-
-#define BLACK 0, 0, 0, 255
-#define ORANGE 150, 50, 0, 255
-#define RED 100, 0, 0, 255
-#define GREEN 50, 100, 0, 255
-#define WHITE 255, 200, 175, 255
-#define YELLOW 200, 150, 0, 255
-
-/*#define NB_PIX_DRIFT 600*/
-/*#define NB_SQUARE 400*/
 
 #define ACCELERATION 10.
 #define FROTTEMENT 8.
@@ -328,17 +319,17 @@ void render_checkPoints(SDL_Renderer *renderer, struct Road* road, struct Camera
 			}	
 			//display:
 			if (road->select && road->num_clos_check == i){
-				SDL_SetRenderDrawColor(renderer, RED);
+				SDL_SetRenderDrawColor(renderer, CP_SELECTED_COLOR); // checkpoint selected
 				SDL_RenderFillRect(renderer, &road->tab_checkPoints[i]);
 			}
 			else if (road->tab_valid_checkPoints[i] == True){
-				SDL_SetRenderDrawColor(renderer, GREEN);
+				SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR); // checkpoint taken
 				SDL_RenderDrawRect(renderer, &road->tab_checkPoints[i]);
 			}else if (road->tab_valid_checkPoints[i] == False){
-				SDL_SetRenderDrawColor(renderer, ORANGE);
+				SDL_SetRenderDrawColor(renderer, CP_COLOR); // normal checkpoint
 				SDL_RenderFillRect(renderer, &road->tab_checkPoints[i]);
 			}else{
-				SDL_SetRenderDrawColor(renderer, YELLOW);
+				SDL_SetRenderDrawColor(renderer, CP_START_COLOR); // start checkpoint
 				SDL_RenderFillRect(renderer, &road->tab_checkPoints[i]);
 			}
 		
@@ -360,7 +351,7 @@ void render_drift(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam
 	int x[4] = {0};
 	int y[4] = {0};
 
-	SDL_SetRenderDrawColor(renderer, BLACK);//drift's black pixel
+	SDL_SetRenderDrawColor(renderer, DRIFT_COLOR);//drift's black pixel
 	
 	int centre_x = car->frame.x + w / 2 - cam->x;
 	int centre_y = car->frame.y + h / 2 - cam->y;
@@ -450,7 +441,7 @@ void render_road(struct Entity* car, SDL_Renderer *renderer, struct Camera* cam,
 	float tabx[4] = {0., 0.};
 	float taby[4] = {0., 0.};
 	short draw = 0;
-	SDL_SetRenderDrawColor(renderer, BLACK);
+	SDL_SetRenderDrawColor(renderer, LINE_ROAD_COLOR);
 	for (t = 0; t < (float)road->long_tab_checkPoints - 3.0f * (road->long_tab_checkPoints <= 3); t += 1. / (NB_PTS * cam->zoom)){
 		calcul_spline(car, cam, road, &x, &y, &t, &draw);
 
@@ -490,7 +481,8 @@ void display(SDL_Renderer *renderer, struct Entity* car, struct Road* road, stru
 	//_____drift display_____
 	render_drift(renderer, car, cam);
 	
-	SDL_SetRenderDrawColor(renderer, WHITE);//drift's black pixel
+	//default color background
+	SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);
 	//_____car display____
 	render_car(renderer, car, cam);
 	SDL_RenderPresent(renderer); 

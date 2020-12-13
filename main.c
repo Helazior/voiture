@@ -1,9 +1,12 @@
 /*main.c*/
+
 /*Jeu de course ayant 3 buts:
  * Jouer à un jeu de course
  * Voir comment fonctionne l'IA de la voiture avec des annimations
  * Créer un univers (3D ?) de façon procédurale, et pouvoir le visiter avec plusieurs caméras
- * Le tout parametrable à volonté, à tout moment*/
+ * Le tout parametrable à volonté, à tout moment
+ *
+ * Voir détails dans le fichier texte*/
 
 
 #include <SDL2/SDL.h>

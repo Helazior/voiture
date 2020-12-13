@@ -1,9 +1,28 @@
+//jeu.h
+
 #ifndef _JEU_H
 #define _JEU_H
 
+#define PI 3.141592653589
+
+#define BLACK 0, 0, 0, 255
+#define ORANGE 150, 50, 0, 255
+#define RED 100, 0, 0, 255
+#define GREEN 50, 100, 0, 255
+#define WHITE 255, 200, 175, 255
+#define YELLOW 200, 150, 0, 255
+
+#define DRIFT_COLOR BLACK
+#define LINE_ROAD_COLOR BLACK
+#define BACKGROUND_COLOR WHITE
+#define CP_TAKEN_COLOR GREEN
+#define CP_COLOR ORANGE
+#define CP_START_COLOR YELLOW
+#define CP_SELECTED_COLOR RED
+
+//dans un fichier
 #define NB_PIX_DRIFT 800
 #define NB_SQUARE 400
-//unsigned int startLapTime;
 
 typedef enum
 {
