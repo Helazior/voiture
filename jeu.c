@@ -18,8 +18,8 @@
 #define WHITE 255, 200, 175, 255
 #define YELLOW 200, 150, 0, 255
 
-#define NB_PIX_DRIFT 600
-#define NB_SQUARE 400
+/*#define NB_PIX_DRIFT 600*/
+/*#define NB_SQUARE 400*/
 
 #define ACCELERATION 10.
 #define FROTTEMENT 8.
@@ -93,11 +93,11 @@ void move_car(struct Entity *car, struct Keys_pressed* key, struct Camera* cam) 
 	}
 	car->angle_drift += ((key->drift == left) - 2*(key->drift == right)) * TURN_DRIFT / 320.;
 	car->speed += ((float)(key->up) - (float)(key->down)/2.) * ACCELERATION / 20.;
-	if (abs(car->speed) > 3.)
+	if (fabs(car->speed) > 3.)
 	{
-		car->angle += (double)(TURN *((double)(key->left) - (double)(key->right))) / (10 * (1. - 2. * (double)((car->speed) < 0.)) * 6 * sqrt(abs(car->speed)));
+		car->angle += (double)(TURN *((double)(key->left) - (double)(key->right))) / (10 * (1. - 2. * (double)((car->speed) < 0.)) * 6 * sqrt(fabs(car->speed)));
 	}
-	else if (abs(car->speed) <= 3.)
+	else if (fabs(car->speed) <= 3.)
 	{
 		car->angle += (double)((double)(key->left) - (double)(key->right)) * (car->speed) * TURN / 1280;
 	}
@@ -107,7 +107,7 @@ void move_car(struct Entity *car, struct Keys_pressed* key, struct Camera* cam) 
 	car->posy -= car->speed * (float)sin(car->angle);
 	car->frame.x = (int)(car->posx);
 	car->frame.y = (int)(car->posy);
-	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (abs(car->speed))) * FROTTEMENT / 640.;
+	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (fabs(car->speed))) * FROTTEMENT / 640.;
 	//manage cam
 	float new_cam_x = car->posx - cam->winSize_w / 2 + REAR_CAMERA * car->speed * cos(car->angle);
 	float new_cam_y = car->posy - cam->winSize_h / 2 - REAR_CAMERA * car->speed * sin(car->angle);

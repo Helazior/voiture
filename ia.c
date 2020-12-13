@@ -9,12 +9,12 @@
 
 #define PI 3.141592653589
 
-void angle_next_cp(struct Road* road, struct Ia* ia){
-	//moyenne entre vect ortho cp1 et vect cp1cp2
-	//pour l'instant on test vect ortho cp1
+/*void angle_next_cp(struct Road* road, struct Ia* ia){*/
+	/*//moyenne entre vect ortho cp1 et vect cp1cp2*/
+	/*//pour l'instant on test vect ortho cp1*/
 	
 
-}
+/*}*/
 void calcul_next_cp(struct Road* road, struct Ia* ia){
 	/*____1: next_cp____*/
 	if (ia->num_next_cp == -1 && road->nb_valid_checkPoints > 1){
