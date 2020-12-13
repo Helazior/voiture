@@ -3,7 +3,7 @@
 
 #define NB_PIX_DRIFT 800
 #define NB_SQUARE 400
-unsigned int startLapTime;
+//unsigned int startLapTime;
 
 typedef enum
 {

@@ -29,6 +29,8 @@
 
 #define NB_PTS 50.
 
+static unsigned int startLapTime;
+
 int init(SDL_Window **window, SDL_Renderer **renderer, int w, int h){
     if(0 != SDL_Init(SDL_INIT_VIDEO)){
         fprintf(stderr, "Erreur SDL_Init : %s", SDL_GetError());
