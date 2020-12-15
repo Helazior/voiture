@@ -16,8 +16,8 @@ debug : $(EXEC)
 opti : COMPILER_FLAGS += -O3
 opti : $(EXEC)
 
-$(EXEC) : $(OBJS) jeu.c jeu.h ia.c ia.h
-	gcc -o $@ $(OBJS) jeu.c ia.c $(LINKER_FLAGS) $(COMPILER_FLAGS)
+$(EXEC) : $(OBJS) jeu.c jeu.h ia.c ia.h background.c
+	gcc -o $@ $(OBJS) jeu.c ia.c background.c $(LINKER_FLAGS) $(COMPILER_FLAGS)
 
 clean :
 	rm *.o

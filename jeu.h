@@ -3,6 +3,7 @@
 #ifndef _JEU_H
 #define _JEU_H
 
+#define FRAMES_PER_SECONDE 60
 
 #define PI 3.141592653589
 
@@ -20,6 +21,7 @@
 #define CP_COLOR ORANGE
 #define CP_START_COLOR YELLOW
 #define CP_SELECTED_COLOR RED
+#define NEXT_CP_COLOR GREEN
 
 #define NB_PIX_DRIFT 800
 #define NB_SQUARE 400
@@ -46,6 +48,10 @@ int init(SDL_Window** window, SDL_Renderer** renderer, int w, int h); //initiali
 int setWindowColor(SDL_Renderer *renderer, SDL_Color color); //to have a new color
 
 SDL_Texture* loadTexture(SDL_Renderer *renderer, const char* p_filePath);
+
+typedef struct Toolbar{
+	SDL_Rect size;
+}Toolbar;
 
 typedef struct Coord{
 	float x;
@@ -142,7 +148,7 @@ void render_drift(SDL_Renderer *renderer, Entity* car, Camera* cam);//_drift dis
 void calcul_spline(Entity* car, Camera* cam, Road* road, float* x, float* y, float* pt, short* draw);
 void calcul_road(Camera* cam, Road* road, float* x, float* y, float* prevx, float* prevy, float* tabx, float* taby);
 void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* road);
-void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia);// display all
+void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar);// display all
 void clear(SDL_Renderer *renderer);
 
 #endif

@@ -17,9 +17,9 @@
 #include <math.h>
 #include "jeu.h"
 #include "ia.h"
+#include "background.h"
 
-#define FRAMES_PER_SECONDE 60
-
+#define ZOOM_INIT 0.25
 
 extern unsigned int startLapTime;
 
@@ -27,9 +27,8 @@ int main(void){
     int status = EXIT_FAILURE;
 
 	//init du temps
-	unsigned int lastTime, currentTime;
-	lastTime = 0;
-	currentTime = 0;
+	unsigned int lastTime;
+	lastTime = SDL_GetTicks();
 	//init SDL
 	SDL_Window *window = NULL;
 	SDL_Renderer *renderer = NULL;
@@ -47,7 +46,7 @@ int main(void){
 
 	cam.x = car.pos_initx - cam.winSize_w / 2;
 	cam.y = car.pos_inity - cam.winSize_h / 2;
-	cam.zoom = 0.25;
+	cam.zoom = ZOOM_INIT;
 
 	//init struct Road;
 	Road road;
@@ -72,17 +71,22 @@ int main(void){
 	Ia ia;
 	init_ia(&ia);
 
+	//init struct Toolbar;
+	Toolbar toolbar;
+	init_toolbar(&toolbar);
+
 	//__________________Start________________
-	unsigned int remaind_time;
-	remaind_time = lastTime + 1000/FRAMES_PER_SECONDE - currentTime;
-	remaind_time *= (remaind_time > 0);
+	int remain_time;
 	Bool gameRunning = True;
 
 	SDL_Event event;
 	while (gameRunning){
 		//limited fps
-		currentTime = SDL_GetTicks();
-		SDL_Delay(remaind_time);
+		/*printf("%d\n", SDL_GetTicks() - lastTime);*/
+		remain_time = (int)(1000./FRAMES_PER_SECONDE + 0.5) + lastTime - SDL_GetTicks();
+		remain_time *= (int)(remain_time > 0);
+		SDL_Delay(remain_time); // wait*/
+		lastTime = SDL_GetTicks();
 		while (SDL_PollEvent(&event))//events
 		{
 		   switch(event.type){
@@ -127,13 +131,16 @@ int main(void){
 			}
 		}
 		// if rezised
+		// à mettre dans une fonction
 		SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
+		cam.winSize_w -= toolbar.size.w;
+		toolbar.size.h = cam.winSize_h;
+		toolbar.size.x = cam.winSize_w;
 		
 		move_car(&car, key, &cam);
 		clear(renderer);
-		display(renderer, &car, &road, &cam, &event, &ia);
+		display(renderer, &car, &road, &cam, &event, &ia, &toolbar);
 		//printf("%d\n", (int)car.speed);
-		lastTime = currentTime;
 		//printf("%ld			\r", SDL_GetPerformanceCounter());	//performances
 	}
     status = EXIT_SUCCESS;

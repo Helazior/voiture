@@ -8,6 +8,7 @@
 #include <math.h>
 #include "jeu.h"
 #include "ia.h"
+#include "background.h"
 
 static unsigned int startLapTime;
 
@@ -76,8 +77,7 @@ float distance(float x1, float y1, float x2, float y2){
 }
 
 void manage_skid_marks(Entity* car, Keys_pressed* key){
-	if (key->drift)
-	{
+	if (key->drift){
 		car->tab_skid_marks_x[car->pos_tab] = car->posx;
 		car->tab_skid_marks_y[car->pos_tab] = car->posy;
 		car->tab_skid_marks_angle[car->pos_tab] = car->angle + car->angle_drift;
@@ -90,21 +90,20 @@ void manage_skid_marks(Entity* car, Keys_pressed* key){
 void move_car(Entity *car, Keys_pressed* key, Camera* cam) {
 	manage_skid_marks(car, key);
 	//keys_to_struct
-	if (car->speed < 0.5 && key->drift)
-	{
+	if (car->speed < 0.5 && key->drift){
 		key->drift = none;
 		car->angle += car->angle_drift;
 		car->angle_drift = 0.;
 	}
-	car->angle_drift += ((key->drift == left) - 2*(key->drift == right)) * car->turn_drift / 320.;
-	car->speed += ((float)(key->up) - (float)(key->down)/2.) * car->acceleration / 20.;
+	car->angle_drift += ((key->drift == left) - 2*(key->drift == right)) * car->turn_drift * (60. / FRAMES_PER_SECONDE) / 320.;
+	car->speed += ((float)(key->up) - (float)(key->down)/2.) * car->acceleration * (60. / FRAMES_PER_SECONDE) / 20.;
 	if (fabs(car->speed) > 3.)
 	{
-		car->angle += (double)(car->turn *((double)(key->left) - (double)(key->right))) / (10 * (1. - 2. * (double)((car->speed) < 0.)) * 6 * sqrt(fabs(car->speed)));
+		car->angle += (double)(car->turn * (60. / FRAMES_PER_SECONDE) * ((double)(key->left) - (double)(key->right))) / (10 * (1. - 2. * (double)((car->speed) < 0.)) * 6 * sqrt(fabs(car->speed)));
 	}
 	else if (fabs(car->speed) <= 3.)
 	{
-		car->angle += (double)((double)(key->left) - (double)(key->right)) * (car->speed) *car->turn / 1280;
+		car->angle += (double)((double)(key->left) - (double)(key->right)) * (car->speed) * car->turn * (60. / FRAMES_PER_SECONDE) / 1280;
 	}
 	
 	//struct_to_moveCar
@@ -114,8 +113,8 @@ void move_car(Entity *car, Keys_pressed* key, Camera* cam) {
 	car->frame.y = (int)(car->posy);
 	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (fabs(car->speed))) * car->frottement / 640.;
 	//manage cam
-	float new_cam_x = car->posx - cam->winSize_w / 2 + REAR_CAMERA * car->speed * cos(car->angle);
-	float new_cam_y = car->posy - cam->winSize_h / 2 - REAR_CAMERA * car->speed * sin(car->angle);
+	float new_cam_x = car->posx - cam->winSize_w / 2 + REAR_CAMERA * car->speed * ( FRAMES_PER_SECONDE / 60. ) * cos(car->angle);
+	float new_cam_y = car->posy - cam->winSize_h / 2 - REAR_CAMERA * car->speed * ( FRAMES_PER_SECONDE / 60. ) * sin(car->angle);
 	cam->x = (int)((9.*(float)cam->x + new_cam_x) / 10.);
 	cam->y = (int)((9.*(float)cam->y + new_cam_y) / 10.);
 }
@@ -310,10 +309,10 @@ void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity*
 		y = road->tab_checkPoints[i].y;	
 		if (x + square_w > 0 && x - square_w < cam->winSize_w && y + square_w > 0 && y - square_w < cam->winSize_h)
 		{
-			//check if collision:
+			//check if collision between car and CP:
 			
 			if (road->long_tab_checkPoints > 1 && (distance(x_prev, y_prev, car->posx, car->posy) <= road->size / 2 + car->frame.h / 2)){	
-				if (road->tab_valid_checkPoints[i] == False){
+				if (road->tab_valid_checkPoints[i] == False){ // CP not already valid
 					road->nb_valid_checkPoints++;
 					road->tab_valid_checkPoints[i] = True;
 					if (IA_MODE && road->long_tab_checkPoints >= 4){
@@ -329,7 +328,7 @@ void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity*
 					reset_valid_tab(road);
 				}
 			}	
-			//display:
+			//display: 
 			if (road->select && road->num_clos_check == i){
 				SDL_SetRenderDrawColor(renderer, CP_SELECTED_COLOR); // checkpoint selected
 				SDL_RenderFillRect(renderer, &road->tab_checkPoints[i]);
@@ -337,6 +336,10 @@ void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity*
 			else if (road->tab_valid_checkPoints[i] == True){
 				SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR); // checkpoint taken
 				SDL_RenderDrawRect(renderer, &road->tab_checkPoints[i]);
+			}
+			else if (ia->mode >= 1 && ia->num_next_cp == i){
+				SDL_SetRenderDrawColor(renderer, NEXT_CP_COLOR); // checkpoint taken
+				SDL_RenderFillRect(renderer, &road->tab_checkPoints[i]);
 			}else if (road->tab_valid_checkPoints[i] == False){
 				SDL_SetRenderDrawColor(renderer, CP_COLOR); // normal checkpoint
 				SDL_RenderFillRect(renderer, &road->tab_checkPoints[i]);
@@ -483,7 +486,7 @@ void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* road){
 	}
 }
 
-void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia){
+void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar){
 	//____spline display____
 	render_road(car, renderer, cam, road);
 
@@ -493,6 +496,9 @@ void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_E
 	//_____drift display_____
 	render_drift(renderer, car, cam);
 	
+	//_____toolbar display___
+	render_toolbar(renderer, toolbar);
+
 	//default color background
 	SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);
 	//_____car display____
