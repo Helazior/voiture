@@ -38,41 +38,26 @@ int main(void){
 		}
 
 
-	struct Entity car;
-	car.speed = 0.;//pixels per frame
-	car.angle = 0.;
-	car.angle_drift = 0.;
-	car.pos_initx = 700.;
-	car.pos_inity = 700.;
-	car.posx = car.pos_initx;
-	car.posy = car.pos_inity;
-	car.frame.x = (int)(car.posx);
-	car.frame.y = (int)(car.posy);
-	car.frame.w = 128;
-	car.frame.h = 52;
-	car.tex = loadTexture(renderer, "image/car.png");//car image
-	car.pos_tab = 0;
-	car.count_pos_tab = 0;
+	Entity car;
+	init_car(&car, renderer);
 
 	//init struct Camera;
-	struct Camera cam;
-	SDL_GetWindowSize(window, &(cam.winSize_w), &(cam.winSize_h));
-	cam.winSize_w = 1851;
-	cam.winSize_h = 1050;
+	Camera cam;
+	SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
 
 	cam.x = car.pos_initx - cam.winSize_w / 2;
 	cam.y = car.pos_inity - cam.winSize_h / 2;
 	cam.zoom = 0.25;
 
 	//init struct Road;
-	struct Road road;
+	Road road;
 	road.long_tab_checkPoints = 0;
 	road.nb_valid_checkPoints = 0;
 	road.square_width = 40;
 	road.select = False;
 	road.size = 500;
 	//init struct Keys_pressed;
-	struct Keys_pressed* key = (struct Keys_pressed* )malloc(sizeof(struct Keys_pressed));
+	Keys_pressed* key = (Keys_pressed* )malloc(sizeof(Keys_pressed));
 	if (!key){
 		printf("Error dynamic allocation of key.");
 		goto Quit;
@@ -82,11 +67,10 @@ int main(void){
 	key->left = False;
 	key->right = False;
 	key->drift = none;
+
 	//init struct Ia;
-	struct Ia ia;
-	ia.next_cp.x = 0.;
-	ia.next_cp.y = 0.;
-	ia.num_next_cp = -1;
+	Ia ia;
+	init_ia(&ia);
 
 	//__________________Start________________
 	unsigned int remaind_time;
@@ -101,8 +85,7 @@ int main(void){
 		SDL_Delay(remaind_time);
 		while (SDL_PollEvent(&event))//events
 		{
-		   switch(event.type)
-			{
+		   switch(event.type){
 				case SDL_QUIT:
 					gameRunning = False;
 					break;
@@ -143,7 +126,9 @@ int main(void){
 					break;
 			}
 		}
-
+		// if rezised
+		SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
+		
 		move_car(&car, key, &cam);
 		clear(renderer);
 		display(renderer, &car, &road, &cam, &event, &ia);

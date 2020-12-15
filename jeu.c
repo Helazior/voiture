@@ -9,17 +9,6 @@
 #include "jeu.h"
 #include "ia.h"
 
-/*dans un fichier */
-#define IA_MODE 1
-
-#define ACCELERATION 10.
-#define FROTTEMENT 8.
-#define TURN 8.
-#define TURN_DRIFT 7.
-#define REAR_CAMERA 20.
-
-#define NB_PTS 50.
-
 static unsigned int startLapTime;
 
 int init(SDL_Window **window, SDL_Renderer **renderer, int w, int h){
@@ -31,7 +20,9 @@ int init(SDL_Window **window, SDL_Renderer **renderer, int w, int h){
 		fprintf(stderr, "Erreur IMG_Init : %s", SDL_GetError());
         return -1;
 	}
-	if(0 != SDL_CreateWindowAndRenderer(w, h, SDL_WINDOW_MAXIMIZED, window, renderer)){
+	// SDL_WINDOW_MAXIMIZED if you do not fullscreen
+	// SDL_WINDOW_FULLSCREEN_DESKTOP
+	if(0 != SDL_CreateWindowAndRenderer(w, h, SDL_WINDOW_FULLSCREEN_DESKTOP, window, renderer)){
         fprintf(stderr, "Erreur SDL_CreateWindowAndRenderer : %s", SDL_GetError());
         return -1;
     }
@@ -59,11 +50,32 @@ SDL_Texture* loadTexture(SDL_Renderer *renderer, const char* p_filePath){
 	return texture;
 }
 
+void init_car(Entity* car, SDL_Renderer *renderer){
+	car->speed = 0.;//pixels per frame
+	car->angle = 0.;
+	car->angle_drift = 0.;
+	car->pos_initx = 700.;
+	car->pos_inity = 700.;
+	car->posx = car->pos_initx;
+	car->posy = car->pos_inity;
+	car->frame.x = (int)(car->posx);
+	car->frame.y = (int)(car->posy);
+	car->frame.w = 128;
+	car->frame.h = 52;
+	car->tex = loadTexture(renderer, "image/car.png");//car image
+	car->pos_tab = 0;
+	car->count_pos_tab = 0;
+	car->acceleration = ACCELERATION;
+	car->frottement = FROTTEMENT;
+	car->turn = TURN;
+	car->turn_drift = TURN_DRIFT;
+}
+
 float distance(float x1, float y1, float x2, float y2){
 	return sqrt(pow((float)x1 - (float)x2, 2) + pow(((float)y1 - (float)y2), 2));
 }
 
-void manage_skid_marks(struct Entity* car, struct Keys_pressed* key){
+void manage_skid_marks(Entity* car, Keys_pressed* key){
 	if (key->drift)
 	{
 		car->tab_skid_marks_x[car->pos_tab] = car->posx;
@@ -75,7 +87,7 @@ void manage_skid_marks(struct Entity* car, struct Keys_pressed* key){
 	}
 }
 
-void move_car(struct Entity *car, struct Keys_pressed* key, struct Camera* cam) {
+void move_car(Entity *car, Keys_pressed* key, Camera* cam) {
 	manage_skid_marks(car, key);
 	//keys_to_struct
 	if (car->speed < 0.5 && key->drift)
@@ -84,15 +96,15 @@ void move_car(struct Entity *car, struct Keys_pressed* key, struct Camera* cam) 
 		car->angle += car->angle_drift;
 		car->angle_drift = 0.;
 	}
-	car->angle_drift += ((key->drift == left) - 2*(key->drift == right)) * TURN_DRIFT / 320.;
-	car->speed += ((float)(key->up) - (float)(key->down)/2.) * ACCELERATION / 20.;
+	car->angle_drift += ((key->drift == left) - 2*(key->drift == right)) * car->turn_drift / 320.;
+	car->speed += ((float)(key->up) - (float)(key->down)/2.) * car->acceleration / 20.;
 	if (fabs(car->speed) > 3.)
 	{
-		car->angle += (double)(TURN *((double)(key->left) - (double)(key->right))) / (10 * (1. - 2. * (double)((car->speed) < 0.)) * 6 * sqrt(fabs(car->speed)));
+		car->angle += (double)(car->turn *((double)(key->left) - (double)(key->right))) / (10 * (1. - 2. * (double)((car->speed) < 0.)) * 6 * sqrt(fabs(car->speed)));
 	}
 	else if (fabs(car->speed) <= 3.)
 	{
-		car->angle += (double)((double)(key->left) - (double)(key->right)) * (car->speed) * TURN / 1280;
+		car->angle += (double)((double)(key->left) - (double)(key->right)) * (car->speed) *car->turn / 1280;
 	}
 	
 	//struct_to_moveCar
@@ -100,7 +112,7 @@ void move_car(struct Entity *car, struct Keys_pressed* key, struct Camera* cam) 
 	car->posy -= car->speed * (float)sin(car->angle);
 	car->frame.x = (int)(car->posx);
 	car->frame.y = (int)(car->posy);
-	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (fabs(car->speed))) * FROTTEMENT / 640.;
+	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (fabs(car->speed))) * car->frottement / 640.;
 	//manage cam
 	float new_cam_x = car->posx - cam->winSize_w / 2 + REAR_CAMERA * car->speed * cos(car->angle);
 	float new_cam_y = car->posy - cam->winSize_h / 2 - REAR_CAMERA * car->speed * sin(car->angle);
@@ -108,7 +120,7 @@ void move_car(struct Entity *car, struct Keys_pressed* key, struct Camera* cam) 
 	cam->y = (int)((9.*(float)cam->y + new_cam_y) / 10.);
 }
 
-void manage_key(SDL_Event* event, struct Keys_pressed* key, Bool stat, struct Entity* car, struct Camera* cam, struct Road* road){
+void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road){
 	switch(event->key.keysym.sym)
 	{
 		case SDLK_UP:
@@ -165,7 +177,7 @@ void manage_key(SDL_Event* event, struct Keys_pressed* key, Bool stat, struct En
 }
 
 //add a checkpoint:
-void add_checkPoint(struct Road* road, SDL_Event* event, struct Camera* cam, struct Entity* car){
+void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 	if (road->long_tab_checkPoints < NB_SQUARE)
 	{
 		road->tab_checkPoints[road->long_tab_checkPoints].x = event->button.x - road->square_width / 2 + cam->x + (event->button.x + cam->x - car->frame.x) * (float)(-1. + 1/cam->zoom);
@@ -181,7 +193,7 @@ void add_checkPoint(struct Road* road, SDL_Event* event, struct Camera* cam, str
 	}
 }
 //found the closest checkpoint to the clic:
-void closest_checkpoint(struct Road* road, SDL_Event* event, struct Camera* cam, struct Entity* car){
+void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 	int dist = 0;
 	int pos_clique_x = event->button.x - road->square_width / 2 + cam->x + (event->button.x + cam->x - car->frame.x) * (float)(-1. + 1/cam->zoom);
 	int pos_clique_y = event->button.y - road->square_width / 2 + cam->y + (event->button.y + cam->y - car->frame.y) * (float)(-1. + 1/cam->zoom);
@@ -201,7 +213,7 @@ void closest_checkpoint(struct Road* road, SDL_Event* event, struct Camera* cam,
 	road->selecty = road->tab_checkPoints[road->num_clos_check].y - pos_clique_y;
 }
 
-void reset_valid_tab(struct Road* road){
+void reset_valid_tab(Road* road){
 	if (road->long_tab_checkPoints >= 4 && road->nb_valid_checkPoints == road->long_tab_checkPoints){
 		printf("Lap time: %.2f\n", ((float)SDL_GetTicks() - (float)startLapTime) / 1000.);
 		//startLapTime = SDL_GetTicks();
@@ -214,13 +226,13 @@ void reset_valid_tab(struct Road* road){
 }	
 
 //manage a checkpoint:
-void manage_checkpoint(struct Road* road, SDL_Event* event, struct Camera* cam, struct Entity* car){
+void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 	road->select = True;
 	closest_checkpoint(road, event, cam, car);
 }
 
 //del a checkpoint:
-void del_checkPoint(struct Road* road, SDL_Event* event, struct Camera* cam, struct Entity* car){
+void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 	closest_checkpoint(road, event, cam, car);
 	int i;
 	if (road->tab_valid_checkPoints[road->num_clos_check] != False){
@@ -241,7 +253,7 @@ void clear(SDL_Renderer *renderer){
 	SDL_RenderClear(renderer);
 }
 
-void render_car(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam){
+void render_car(SDL_Renderer *renderer, Entity* car, Camera* cam){
 	SDL_Rect src;
 	src.x = 0;
 	src.y = 0;
@@ -266,7 +278,7 @@ void render_car(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam){
 	car->frame.w = w_prev;
 }
 
-void render_checkPoints(SDL_Renderer *renderer, struct Road* road, struct Camera* cam, struct Entity* car, SDL_Event* event, struct Ia* ia){
+void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity* car, SDL_Event* event, Ia* ia){
 	int i;
 	int x;
 	int y;
@@ -341,7 +353,7 @@ void render_checkPoints(SDL_Renderer *renderer, struct Road* road, struct Camera
 	}	
 }
 
-void render_drift(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam){
+void render_drift(SDL_Renderer *renderer, Entity* car, Camera* cam){
 	int w, h;
 	w = car->frame.w * cam->zoom;
 	h = car->frame.h * cam->zoom;
@@ -379,7 +391,7 @@ void render_drift(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam
 		}
 	}
 }
-void calcul_spline(struct Entity* car, struct Camera* cam, struct Road* road, float* x, float* y, float* pt, short* draw){
+void calcul_spline(Entity* car, Camera* cam, Road* road, float* x, float* y, float* pt, short* draw){
 	float t = *pt; 
 	int centre_x = car->frame.x - cam->x;
 	int centre_y = car->frame.y - cam->y;
@@ -424,7 +436,7 @@ void calcul_spline(struct Entity* car, struct Camera* cam, struct Road* road, fl
 	*y = (1 - cam->zoom) * centre_y + cam->zoom * *y;
 }
 
-void calcul_road(struct Camera* cam, struct Road* road, float* x, float* y, float* prevx, float* prevy, float* tabx, float* taby){
+void calcul_road(Camera* cam, Road* road, float* x, float* y, float* prevx, float* prevy, float* tabx, float* taby){
 	float distx = *prevx - *x;
 	float disty = *prevy - *y;
 	float dist = 2 * distance(*prevx, *prevy, *x, *y);
@@ -433,7 +445,7 @@ void calcul_road(struct Camera* cam, struct Road* road, float* x, float* y, floa
 	tabx[3] = *x - (disty * road->size * cam->zoom) / dist;
 	taby[3] = *y + (distx * road->size * cam->zoom) / dist;
 }	
-void render_road(struct Entity* car, SDL_Renderer *renderer, struct Camera* cam, struct Road* road){
+void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* road){
 	// Draw Spline
 	float t;
 	float x, y;
@@ -471,7 +483,7 @@ void render_road(struct Entity* car, SDL_Renderer *renderer, struct Camera* cam,
 	}
 }
 
-void display(SDL_Renderer *renderer, struct Entity* car, struct Road* road, struct Camera* cam, SDL_Event* event, struct Ia* ia){
+void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia){
 	//____spline display____
 	render_road(car, renderer, cam, road);
 

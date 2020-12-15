@@ -3,6 +3,7 @@
 #ifndef _JEU_H
 #define _JEU_H
 
+
 #define PI 3.141592653589
 
 #define BLACK 0, 0, 0, 255
@@ -20,9 +21,17 @@
 #define CP_START_COLOR YELLOW
 #define CP_SELECTED_COLOR RED
 
-//dans un fichier
 #define NB_PIX_DRIFT 800
 #define NB_SQUARE 400
+
+#define ACCELERATION 10.
+#define FROTTEMENT 8.
+#define TURN 8.
+#define TURN_DRIFT 7.
+
+#define REAR_CAMERA 20.
+
+#define NB_PTS 50.
 
 typedef enum
 {
@@ -43,20 +52,24 @@ typedef struct Coord{
 	float y;
 }Coord;
 
-struct Ia
-{
+typedef struct Ia{
+	short mode;
 	Coord next_cp;
 	int num_next_cp;
 	float angle_cp;
 	Coord next_cp_bord[2];
-};
+}Ia;
 
-struct Entity
-{
+typedef struct Entity{
 	float posx;
 	float posy;
 	float pos_initx;
 	float pos_inity;
+
+	float acceleration;
+	float frottement;
+	float turn;
+	float turn_drift;
 
 	float speed;
 	double angle;
@@ -68,10 +81,9 @@ struct Entity
 	double tab_skid_marks_angle[NB_PIX_DRIFT];
 	unsigned int pos_tab;//return to 0 when arrived to max
 	unsigned int count_pos_tab;//stay max
-};
+}Entity;
 
-struct Road
-{
+typedef struct Road{
 	SDL_Rect tab_checkPoints[NB_SQUARE];//bien vérifier qu'on ne dépasse pas 100.
 	Bool tab_valid_checkPoints[NB_SQUARE];
 	int long_tab_checkPoints;
@@ -82,10 +94,9 @@ struct Road
 	int selectx;
 	int selecty;
 	int size;
-};
+}Road;
 
-struct Keys_pressed
-{
+typedef struct Keys_pressed{
 	Bool up;
 	Bool down;
 	Bool left;
@@ -96,41 +107,42 @@ struct Keys_pressed
 		left = 1,
 		right = 2
 	}drift;
-};
+}Keys_pressed;
 
-struct Camera
-{
+typedef struct Camera{
 	int x;
 	int y;
 	int winSize_w;
 	int winSize_h;
 	float zoom;
-};
+}Camera;
+
+void init_car(Entity* car, SDL_Renderer *renderer);
 float distance(float x1, float y1, float x2, float y2);
-void reset_valid_tab(struct Road* road);
+void reset_valid_tab(Road* road);
 //drift
-void manage_skid_marks(struct Entity* car, struct Keys_pressed* key);
+void manage_skid_marks(Entity* car, Keys_pressed* key);
 //car
-void move_car(struct Entity *car, struct Keys_pressed* key, struct Camera* cam);
+void move_car(Entity *car, Keys_pressed* key, Camera* cam);
 //key
-void manage_key(SDL_Event* event, struct Keys_pressed* key, Bool stat, struct Entity* car, struct Camera* cam, struct Road* road);
+void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road);
 //put the 3 last checkpoints into the 3 first:
-void close_circuit(struct Road road);
+void close_circuit(Road road);
 //add a checkpoint:
-void add_checkPoint(struct Road* road, SDL_Event* event, struct Camera* cam, struct Entity* car);
+void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 //del a checkpoint:
-void del_checkPoint(struct Road* road, SDL_Event* event, struct Camera* cam, struct Entity* car);
+void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 //found the closest checkpoint to the clic:
-void closest_checkpoint(struct Road* road, SDL_Event* event, struct Camera* cam, struct Entity* car);
+void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 //manage a checkpoint:
-void manage_checkpoint(struct Road* road, SDL_Event* event, struct Camera* cam, struct Entity* car);
-void render_car(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam);//_car display_
-void render_checkPoints(SDL_Renderer *renderer, struct Road* road, struct Camera* cam, struct Entity* car, SDL_Event* event, struct Ia* ia);//_road display_
-void render_drift(SDL_Renderer *renderer, struct Entity* car, struct Camera* cam);//_drift display_
-void calcul_spline(struct Entity* car, struct Camera* cam, struct Road* road, float* x, float* y, float* pt, short* draw);
-void calcul_road(struct Camera* cam, struct Road* road, float* x, float* y, float* prevx, float* prevy, float* tabx, float* taby);
-void render_road(struct Entity* car, SDL_Renderer *renderer, struct Camera* cam, struct Road* road);
-void display(SDL_Renderer *renderer, struct Entity* car, struct Road* road, struct Camera* cam, SDL_Event* event, struct Ia* ia);// display all
+void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
+void render_car(SDL_Renderer *renderer, Entity* car, Camera* cam);//_car display_
+void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity* car, SDL_Event* event, Ia* ia);//_road display_
+void render_drift(SDL_Renderer *renderer, Entity* car, Camera* cam);//_drift display_
+void calcul_spline(Entity* car, Camera* cam, Road* road, float* x, float* y, float* pt, short* draw);
+void calcul_road(Camera* cam, Road* road, float* x, float* y, float* prevx, float* prevy, float* tabx, float* taby);
+void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* road);
+void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia);// display all
 void clear(SDL_Renderer *renderer);
 
 #endif

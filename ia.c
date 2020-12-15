@@ -7,7 +7,13 @@
 #include "jeu.h"
 #include "ia.h"
 
-#define PI 3.141592653589
+
+void init_ia(Ia* ia){
+	ia->mode = IA_MODE;
+	ia->next_cp.x = 0.;
+	ia->next_cp.y = 0.;
+	ia->num_next_cp = -1;
+}
 
 /*void angle_next_cp(struct Road* road, struct Ia* ia){*/
 	/*//moyenne entre vect ortho cp1 et vect cp1cp2*/
