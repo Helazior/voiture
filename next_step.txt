@@ -5,7 +5,7 @@
 
 
 /*autre*/
-// pouvoir modifier les FPS sans changer la vitesse du jeu (fait ?)
+(fait)// pouvoir modifier les FPS sans changer la vitesse du jeu
 // commenter chaque fonction/struct
 // affiche vitesse
 // caméra limité au bout du circuit
@@ -14,15 +14,15 @@
 //procedural generation pour le décore
 
 /*À faire*/
-// barre et touche pour agrandir la largeur de route
+(en cours)// barre et touche pour agrandir la largeur de route
 // barre pour gerer la vitesse/acceleration/frottement/virage/derapage
-// case à cocher pour qu'il ne suive plus la voiture, dans ce cas, on peut se déplacer avec les flêches ou avec la souris au bord de l'écran
-// case à cocher pour mettre/ enlever l'IA
+// case à cocher pour que la caméra ne suive plus la voiture, dans ce cas, on peut se déplacer avec les flêches ou avec la souris au bord de l'écran
+// case à cocher pour mettre/enlever l'IA
 
 //trajectoire optimal sans dérapage
 //trajectoire optimal sans sortir de la route
 //trajectoire optimal avec dérapage
-// pouvoir mettre des obstacles sur la route (mur etc.)
+//pouvoir mettre des obstacles sur la route (mur etc.)
 //IA opti
 //jeu pause
 //fantome de la course
@@ -46,7 +46,8 @@ on a à gauche (modifiable, resizable et enlevable) un panneau de controle qui p
 Options raccourcis clavier:
 	Le panneau peut s'agrandir (ou alors plusieurs onglets) pour donner encore plus de possibilités:
 	On pourra ainsi modifier les racourcis clavier, mais plus important, avoir des raccourcis pour remplacer une souris sur un ordi portable.
-	Le clique peut donc placer des CP, les enlever/modifier, mais aussi dans un mode plus édition BOUGER LA VOITURE de place
+	Le clique peut donc placer des CP, les enlever/modifier, mais aussi dans un mode plus édition BOUGER LA VOITURE de place.
+	Lorsque l'on est sur un curseur, on peut le bouger avec '-' et '+'.
 
 Options jeu:
 	je veux pouvour régler:
@@ -112,4 +113,3 @@ En bonus, mettre un algo du voyageur de commerce pour la route.
 ...
 	ne pas oublier de rajouter struct Ia* ia en parametre
 */
-
