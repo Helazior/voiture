@@ -9,10 +9,11 @@
  * Voir détails dans le fichier texte*/
 
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #include <math.h>
 #include "jeu.h"
@@ -26,7 +27,7 @@ extern unsigned int startLapTime;
 int main(void){
     int status = EXIT_FAILURE;
 
-	//init du temps
+	//init time
 	unsigned int lastTime;
 	lastTime = SDL_GetTicks();
 	//init SDL
@@ -35,7 +36,7 @@ int main(void){
 	if (init(&window, &renderer, 1851, 1050)){
 			goto Quit;
 		}
-
+	
 
 	Entity car;
 	init_car(&car, renderer);
@@ -73,7 +74,8 @@ int main(void){
 
 	//init struct Toolbar;
 	Toolbar toolbar;
-	init_toolbar(&toolbar);
+	init_toolbar(&toolbar, renderer);
+	
 
 	//__________________Start________________
 	int remain_time;
@@ -136,6 +138,7 @@ int main(void){
 		cam.winSize_w -= toolbar.size.w;
 		toolbar.size.h = cam.winSize_h;
 		toolbar.size.x = cam.winSize_w;
+		toolbar.tex_size.x = toolbar.size.x + 50;
 		
 		move_car(&car, key, &cam);
 		clear(renderer);
@@ -150,7 +153,8 @@ Quit:
     if(NULL != renderer)
         SDL_DestroyRenderer(renderer);
     if(NULL != window)
-        SDL_DestroyWindow(window);
+		SDL_DestroyWindow(window);
+	free_font(&toolbar);
     SDL_Quit();
     return status;
 }

@@ -51,6 +51,12 @@ SDL_Texture* loadTexture(SDL_Renderer *renderer, const char* p_filePath);
 
 typedef struct Toolbar{
 	SDL_Rect size;
+	// le texte sera une structure, on fera donc un tableau de texte
+	TTF_Font* font;
+	//SDL_Color color;
+	SDL_Surface* text;
+	SDL_Texture* texture;
+	SDL_Rect tex_size;
 }Toolbar;
 
 typedef struct Coord{

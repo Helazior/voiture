@@ -1,9 +1,10 @@
 /*jeu.c*/
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #include <math.h>
 #include "jeu.h"
@@ -20,6 +21,10 @@ int init(SDL_Window **window, SDL_Renderer **renderer, int w, int h){
 	if (!(IMG_Init(IMG_INIT_PNG))){
 		fprintf(stderr, "Erreur IMG_Init : %s", SDL_GetError());
         return -1;
+	}
+	if (TTF_Init() < 0){ // to write text
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[DEBUG] > %s", SDL_GetError());
+		return EXIT_FAILURE;
 	}
 	// SDL_WINDOW_MAXIMIZED if you do not fullscreen
 	// SDL_WINDOW_FULLSCREEN_DESKTOP
@@ -177,8 +182,7 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Cam
 
 //add a checkpoint:
 void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
-	if (road->long_tab_checkPoints < NB_SQUARE)
-	{
+	if (road->long_tab_checkPoints < NB_SQUARE){
 		road->tab_checkPoints[road->long_tab_checkPoints].x = event->button.x - road->square_width / 2 + cam->x + (event->button.x + cam->x - car->frame.x) * (float)(-1. + 1/cam->zoom);
 	   	road->tab_checkPoints[road->long_tab_checkPoints].y = event->button.y - road->square_width / 2 + cam->y + (event->button.y + cam->y - car->frame.y) * (float)(-1. + 1/cam->zoom);
 		road->tab_checkPoints[road->long_tab_checkPoints].w = road->square_width;

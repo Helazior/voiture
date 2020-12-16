@@ -4,7 +4,7 @@ OBJS = main.c
 COMPILER_FLAGS = -Wall -Wextra -pedantic
 
 #LINKER_FLAGS specifies the libraries we're linking against
-LINKER_FLAGS = -lSDL2 -lSDL2_image -lm
+LINKER_FLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf -lm
 #OBJ_NAME specifies the name of our exectuable
 EXEC = exec
 
