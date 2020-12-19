@@ -1,6 +1,8 @@
 # voiture
 Car game with splines and camera.
 
+
+
 Request SDL2  
 Install on Ubuntu:
 ```
@@ -11,3 +13,17 @@ Install on Arch:
 ```
 sudo pacman -S sdl2 sdl2_image sdl2_ttf
 ```
+** **  
+# Compiler
+```
+make
+```
+debugg mode :
+```
+make debug
+```
+with gcc -O3 optimisations :
+```
+make opti
+```
+
