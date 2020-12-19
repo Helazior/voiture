@@ -5,9 +5,11 @@
 
 #define FONT "akaashNormal.ttf"
 #define FONT_SIZE 18
-#define ANTIALIASING 0
+#define COLOR_TOOLBAR ORANGE
 
-void init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer);
+void init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Camera* cam, Road* road);
+
+void click_toolbar(Toolbar* toolbar, SDL_Event* event);
 
 void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar);
 

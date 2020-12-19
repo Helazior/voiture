@@ -74,7 +74,7 @@ int main(void){
 
 	//init struct Toolbar;
 	Toolbar toolbar;
-	init_toolbar(&toolbar, renderer);
+	init_toolbar(&toolbar, renderer, &cam, &road);
 	
 
 	//__________________Start________________
@@ -105,15 +105,18 @@ int main(void){
 					switch(event.button.button)
 					{
 						case SDL_BUTTON_LEFT:
-							add_checkPoint(&road, &event, &cam, &car);
+							if (event.button.x <= cam.winSize_w){
+								add_checkPoint(&road, &event, &cam, &car);
+							} else {
+								click_toolbar(&toolbar, &event);
+							}
 							break;
 						case SDL_BUTTON_MIDDLE:
 							if (road.long_tab_checkPoints > 0)
 								del_checkPoint(&road, &event, &cam, &car);
 							break;
 						case SDL_BUTTON_RIGHT:
-							if (road.long_tab_checkPoints)// if it exist at least 1 checkpoint
-							{
+							if (road.long_tab_checkPoints){// if it exist at least 1 checkpoint
 								manage_checkpoint(&road, &event, &cam, &car);
 							}
 							break;
@@ -123,8 +126,7 @@ int main(void){
 					}
 					break;
 				case SDL_MOUSEBUTTONUP:
-					if (event.button.button == SDL_BUTTON_RIGHT)
-					{
+					if (event.button.button == SDL_BUTTON_RIGHT){
 							road.select = False;
 					}
 					break;
@@ -138,7 +140,6 @@ int main(void){
 		cam.winSize_w -= toolbar.size.w;
 		toolbar.size.h = cam.winSize_h;
 		toolbar.size.x = cam.winSize_w;
-		toolbar.tex_size.x = toolbar.size.x + 50;
 		
 		move_car(&car, key, &cam);
 		clear(renderer);
@@ -147,9 +148,9 @@ int main(void){
 		//printf("%ld			\r", SDL_GetPerformanceCounter());	//performances
 	}
     status = EXIT_SUCCESS;
+
+	free(key);
 Quit:
-	if(NULL != key)
-		free(key);
     if(NULL != renderer)
         SDL_DestroyRenderer(renderer);
     if(NULL != window)

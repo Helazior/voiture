@@ -35,13 +35,18 @@
 
 #define NB_PTS 50.
 
-typedef enum
-{
+#define NB_SETTINGS 3
+
+typedef enum{
 	False = 0,
 	True = 1,
 	Start = 2
 }Bool;
 
+typedef enum{
+	Checkbox = 0,
+	Line = 1
+}Type_of_settings;
 
 int init(SDL_Window** window, SDL_Renderer** renderer, int w, int h); //initialisation SDL
 
@@ -49,14 +54,30 @@ int setWindowColor(SDL_Renderer *renderer, SDL_Color color); //to have a new col
 
 SDL_Texture* loadTexture(SDL_Renderer *renderer, const char* p_filePath);
 
+typedef struct Setting{
+	int* variable; // sera sans doute un ** pour ne plus avoir de type
+	SDL_Surface* text;
+	SDL_Texture* texture;
+	SDL_Rect tex_size; //automatic
+	Type_of_settings type;
+	int min; // pour l'instant int, mais sera changé pour du multi type
+	int max;
+
+}Setting;
+//TODO: mettre Toolbar dans le bon programme (background.h), de même pour Ia.
 typedef struct Toolbar{
-	SDL_Rect size;
+	SDL_Rect size; // size of Toolbar
 	// le texte sera une structure, on fera donc un tableau de texte
 	TTF_Font* font;
 	//SDL_Color color;
-	SDL_Surface* text;
-	SDL_Texture* texture;
-	SDL_Rect tex_size;
+	Setting settings[NB_SETTINGS];
+
+	int num_page; // of the toolbar
+	int* select_var; //multi type ** bientôt
+	//int pages[5];
+	//int tab_settings[30]; //tab
+	int pos_click_x;
+	int pos_click_y;
 }Toolbar;
 
 typedef struct Coord{
@@ -113,8 +134,7 @@ typedef struct Keys_pressed{
 	Bool down;
 	Bool left;
 	Bool right;
-	enum
-	{
+	enum{
 		none = 0,
 		left = 1,
 		right = 2

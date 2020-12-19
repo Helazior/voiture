@@ -26,8 +26,8 @@ int init(SDL_Window **window, SDL_Renderer **renderer, int w, int h){
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[DEBUG] > %s", SDL_GetError());
 		return EXIT_FAILURE;
 	}
-	// SDL_WINDOW_MAXIMIZED if you do not fullscreen
-	// SDL_WINDOW_FULLSCREEN_DESKTOP
+	// SDL_WINDOW_MAXIMIZED -> not fullscreen
+	// SDL_WINDOW_FULLSCREEN_DESKTOP -> fs
 	if(0 != SDL_CreateWindowAndRenderer(w, h, SDL_WINDOW_FULLSCREEN_DESKTOP, window, renderer)){
         fprintf(stderr, "Erreur SDL_CreateWindowAndRenderer : %s", SDL_GetError());
         return -1;
@@ -92,7 +92,7 @@ void manage_skid_marks(Entity* car, Keys_pressed* key){
 	}
 }
 
-void move_car(Entity *car, Keys_pressed* key, Camera* cam) {
+void move_car(Entity* car, Keys_pressed* key, Camera* cam) {
 	manage_skid_marks(car, key);
 	//keys_to_struct
 	if (car->speed < 0.5 && key->drift){
@@ -451,7 +451,8 @@ void calcul_road(Camera* cam, Road* road, float* x, float* y, float* prevx, floa
 	taby[2] = *y - (distx * road->size * cam->zoom) / dist;
 	tabx[3] = *x - (disty * road->size * cam->zoom) / dist;
 	taby[3] = *y + (distx * road->size * cam->zoom) / dist;
-}	
+}
+
 void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* road){
 	// Draw Spline
 	float t;
