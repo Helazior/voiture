@@ -1,12 +1,10 @@
 # voiture
 Car game with splines and camera.
 
-<<<<<<< HEAD
-
 
 =======
 ** **  
->>>>>>> f1bc4a5d4e7e8fb121fcc3a55497713ddcb6c925
+
 Request SDL2  
 
 Install on Ubuntu:
