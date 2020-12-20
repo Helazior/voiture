@@ -73,11 +73,12 @@ typedef struct Toolbar{
 	Setting settings[NB_SETTINGS];
 
 	int num_page; // of the toolbar
+	int num_setting;
 	int* select_var; //multi type ** bientôt
+	Bool is_selecting;
 	//int pages[5];
 	//int tab_settings[30]; //tab
 	int pos_click_x;
-	int pos_click_y;
 }Toolbar;
 
 typedef struct Coord{

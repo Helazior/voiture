@@ -102,8 +102,7 @@ int main(void){
 					manage_key(&event, key, False, &car, &cam, &road);
 					break;
 				case SDL_MOUSEBUTTONDOWN://clique souris
-					switch(event.button.button)
-					{
+					switch(event.button.button){
 						case SDL_BUTTON_LEFT:
 							if (event.button.x <= cam.winSize_w){
 								add_checkPoint(&road, &event, &cam, &car);
@@ -127,12 +126,17 @@ int main(void){
 					break;
 				case SDL_MOUSEBUTTONUP:
 					if (event.button.button == SDL_BUTTON_RIGHT){
-							road.select = False;
-					}
+						road.select = False;
+					}else if(event.button.button == SDL_BUTTON_LEFT){
+						toolbar.is_selecting = False;
+					} 
 					break;
 				default:
 					break;
 			}
+		}
+		if (toolbar.is_selecting){
+			change_variable(&toolbar, &event);
 		}
 		// if rezised
 		// à mettre dans une fonction

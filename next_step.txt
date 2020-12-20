@@ -8,6 +8,7 @@
 (fait)// pouvoir modifier les FPS sans changer la vitesse du jeu
 // commenter chaque fonction/struct
 // affiche vitesse
+// afficher frame pour voir frame max
 // caméra limité au bout du circuit
 //roule mieux sur spline que sur herbe
 //terre/dur (plusieurs surfaces dans les splines)
