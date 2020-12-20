@@ -2,7 +2,6 @@
 Car game with splines and camera.
 
 
-=======
 ** **  
 
 Request SDL2  
