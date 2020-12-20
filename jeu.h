@@ -33,7 +33,7 @@
 
 #define REAR_CAMERA 20.
 
-#define NB_PTS 50.
+#define NB_PTS 250.
 
 #define NB_SETTINGS 3
 
@@ -64,7 +64,7 @@ typedef struct Setting{
 	int max;
 
 }Setting;
-//TODO: mettre Toolbar dans le bon programme (background.h), de même pour Ia.
+
 typedef struct Toolbar{
 	SDL_Rect size; // size of Toolbar
 	// le texte sera une structure, on fera donc un tableau de texte
@@ -158,7 +158,7 @@ void manage_skid_marks(Entity* car, Keys_pressed* key);
 //car
 void move_car(Entity *car, Keys_pressed* key, Camera* cam);
 //key
-void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road);
+void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road, Toolbar* toolbar);
 //put the 3 last checkpoints into the 3 first:
 void close_circuit(Road road);
 //add a checkpoint:

@@ -96,10 +96,10 @@ int main(void){
 					gameRunning = False;
 					break;
 				case SDL_KEYDOWN:
-					manage_key(&event, key, True, &car, &cam, &road);
+					manage_key(&event, key, True, &car, &cam, &road, &toolbar);
 					break;
 				case SDL_KEYUP:
-					manage_key(&event, key, False, &car, &cam, &road);
+					manage_key(&event, key, False, &car, &cam, &road, &toolbar);
 					break;
 				case SDL_MOUSEBUTTONDOWN://clique souris
 					switch(event.button.button){

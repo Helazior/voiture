@@ -102,12 +102,10 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam) {
 	}
 	car->angle_drift += ((key->drift == left) - 2*(key->drift == right)) * car->turn_drift * (60. / FRAMES_PER_SECONDE) / 320.;
 	car->speed += ((float)(key->up) - (float)(key->down)/2.) * car->acceleration * (60. / FRAMES_PER_SECONDE) / 20.;
-	if (fabs(car->speed) > 3.)
-	{
+	if (fabs(car->speed) > 3.){
 		car->angle += (double)(car->turn * (60. / FRAMES_PER_SECONDE) * ((double)(key->left) - (double)(key->right))) / (10 * (1. - 2. * (double)((car->speed) < 0.)) * 6 * sqrt(fabs(car->speed)));
 	}
-	else if (fabs(car->speed) <= 3.)
-	{
+	else if (fabs(car->speed) <= 3.){
 		car->angle += (double)((double)(key->left) - (double)(key->right)) * (car->speed) * car->turn * (60. / FRAMES_PER_SECONDE) / 1280;
 	}
 	
@@ -124,13 +122,13 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam) {
 	cam->y = (int)((9.*(float)cam->y + new_cam_y) / 10.);
 }
 
-void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road){
-	switch(event->key.keysym.sym)
-	{
+void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road, Toolbar* toolbar){
+	short add_to_var;
+	add_to_var = 1;
+	switch(event->key.keysym.sym){
 		case SDLK_UP:
 			key->up = stat;
-			if (key->drift && stat)
-			{
+			if (key->drift && stat){
 				key->drift = none;
 				car->angle += car->angle_drift;
 				car->angle_drift = 0.;
@@ -174,6 +172,24 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Cam
 		case SDLK_o:
 			cam->zoom /= 1.1;
 			break;
+		case SDLK_KP_PLUS:
+		case SDLK_PLUS:
+		case SDLK_EQUALS:
+			if (toolbar->select_var){
+				change_variable_keys(toolbar, add_to_var);
+			}
+			break;
+		case SDLK_KP_MINUS:
+		case SDLK_MINUS:
+		case SDLK_KP_LESS:
+		case SDLK_LESS:
+		case SDLK_6:
+			if (toolbar->select_var){
+				change_variable_keys(toolbar, -add_to_var);
+			}
+			break;
+
+
 
 		default:
 			break;
@@ -195,6 +211,7 @@ void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 	road->long_tab_checkPoints++;
 	}
 }
+
 //found the closest checkpoint to the clic:
 void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 	int dist = 0;
@@ -203,8 +220,7 @@ void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 	road->num_clos_check = 0;
 	int min_dist = distance((float)pos_clique_x, (float)pos_clique_y, (float)road->tab_checkPoints[0].x, (float)road->tab_checkPoints[0].y);
 	int i;
-	for (i = 1; i < road->long_tab_checkPoints; i++)
-	{
+	for (i = 1; i < road->long_tab_checkPoints; i++){
 		dist = distance((float)pos_clique_x, (float)pos_clique_y, (float)road->tab_checkPoints[i].x, (float)road->tab_checkPoints[i].y);
 		if (dist < min_dist)
 		{
@@ -244,8 +260,7 @@ void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 			reset_valid_tab(road);
 		}
 	}
-	for(i = road->num_clos_check; i < road->long_tab_checkPoints - 1; i++)
-	{
+	for(i = road->num_clos_check; i < road->long_tab_checkPoints - 1; i++){
 		road->tab_checkPoints[i] = road->tab_checkPoints[i+1];
 		road->tab_valid_checkPoints[i] = road->tab_valid_checkPoints[i+1];
 	}
@@ -311,8 +326,7 @@ void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity*
 		road->tab_checkPoints[i].h *= cam->zoom;
 		x = road->tab_checkPoints[i].x;
 		y = road->tab_checkPoints[i].y;	
-		if (x + square_w > 0 && x - square_w < cam->winSize_w && y + square_w > 0 && y - square_w < cam->winSize_h)
-		{
+		if (x + square_w > 0 && x - square_w < cam->winSize_w && y + square_w > 0 && y - square_w < cam->winSize_h){
 			//check if collision between car and CP:
 			
 			if (road->long_tab_checkPoints > 1 && (distance(x_prev, y_prev, car->posx, car->posy) <= road->size / 2 + car->frame.h / 2)){	
@@ -357,7 +371,7 @@ void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity*
 		road->tab_checkPoints[i].w = w_prev;
 		road->tab_checkPoints[i].x = x_prev;
 		road->tab_checkPoints[i].y = y_prev;
-	}	
+	}
 }
 
 void render_drift(SDL_Renderer *renderer, Entity* car, Camera* cam){
@@ -398,6 +412,7 @@ void render_drift(SDL_Renderer *renderer, Entity* car, Camera* cam){
 		}
 	}
 }
+
 void calcul_spline(Entity* car, Camera* cam, Road* road, float* x, float* y, float* pt, short* draw){
 	float t = *pt; 
 	int centre_x = car->frame.x - cam->x;

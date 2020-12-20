@@ -97,6 +97,8 @@ _____________________________________________________
 */
 
 PARTIE GRAPHIQUES:
+
+algo : premier pixel de la map, on check le point road le plus proche  -> détermine la couleur (+ bruit de perlin par dessus) PUIS refaire avec le prochain point qui PEUT changer de zone.
 - mettre des textures avec de la génération procédurale
 - faire de la 3D
 Le but est simple : avoir un monde avec des montagnes aux endroits sans route.
