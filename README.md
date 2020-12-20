@@ -20,7 +20,7 @@ sudo pacman -S sdl2 sdl2_image sdl2_ttf
 ```
 make
 ```
-debugg mode :
+debug mode :
 ```
 make debug
 ```
