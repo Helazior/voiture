@@ -4,8 +4,20 @@
 -mettre des commentaires pour chaque fonction et structure
 
 
+OPTIMISATION :
+ %   cumulative   self              self     total           
+ time   seconds   seconds    calls  us/call  us/call  name    
+ 51.62      0.65     0.65     4326   150.35   150.35  render_drift		// wtf à changer ! Voir si c'est l'affichage où les calcules, mais je pense que c'est les sin/cos qui prennent beaucoup de temps !
+ 25.41      0.97     0.32  1874954     0.17     0.17  calcul_spline		// les calculer que quand on touche aux splines !!! (donc les retenir (sera indispensable pour le décore de toute façon))
+ 10.32      1.10     0.13  1398013     0.09     0.13  calcul_road		// voir si on peut opti mais ça semble compliqué
+  8.74      1.21     0.11     4326    25.44   140.98  render_road
+  3.97      1.26     0.05  1413044     0.04     0.04  distance			// enlever pow ?
+
+
+
 /*autre*/
 (fait)// pouvoir modifier les FPS sans changer la vitesse du jeu
+// mettre un fps MIN et fps MAX, le jeu va au maximum en restant à la même vitesse de jeu. 
 // commenter chaque fonction/struct
 // affiche vitesse
 // afficher frame pour voir frame max
@@ -25,6 +37,7 @@
 //trajectoire optimal avec dérapage
 //pouvoir mettre des obstacles sur la route (mur etc.)
 //IA opti
+//IA deep learning
 //jeu pause
 //fantome de la course
 //retenir plusieurs circuits

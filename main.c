@@ -45,32 +45,45 @@ int main(void){
 	Camera cam;
 	SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
 
-	cam.x = car.pos_initx - cam.winSize_w / 2;
-	cam.y = car.pos_inity - cam.winSize_h / 2;
+	cam.x = (int)car.pos_initx - cam.winSize_w / 2;
+	cam.y = (int)car.pos_inity - cam.winSize_h / 2;
 	cam.zoom = ZOOM_INIT;
 
 	//init struct Road;
-	Road road;
-	road.long_tab_checkPoints = 0;
-	road.nb_valid_checkPoints = 0;
-	road.square_width = 40;
-	road.select = False;
-	road.size = 500;
+	Road road = {
+		.long_tab_checkPoints = 0,
+		.nb_valid_checkPoints = 0,
+		.square_width = 40,
+		.select = False,
+		.size = 500
+	};
 	//init struct Keys_pressed;
-	Keys_pressed* key = (Keys_pressed* )malloc(sizeof(Keys_pressed));
-	if (!key){
-		printf("Error dynamic allocation of key.");
-		goto Quit;
-	}
-	key->up = False;
-	key->down = False;
-	key->left = False;
-	key->right = False;
-	key->drift = none;
+	Keys_pressed key = {
+		.up = False,
+		.down = False,
+		.left = False,
+		.right = False,
+		.drift = none
+	};
+
+	/*Keys_pressed* key = (Keys_pressed* )malloc(sizeof(Keys_pressed));*/
+	/*if (!key){*/
+		/*printf("Error dynamic allocation of key.");*/
+		/*goto Quit;*/
+	/*}*/
+	/*key->up = False;*/
+	/*key->down = False;*/
+	/*key->left = False;*/
+	/*key->right = False;*/
+	/*key->drift = none;*/
 
 	//init struct Ia;
-	Ia ia;
-	init_ia(&ia);
+	Ia ia = {
+		.mode = IA_MODE,
+		.next_cp.x = 0.,
+		.next_cp.y = 0.,
+		.num_next_cp = -1
+	};
 
 	//init struct Toolbar;
 	Toolbar toolbar;
@@ -96,10 +109,10 @@ int main(void){
 					gameRunning = False;
 					break;
 				case SDL_KEYDOWN:
-					manage_key(&event, key, True, &car, &cam, &road, &toolbar);
+					manage_key(&event, &key, True, &car, &cam, &road, &toolbar);
 					break;
 				case SDL_KEYUP:
-					manage_key(&event, key, False, &car, &cam, &road, &toolbar);
+					manage_key(&event, &key, False, &car, &cam, &road, &toolbar);
 					break;
 				case SDL_MOUSEBUTTONDOWN://clique souris
 					switch(event.button.button){
@@ -145,7 +158,7 @@ int main(void){
 		toolbar.size.h = cam.winSize_h;
 		toolbar.size.x = cam.winSize_w;
 		
-		move_car(&car, key, &cam);
+		move_car(&car, &key, &cam);
 		clear(renderer);
 		display(renderer, &car, &road, &cam, &event, &ia, &toolbar);
 		//printf("%d\n", (int)car.speed);
@@ -153,7 +166,6 @@ int main(void){
 	}
     status = EXIT_SUCCESS;
 
-	free(key);
 Quit:
     if(NULL != renderer)
         SDL_DestroyRenderer(renderer);

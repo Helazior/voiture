@@ -3,6 +3,10 @@
 #ifndef _JEU_H
 #define _JEU_H
 
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+
 #define FRAMES_PER_SECONDE 60
 
 #define PI 3.141592653589
@@ -65,34 +69,14 @@ typedef struct Setting{
 
 }Setting;
 
-typedef struct Toolbar{
-	SDL_Rect size; // size of Toolbar
-	// le texte sera une structure, on fera donc un tableau de texte
-	TTF_Font* font;
-	//SDL_Color color;
-	Setting settings[NB_SETTINGS];
-
-	int num_page; // of the toolbar
-	int num_setting;
-	int* select_var; //multi type ** bientôt
-	Bool is_selecting;
-	//int pages[5];
-	//int tab_settings[30]; //tab
-	int pos_click_x;
-}Toolbar;
+typedef struct Toolbar Toolbar;
 
 typedef struct Coord{
 	float x;
 	float y;
 }Coord;
 
-typedef struct Ia{
-	short mode;
-	Coord next_cp;
-	int num_next_cp;
-	float angle_cp;
-	Coord next_cp_bord[2];
-}Ia;
+typedef struct Ia Ia;
 
 typedef struct Entity{
 	float posx;
@@ -137,8 +121,8 @@ typedef struct Keys_pressed{
 	Bool right;
 	enum{
 		none = 0,
-		left = 1,
-		right = 2
+		drift_left = 1,
+		drift_right = 2
 	}drift;
 }Keys_pressed;
 

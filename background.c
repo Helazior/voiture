@@ -13,13 +13,12 @@
 #include <SDL2/SDL_ttf.h>
 
 #include <math.h>
-#include "jeu.h"
 #include "ia.h"
 #include "background.h"
 
 
 void init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Camera* cam, Road* road){
-	// TODO: enlever text et font de la struct, faire un tab de struct de { texture, posx, poy }
+	// TODO: enlever text et font de la struct, faire un tab de struct de { texture, posx, posy }
 	toolbar->size.w = 300;
 	toolbar->size.y = 0;
 	

@@ -30,7 +30,7 @@ void calcul_next_cp(struct Road* road, struct Ia* ia){
 		ia->num_next_cp = 0;
 		while (road->tab_valid_checkPoints[ia->num_next_cp++] != Start);
 		if (ia->num_next_cp > road->long_tab_checkPoints)
-			printf("error");
+			printf("error\n");
 	}
 	if (!road->tab_valid_checkPoints[ia->num_next_cp] && ia->num_next_cp >= 0){
 		return;
