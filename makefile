@@ -21,6 +21,9 @@ gprof : COMPILER_FLAGS += -pg
 #gprof : LINKER_FLAGS += -pg
 gprof : $(EXEC)
 
+valgrind : COMPILER_FLAGS += -g
+valgrind : $(EXEC)
+
 $(EXEC) : $(OBJS) jeu.c jeu.h ia.c ia.h background.c
 	gcc -o $@ $(OBJS) jeu.c ia.c background.c $(LINKER_FLAGS) $(COMPILER_FLAGS)
 

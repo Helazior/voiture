@@ -39,8 +39,6 @@
 
 #define NB_PTS 250.
 
-#define NB_SETTINGS 3
-
 typedef enum{
 	False = 0,
 	True = 1,
@@ -58,16 +56,7 @@ int setWindowColor(SDL_Renderer *renderer, SDL_Color color); //to have a new col
 
 SDL_Texture* loadTexture(SDL_Renderer *renderer, const char* p_filePath);
 
-typedef struct Setting{
-	int* variable; // sera sans doute un ** pour ne plus avoir de type
-	SDL_Surface* text;
-	SDL_Texture* texture;
-	SDL_Rect tex_size; //automatic
-	Type_of_settings type;
-	int min; // pour l'instant int, mais sera changé pour du multi type
-	int max;
-
-}Setting;
+typedef struct Setting Setting;
 
 typedef struct Toolbar Toolbar;
 

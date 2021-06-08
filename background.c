@@ -16,9 +16,46 @@
 #include "ia.h"
 #include "background.h"
 
+typedef struct visible_sitting{
+	char* name;
+	int* variable;
+	int min;
+	int max;
+	Type_of_settings type;
+}Visible_sitting;
 
-void init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Camera* cam, Road* road){
-	// TODO: enlever text et font de la struct, faire un tab de struct de { texture, posx, posy }
+static void init_setting(
+		Setting settings[NB_SETTINGS],
+		Visible_sitting sub_sittings[NB_SETTINGS],
+		SDL_Renderer *renderer,
+		TTF_Font* font,
+		SDL_Color fg_color,
+		SDL_Color bg_color
+		){
+
+	for (int num_var = 0; num_var < NB_SETTINGS; num_var++){
+		settings[num_var].variable = sub_sittings[num_var].variable;
+		settings[num_var].type = sub_sittings[num_var].type;
+		settings[num_var].min = sub_sittings[num_var].min;
+		settings[num_var].max = sub_sittings[num_var].max;
+		SDL_Surface* text = TTF_RenderText_Shaded(font, sub_sittings[num_var].name, fg_color, bg_color);
+		if (!text){
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[DEBUG] > %s", TTF_GetError());
+		}
+		int tex_size_w;
+		int tex_size_h;
+		if (!(settings[num_var].texture = SDL_CreateTextureFromSurface(renderer, text))){ // settings[num_var].texture
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[DEBUG] > %s", TTF_GetError());
+		}
+		SDL_QueryTexture(settings[num_var].texture, NULL, NULL, &tex_size_w, &tex_size_h);
+		settings[num_var].tex_size.y = 100 + 200 * num_var;
+		settings[num_var].tex_size.w = tex_size_w;
+		settings[num_var].tex_size.h = tex_size_h;
+		SDL_FreeSurface(text);
+	}
+}
+
+void init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road){
 	toolbar->size.w = 300;
 	toolbar->size.y = 0;
 	
@@ -26,39 +63,23 @@ void init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Camera* cam, Road* r
 	toolbar->is_selecting = False;
 	
 	//init font
-	toolbar->font = TTF_OpenFont("akaashNormal.ttf", FONT_SIZE);
-	if (!toolbar->font){
+	TTF_Font* font  = TTF_OpenFont("akaashNormal.ttf", FONT_SIZE);
+	if (!font){
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[DEBUG] > %s", TTF_GetError());
 	}
 	SDL_Color fg_color = { WHITE };
 	SDL_Color bg_color = { COLOR_TOOLBAR };
 	
 	// init struct Toolbar:
-	int tex_w;
-	int tex_h;
-	
-	int i;
-	for(i = 0; i < NB_SETTINGS; i++){
-		toolbar->settings[i].variable = &(road->size);
-		toolbar->settings[i].type = Line;
-		toolbar->settings[i].min = 0;
-		toolbar->settings[i].max = 2000;
+	Visible_sitting sub_sittings[NB_SETTINGS] = {
+		{"road->size", &road->size, 0, 2000, Line},
+		{"road->size", &road->size, 0, 2000, Line},
+		{"road->size", &road->size, 0, 2000, Line}
+	};
 
-		toolbar->settings[i].text = TTF_RenderText_Shaded(toolbar->font, "Hello World", fg_color, bg_color);
-		if (!toolbar->settings[i].text){
-			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[DEBUG] > %s", TTF_GetError());
-		}
-		if (!(toolbar->settings[i].texture = SDL_CreateTextureFromSurface(renderer, toolbar->settings[i].text))){ // texture
-			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[DEBUG] > %s", TTF_GetError());
-		}
-		SDL_QueryTexture(toolbar->settings[i].texture, NULL, NULL, &tex_w, &tex_h);
-		toolbar->settings[i].tex_size.y = 100 + 200 * i;
-		toolbar->settings[i].tex_size.w = tex_w;
-		toolbar->settings[i].tex_size.h = tex_h;
-		SDL_FreeSurface(toolbar->settings[i].text); // deviendra une structure
-	}
+	init_setting(toolbar->settings, sub_sittings, renderer, font, fg_color, bg_color);
 
-	TTF_CloseFont(toolbar->font);
+	TTF_CloseFont(font);
 }
 
 void click_toolbar(Toolbar* toolbar, SDL_Event* event){
@@ -133,12 +154,3 @@ void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar){
 		}
 	}
 }
-
-void free_font(Toolbar* toolbar){
-	int i;
-	for(i = 0; i < NB_SETTINGS; i++){
-		SDL_DestroyTexture(toolbar->settings[i].texture);
-	}
-	TTF_Quit();
-}
-

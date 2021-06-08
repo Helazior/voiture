@@ -66,17 +66,6 @@ int main(void){
 		.drift = none
 	};
 
-	/*Keys_pressed* key = (Keys_pressed* )malloc(sizeof(Keys_pressed));*/
-	/*if (!key){*/
-		/*printf("Error dynamic allocation of key.");*/
-		/*goto Quit;*/
-	/*}*/
-	/*key->up = False;*/
-	/*key->down = False;*/
-	/*key->left = False;*/
-	/*key->right = False;*/
-	/*key->drift = none;*/
-
 	//init struct Ia;
 	Ia ia = {
 		.mode = IA_MODE,
@@ -87,7 +76,7 @@ int main(void){
 
 	//init struct Toolbar;
 	Toolbar toolbar;
-	init_toolbar(&toolbar, renderer, &cam, &road);
+	init_toolbar(&toolbar, renderer, &car, &road);
 	
 
 	//__________________Start________________
@@ -171,7 +160,8 @@ Quit:
         SDL_DestroyRenderer(renderer);
     if(NULL != window)
 		SDL_DestroyWindow(window);
-	free_font(&toolbar);
+	TTF_Quit();
+	SDL_QuitSubSystem(SDL_INIT_VIDEO);
     SDL_Quit();
     return status;
 }
