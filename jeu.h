@@ -45,11 +45,6 @@ typedef enum{
 	Start = 2
 }Bool;
 
-typedef enum{
-	Checkbox = 0,
-	Line = 1
-}Type_of_settings;
-
 int init(SDL_Window** window, SDL_Renderer** renderer, int w, int h); //initialisation SDL
 
 int setWindowColor(SDL_Renderer *renderer, SDL_Color color); //to have a new color

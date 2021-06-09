@@ -2,11 +2,11 @@
 #define _IA_H
 
 #include "jeu.h"
-#define IA_MODE 1
+#define IA_ACTIVE True
 
 
 typedef struct Ia{
-	short mode;
+	Bool active;
 	Coord next_cp;
 	int num_next_cp;
 	float angle_cp;

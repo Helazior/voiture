@@ -1,8 +1,6 @@
 /*background.c*/
 
 // TODO :
-// faire une fonction pour créé les différents texts
-// faire fonctionner les variables float
 
 // si souris hors de l'écran, gérer le cas de la position. (garder l'ancienne)
 
@@ -18,9 +16,10 @@
 
 typedef struct visible_sitting{
 	char* name;
-	int* variable;
-	int min;
-	int max;
+	int* int_variable;
+	float* float_variable;
+	float min;
+	float max;
 	Type_of_settings type;
 }Visible_sitting;
 
@@ -34,7 +33,13 @@ static void init_setting(
 		){
 
 	for (int num_var = 0; num_var < NB_SETTINGS; num_var++){
-		settings[num_var].variable = sub_sittings[num_var].variable;
+		if (sub_sittings[num_var].int_variable != NULL){
+			settings[num_var].int_variable = sub_sittings[num_var].int_variable;
+		} else if (sub_sittings[num_var].float_variable != NULL) {
+			settings[num_var].float_variable = sub_sittings[num_var].float_variable;
+		} else {
+			printf("Error: no variable in the setting %d\n", num_var);
+		}
 		settings[num_var].type = sub_sittings[num_var].type;
 		settings[num_var].min = sub_sittings[num_var].min;
 		settings[num_var].max = sub_sittings[num_var].max;
@@ -55,11 +60,12 @@ static void init_setting(
 	}
 }
 
-void init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road){
+void init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia){
 	toolbar->size.w = 300;
 	toolbar->size.y = 0;
 	
-	toolbar->select_var = NULL;
+	toolbar->select_var_int = NULL;
+	toolbar->select_var_float = NULL;
 	toolbar->is_selecting = False;
 	
 	//init font
@@ -72,9 +78,10 @@ void init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* r
 	
 	// init struct Toolbar:
 	Visible_sitting sub_sittings[NB_SETTINGS] = {
-		{"road->size", &road->size, 0, 2000, Line},
-		{"road->size", &road->size, 0, 2000, Line},
-		{"road->size", &road->size, 0, 2000, Line}
+		{"IA :", (int*)&ia->active, NULL, 0, 1, Checkbox},
+		{"road->size", &road->size, NULL, 0, 2000, Line},
+		{"car->turn", NULL, &car->turn, 0.1, 30, Line},
+		{"car->acceleration", NULL, &car->acceleration, 0.1, 30, Line}
 	};
 
 	init_setting(toolbar->settings, sub_sittings, renderer, font, fg_color, bg_color);
@@ -89,7 +96,8 @@ void click_toolbar(Toolbar* toolbar, SDL_Event* event){
 	for (i = 0; i < NB_SETTINGS; i++){
 		if (is_in(toolbar->pos_click_x, event->button.y , &(toolbar->settings[i].tex_size))){
 			//put the carresponding variable in select_var
-			toolbar->select_var = toolbar->settings[i].variable;
+			toolbar->select_var_int = toolbar->settings[i].int_variable;
+			toolbar->select_var_float = toolbar->settings[i].float_variable;
 			toolbar->is_selecting = True;
 			toolbar->num_setting = i;
 			break;
@@ -104,22 +112,50 @@ Bool is_in(int x, int y, SDL_Rect* size){
 }
 
 void change_variable(Toolbar* toolbar, SDL_Event* event){
-	*(toolbar->select_var) += (event->button.x - toolbar->pos_click_x) * (toolbar->settings[toolbar->num_setting].max - toolbar->settings[toolbar->num_setting].min) / SIZE_LINE_TOOLBAR;
-	if (*(toolbar->select_var) > toolbar->settings[toolbar->num_setting].max){
-		//TODO : Retenir la position pour ne pas décaler tant qu'on n'y revient pas
-		*(toolbar->select_var) = toolbar->settings[toolbar->num_setting].max;
-	}else if (*(toolbar->select_var) < toolbar->settings[toolbar->num_setting].min){
-		*(toolbar->select_var) = toolbar->settings[toolbar->num_setting].min;
+	// Line
+	if (toolbar->settings[toolbar->num_setting].type == Line){
+		// int variable
+		if (toolbar->select_var_int){
+			*(toolbar->select_var_int) += (event->button.x - toolbar->pos_click_x) * (int)(toolbar->settings[toolbar->num_setting].max - toolbar->settings[toolbar->num_setting].min) / SIZE_LINE_TOOLBAR;
+			if (*(toolbar->select_var_int) > (int)toolbar->settings[toolbar->num_setting].max){
+				*(toolbar->select_var_int) = (int)toolbar->settings[toolbar->num_setting].max;
+			} else if (*(toolbar->select_var_int) < (int)toolbar->settings[toolbar->num_setting].min){
+				*(toolbar->select_var_int) = (int)toolbar->settings[toolbar->num_setting].min;
+			} 
+			// float variable
+		} else if (toolbar->select_var_float) {
+			*(toolbar->select_var_float) += (float)(event->button.x - toolbar->pos_click_x) * (toolbar->settings[toolbar->num_setting].max - toolbar->settings[toolbar->num_setting].min) / SIZE_LINE_TOOLBAR;	
+			if (*(toolbar->select_var_float) > toolbar->settings[toolbar->num_setting].max){
+				*(toolbar->select_var_float) = toolbar->settings[toolbar->num_setting].max;
+			} else if (*(toolbar->select_var_float) < toolbar->settings[toolbar->num_setting].min){
+				*(toolbar->select_var_float) = toolbar->settings[toolbar->num_setting].min;
+			}
+		} else {
+			printf("Error: select_var NULL\n"); 
+		}
+		// TODO : vérifier que le clique est dans la fenêtre !
+		toolbar->pos_click_x = event->button.x;
 	}
-	toolbar->pos_click_x = event->button.x;
 }
 
+
 void change_variable_keys(Toolbar* toolbar, short add){
-	*(toolbar->select_var) += add * (toolbar->settings[toolbar->num_setting].max - toolbar->settings[toolbar->num_setting].min) / SIZE_LINE_TOOLBAR;
-	if (*(toolbar->select_var) > toolbar->settings[toolbar->num_setting].max){
-		*(toolbar->select_var) = toolbar->settings[toolbar->num_setting].max;
-	}else if (*(toolbar->select_var) < toolbar->settings[toolbar->num_setting].min){
-		*(toolbar->select_var) = toolbar->settings[toolbar->num_setting].min;
+	if (toolbar->select_var_int){
+		*(toolbar->select_var_int) += add * (int)(toolbar->settings[toolbar->num_setting].max - toolbar->settings[toolbar->num_setting].min) / SIZE_LINE_TOOLBAR;
+		if (*(toolbar->select_var_int) > (int)toolbar->settings[toolbar->num_setting].max){
+			*(toolbar->select_var_int) = (int)toolbar->settings[toolbar->num_setting].max;
+		}else if (*(toolbar->select_var_int) < (int)toolbar->settings[toolbar->num_setting].min){
+			*(toolbar->select_var_int) = (int)toolbar->settings[toolbar->num_setting].min;
+		}
+	} else if (toolbar->select_var_float) {
+		*(toolbar->select_var_float) += (float)add * (toolbar->settings[toolbar->num_setting].max - toolbar->settings[toolbar->num_setting].min) / SIZE_LINE_TOOLBAR;
+		if (*(toolbar->select_var_float) > toolbar->settings[toolbar->num_setting].max){
+			*(toolbar->select_var_float) = toolbar->settings[toolbar->num_setting].max;
+		}else if (*(toolbar->select_var_float) < toolbar->settings[toolbar->num_setting].min){
+			*(toolbar->select_var_float) = toolbar->settings[toolbar->num_setting].min;
+		}
+	} else {
+		printf("Error: select_var NULL\n"); 
 	}
 }
 
@@ -144,13 +180,40 @@ void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar){
 		if (toolbar->settings[i].type == Line){
 			x_mean_line = toolbar->settings[i].tex_size.x + toolbar->settings[i].tex_size.w / 2;
 			y_line = toolbar->settings[i].tex_size.y + 2 * toolbar->settings[i].tex_size.h;
+			// draw the line
 			SDL_RenderDrawLine(renderer, x_mean_line - SIZE_LINE_TOOLBAR / 2, y_line, x_mean_line + SIZE_LINE_TOOLBAR / 2, y_line);
-			//cursor
+			// cursor
 			min = toolbar->settings[i].min;
 			max = toolbar->settings[i].max;
-			rect.x = x_mean_line - SIZE_LINE_TOOLBAR / 2 + (*(toolbar->settings[i].variable) - min) * SIZE_LINE_TOOLBAR / (max - min);//calculer la pos du curseur
+			if (toolbar->settings[i].int_variable){
+				rect.x = x_mean_line - SIZE_LINE_TOOLBAR / 2 + (*(toolbar->settings[i].int_variable) - min) * SIZE_LINE_TOOLBAR / (max - min);//calculer la pos du curseur
+			} else if (toolbar->settings[i].float_variable) {
+				rect.x = x_mean_line - SIZE_LINE_TOOLBAR / 2 + (int)(*(toolbar->settings[i].float_variable) - min) * SIZE_LINE_TOOLBAR / (max - min);//calculer la pos du curseur
+			}
 			rect.y = y_line - rect.h/2;
 			SDL_RenderFillRect(renderer, &rect);
+		} else if (toolbar->settings[i].type == Checkbox){
+			rect.h = toolbar->settings[i].tex_size.h;
+			rect.w = toolbar->settings[i].tex_size.h;
+			rect.x = toolbar->settings[i].tex_size.x + toolbar->settings[i].tex_size.w + 10;
+			rect.y = toolbar->settings[i].tex_size.y;
+			if (*toolbar->settings[i].int_variable == True && toolbar->select_var_int == NULL){
+				SDL_SetRenderDrawColor(renderer, NEXT_CP_COLOR); // green checkboxe
+				SDL_RenderFillRect(renderer, &rect);
+			} else if (toolbar->select_var_int == toolbar->settings[i].int_variable){
+				SDL_SetRenderDrawColor(renderer, CP_SELECTED_COLOR); // checkboxe selected
+				SDL_RenderFillRect(renderer, &rect);
+			} else {
+				SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR); // empty checkboxe
+				SDL_RenderDrawRect(renderer, &rect);
+			}
+
+			// Put back as before
+				SDL_SetRenderDrawColor(renderer, WHITE);
+			rect.h = 10;
+			rect.w = 4;
+		} else {
+			printf("Error: bad toolbar->settings[%d].type. Must be Line or Checkbox. \n", i);
 		}
 	}
 }

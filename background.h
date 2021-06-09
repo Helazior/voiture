@@ -10,17 +10,22 @@
 #define COLOR_TOOLBAR ORANGE
 #define SIZE_LINE_TOOLBAR 200
 
-#define NB_SETTINGS 3
+#define NB_SETTINGS 4
+
+typedef enum{
+	Checkbox = 0,
+	Line = 1
+}Type_of_settings;
 
 
 typedef struct Setting{
-	int* variable; // sera sans doute un ** pour ne plus avoir de type
+	int* int_variable;
+	float* float_variable;
 	SDL_Texture* texture;
 	SDL_Rect tex_size; //automatic
 	Type_of_settings type;
-	int min; // pour l'instant int, mais sera changé pour du multi type
-	int max;
-
+	float min;
+	float max;
 }Setting;
 
 
@@ -32,7 +37,8 @@ typedef struct Toolbar{
 
 	int num_page; // of the toolbar
 	int num_setting;
-	int* select_var; //multi type ** bientôt
+	int* select_var_int;
+	float* select_var_float;
 	Bool is_selecting;
 	//int pages[5];
 	//int tab_settings[30]; //tab
@@ -40,7 +46,7 @@ typedef struct Toolbar{
 }Toolbar;
 
 //init all the toolbar at the right of the screen
-void init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road);
+void init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia);
 
 void click_toolbar(Toolbar* toolbar, SDL_Event* event);
 

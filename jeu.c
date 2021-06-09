@@ -175,7 +175,7 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Cam
 		case SDLK_KP_PLUS:
 		case SDLK_PLUS:
 		case SDLK_EQUALS:
-			if (toolbar->select_var){
+			if (toolbar->settings[toolbar->num_setting].type == Line && (toolbar->select_var_int || toolbar->select_var_float)){
 				change_variable_keys(toolbar, add_to_var);
 			}
 			break;
@@ -184,12 +184,10 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Cam
 		case SDLK_KP_LESS:
 		case SDLK_LESS:
 		case SDLK_6:
-			if (toolbar->select_var){
+			if (toolbar->settings[toolbar->num_setting].type == Line && (toolbar->select_var_int || toolbar->select_var_float)){
 				change_variable_keys(toolbar, -add_to_var);
 			}
 			break;
-
-
 
 		default:
 			break;
@@ -333,7 +331,7 @@ void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity*
 				if (road->tab_valid_checkPoints[i] == False){ // CP not already valid
 					road->nb_valid_checkPoints++;
 					road->tab_valid_checkPoints[i] = True;
-					if (IA_MODE && road->long_tab_checkPoints >= 4){
+					if (ia->active && road->long_tab_checkPoints >= 4){
 						calcul_next_cp(road, ia);	
 					}
 
@@ -355,8 +353,8 @@ void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity*
 				SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR); // checkpoint taken
 				SDL_RenderDrawRect(renderer, &road->tab_checkPoints[i]);
 			}
-			else if (ia->mode >= 1 && ia->num_next_cp == i){
-				SDL_SetRenderDrawColor(renderer, NEXT_CP_COLOR); // checkpoint taken
+			else if (ia->active >= True && ia->num_next_cp == i){
+				SDL_SetRenderDrawColor(renderer, NEXT_CP_COLOR); // next checkpoint
 				SDL_RenderFillRect(renderer, &road->tab_checkPoints[i]);
 			}else if (road->tab_valid_checkPoints[i] == False){
 				SDL_SetRenderDrawColor(renderer, CP_COLOR); // normal checkpoint

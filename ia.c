@@ -12,7 +12,7 @@
 
 
 void init_ia(Ia* ia){
-	ia->mode = IA_MODE;
+	ia->active = IA_ACTIVE;
 	ia->next_cp.x = 0.;
 	ia->next_cp.y = 0.;
 	ia->num_next_cp = -1;

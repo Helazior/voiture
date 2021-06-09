@@ -68,7 +68,7 @@ int main(void){
 
 	//init struct Ia;
 	Ia ia = {
-		.mode = IA_MODE,
+		.active = IA_ACTIVE,
 		.next_cp.x = 0.,
 		.next_cp.y = 0.,
 		.num_next_cp = -1
@@ -76,7 +76,7 @@ int main(void){
 
 	//init struct Toolbar;
 	Toolbar toolbar;
-	init_toolbar(&toolbar, renderer, &car, &road);
+	init_toolbar(&toolbar, renderer, &car, &road, &ia);
 	
 
 	//__________________Start________________
@@ -93,7 +93,7 @@ int main(void){
 		lastTime = SDL_GetTicks();
 		while (SDL_PollEvent(&event))//events
 		{
-		   switch(event.type){
+			switch(event.type){
 				case SDL_QUIT:
 					gameRunning = False;
 					break;
@@ -129,9 +129,13 @@ int main(void){
 				case SDL_MOUSEBUTTONUP:
 					if (event.button.button == SDL_BUTTON_RIGHT){
 						road.select = False;
-					}else if(event.button.button == SDL_BUTTON_LEFT){
+					} else if (event.button.button == SDL_BUTTON_LEFT){
 						toolbar.is_selecting = False;
-					} 
+						if (toolbar.settings[toolbar.num_setting].type == Checkbox && toolbar.select_var_int == toolbar.settings[toolbar.num_setting].int_variable){
+							*toolbar.settings[toolbar.num_setting].int_variable = (*toolbar.settings[toolbar.num_setting].int_variable + 1) % 2;
+							toolbar.select_var_int = NULL;
+						}
+					}
 					break;
 				default:
 					break;
