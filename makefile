@@ -1,10 +1,17 @@
+CC = gcc
+LD = gcc
+
 #OBJS specifies which files to compile as part of the project
 OBJS = main.c
 
-COMPILER_FLAGS = -Wall -Wextra -pedantic
+COMPILER_FLAGS = -Wall -Wextra -std=c99 -Iinclude -O0
 
 #LINKER_FLAGS specifies the libraries we're linking against
 LINKER_FLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf -lm
+SRC_FILES=$(wildcard src/*.c)
+# Par défaut, la compilation de src/toto.c génère le fichier objet obj/toto.o 
+OBJ_FILES=$(patsubst src/%.c,obj/%.o,$(SRC_FILES))
+
 #OBJ_NAME specifies the name of our exectuable
 EXEC = exec
 
@@ -24,11 +31,11 @@ gprof : $(EXEC)
 valgrind : COMPILER_FLAGS += -g
 valgrind : $(EXEC)
 
-$(EXEC) : $(OBJS) jeu.c jeu.h ia.c ia.h background.c
-	gcc -o $@ $(OBJS) jeu.c ia.c background.c $(LINKER_FLAGS) $(COMPILER_FLAGS)
+$(EXEC) : $(OBJ_FILES)
+	$(LD) $(OBJ_FILES) $(LDFLAGS) -o $@
 
+obj/%.o: src/%.c 	$(CC) -c $(CFLAGS) $< -o $@
+
+.PHONY: clean
 clean :
-	rm *.o
-
-mrproper : clean
-	rm $(EXEC)
+	rm -rf $(EXEC) $(OBJ_FILES)

@@ -27,10 +27,10 @@ OPTIMISATION :
 //procedural generation pour le décore
 
 /*À faire*/
-(en cours)// barre et touche pour agrandir la largeur de route
-// barre pour gerer la vitesse/acceleration/frottement/virage/derapage
+(fait)// barre et touche pour agrandir la largeur de route
+(fait)// barre pour gerer la vitesse/acceleration/frottement/virage/derapage
 // case à cocher pour que la caméra ne suive plus la voiture, dans ce cas, on peut se déplacer avec les flêches ou avec la souris au bord de l'écran
-// case à cocher pour mettre/enlever l'IA
+(fait)// case à cocher pour mettre/enlever l'IA
 
 //trajectoire optimal sans dérapage
 //trajectoire optimal sans sortir de la route

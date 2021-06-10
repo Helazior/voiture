@@ -6,17 +6,19 @@
 
 
 typedef struct Ia{
-	Bool active;
+	Bool active; // active IA or not
 	Coord next_cp;
 	int num_next_cp;
-	float angle_cp;
-	Coord next_cp_bord[2];
+	float angle_cp; // final angle in the cp
+	float angle_car_angle_cp; // angle between the angle car and the final angle in the cp
+	float angle_car_cp; // angle to go to the next cp
+	Coord next_cp_roadside[2];
+	
 }Ia;
 
 
-
 void init_ia(Ia* ia);
-void calcul_next_cp(struct Road* road, struct Ia* ia);
-void angle_next_cp(struct Road* road, struct Ia* ia);
+void calcul_next_cp(Road* road, Ia* ia, Entity* car);
+void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car);
 
 #endif

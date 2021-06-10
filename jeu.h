@@ -88,7 +88,7 @@ typedef struct Entity{
 typedef struct Road{
 	SDL_Rect tab_checkPoints[NB_SQUARE];//bien vérifier qu'on ne dépasse pas 100.
 	Bool tab_valid_checkPoints[NB_SQUARE];
-	int long_tab_checkPoints;
+	int len_tab_checkPoints;
 	int nb_valid_checkPoints;
 	int square_width;
 	int num_clos_check;
@@ -130,9 +130,9 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Cam
 //put the 3 last checkpoints into the 3 first:
 void close_circuit(Road road);
 //add a checkpoint:
-void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
+void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Ia* ia);
 //del a checkpoint:
-void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
+void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Ia* ia);
 //found the closest checkpoint to the clic:
 void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 //manage a checkpoint:

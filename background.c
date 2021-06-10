@@ -197,13 +197,13 @@ void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar){
 			rect.w = toolbar->settings[i].tex_size.h;
 			rect.x = toolbar->settings[i].tex_size.x + toolbar->settings[i].tex_size.w + 10;
 			rect.y = toolbar->settings[i].tex_size.y;
-			if (*toolbar->settings[i].int_variable == True && toolbar->select_var_int == NULL){
-				SDL_SetRenderDrawColor(renderer, NEXT_CP_COLOR); // green checkboxe
-				SDL_RenderFillRect(renderer, &rect);
-			} else if (toolbar->select_var_int == toolbar->settings[i].int_variable){
+			if (toolbar->select_var_int == toolbar->settings[i].int_variable){
 				SDL_SetRenderDrawColor(renderer, CP_SELECTED_COLOR); // checkboxe selected
 				SDL_RenderFillRect(renderer, &rect);
-			} else {
+			} else if (*toolbar->settings[i].int_variable == True){
+				SDL_SetRenderDrawColor(renderer, NEXT_CP_COLOR); // green checkboxe
+				SDL_RenderFillRect(renderer, &rect);
+			} else if (*toolbar->settings[i].int_variable == False){
 				SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR); // empty checkboxe
 				SDL_RenderDrawRect(renderer, &rect);
 			}

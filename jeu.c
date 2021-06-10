@@ -78,7 +78,9 @@ void init_car(Entity* car, SDL_Renderer *renderer){
 }
 
 float distance(float x1, float y1, float x2, float y2){
-	return sqrt(pow((float)x1 - (float)x2, 2) + pow(((float)y1 - (float)y2), 2));
+	return sqrt(pow((float)x1 - (float)x2, 2) + pow(((float)y1 - (float)y2), 2)); // TODO : faire x*x au lieu de pow(x,2) pour opti
+	// TODO : a-t-on vraiment besoin de sqrt ?
+	// TODO : faire static inside pour opti si possible (c99)
 }
 
 void manage_skid_marks(Entity* car, Keys_pressed* key){
@@ -92,7 +94,7 @@ void manage_skid_marks(Entity* car, Keys_pressed* key){
 	}
 }
 
-void move_car(Entity* car, Keys_pressed* key, Camera* cam) {
+void move_car(Entity* car, Keys_pressed* key, Camera* cam){
 	manage_skid_marks(car, key);
 	//keys_to_struct
 	if (car->speed < 0.5 && key->drift){
@@ -195,18 +197,21 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Cam
 }
 
 //add a checkpoint:
-void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
-	if (road->long_tab_checkPoints < NB_SQUARE){
-		road->tab_checkPoints[road->long_tab_checkPoints].x = event->button.x - (float)road->square_width / 2 + cam->x + (event->button.x + cam->x - car->frame.x) * (float)(-1. + 1/cam->zoom);
-	   	road->tab_checkPoints[road->long_tab_checkPoints].y = event->button.y - (float)road->square_width / 2 + cam->y + (event->button.y + cam->y - car->frame.y) * (float)(-1. + 1/cam->zoom);
-		road->tab_checkPoints[road->long_tab_checkPoints].w = road->square_width;
-		road->tab_checkPoints[road->long_tab_checkPoints].h = road->square_width;	
-		road->tab_valid_checkPoints[road->long_tab_checkPoints] = False;
+void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Ia* ia){
+	if (road->len_tab_checkPoints < NB_SQUARE){
+		road->tab_checkPoints[road->len_tab_checkPoints].x = event->button.x - (float)road->square_width / 2 + cam->x + (event->button.x + cam->x - car->frame.x) * (float)(-1. + 1/cam->zoom);
+		road->tab_checkPoints[road->len_tab_checkPoints].y = event->button.y - (float)road->square_width / 2 + cam->y + (event->button.y + cam->y - car->frame.y) * (float)(-1. + 1/cam->zoom);
+		road->tab_checkPoints[road->len_tab_checkPoints].w = road->square_width;
+		road->tab_checkPoints[road->len_tab_checkPoints].h = road->square_width;	
+		road->tab_valid_checkPoints[road->len_tab_checkPoints] = False;
 		startLapTime = SDL_GetTicks();
 
-		//printf("%d	%d		\n", road->tab_checkPoints[road->long_tab_checkPoints].x, road->tab_checkPoints[road->long_tab_checkPoints].y);
-	
-	road->long_tab_checkPoints++;
+		//printf("%d	%d		\n", road->tab_checkPoints[road->len_tab_checkPoints].x, road->tab_checkPoints[road->len_tab_checkPoints].y);
+
+		road->len_tab_checkPoints++;
+		if (road->len_tab_checkPoints == 4){
+			calcul_next_cp(road, ia, car);
+		}
 	}
 }
 
@@ -218,10 +223,9 @@ void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 	road->num_clos_check = 0;
 	int min_dist = distance((float)pos_clique_x, (float)pos_clique_y, (float)road->tab_checkPoints[0].x, (float)road->tab_checkPoints[0].y);
 	int i;
-	for (i = 1; i < road->long_tab_checkPoints; i++){
+	for (i = 1; i < road->len_tab_checkPoints; i++){
 		dist = distance((float)pos_clique_x, (float)pos_clique_y, (float)road->tab_checkPoints[i].x, (float)road->tab_checkPoints[i].y);
-		if (dist < min_dist)
-		{
+		if (dist < min_dist){
 			road->num_clos_check = i;
 			min_dist = dist;
 		}
@@ -231,12 +235,12 @@ void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 }
 
 void reset_valid_tab(Road* road){
-	if (road->long_tab_checkPoints >= 4 && road->nb_valid_checkPoints == road->long_tab_checkPoints){
+	if (road->len_tab_checkPoints >= 4 && road->nb_valid_checkPoints == road->len_tab_checkPoints){
 		printf("Lap time: %.2f\n", ((float)SDL_GetTicks() - (float)startLapTime) / 1000.);
 		//startLapTime = SDL_GetTicks();
 	}
 	int i;
-	for (i = 0; i < road->long_tab_checkPoints; i++){
+	for (i = 0; i < road->len_tab_checkPoints; i++){
 		road->tab_valid_checkPoints[i] = 0;
 	}
 	road->nb_valid_checkPoints = 0;
@@ -249,7 +253,7 @@ void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 }
 
 //del a checkpoint:
-void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
+void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Ia* ia){
 	closest_checkpoint(road, event, cam, car);
 	int i;
 	if (road->tab_valid_checkPoints[road->num_clos_check] != False){
@@ -258,11 +262,14 @@ void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 			reset_valid_tab(road);
 		}
 	}
-	for(i = road->num_clos_check; i < road->long_tab_checkPoints - 1; i++){
+	for(i = road->num_clos_check; i < road->len_tab_checkPoints - 1; i++){
 		road->tab_checkPoints[i] = road->tab_checkPoints[i+1];
 		road->tab_valid_checkPoints[i] = road->tab_valid_checkPoints[i+1];
 	}
-	road->long_tab_checkPoints--;
+	road->len_tab_checkPoints--;
+	if (road->len_tab_checkPoints == 3){
+		ia->num_next_cp = -1;	
+	}
 }
 
 void clear(SDL_Renderer *renderer){
@@ -311,7 +318,7 @@ void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity*
 		road->tab_checkPoints[road->num_clos_check].x = pos_clique_x + road->selectx;
 		road->tab_checkPoints[road->num_clos_check].y = pos_clique_y + road->selecty;
 	}
-	for (i = 0; i < road->long_tab_checkPoints; i++){
+	for (i = 0; i < road->len_tab_checkPoints; i++){
 		x_prev = road->tab_checkPoints[i].x;
 		y_prev = road->tab_checkPoints[i].y;
 		w_prev = road->tab_checkPoints[i].w;
@@ -327,12 +334,15 @@ void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity*
 		if (x + square_w > 0 && x - square_w < cam->winSize_w && y + square_w > 0 && y - square_w < cam->winSize_h){
 			//check if collision between car and CP:
 			
-			if (road->long_tab_checkPoints > 1 && (distance(x_prev, y_prev, car->posx, car->posy) <= (float)road->size / 2 + (float)car->frame.h / 2)){	
+			if (road->len_tab_checkPoints > 1 && (distance(x_prev, y_prev, car->posx, car->posy) <= (float)road->size / 2 + (float)car->frame.h / 2)){	
 				if (road->tab_valid_checkPoints[i] == False){ // CP not already valid
 					road->nb_valid_checkPoints++;
 					road->tab_valid_checkPoints[i] = True;
-					if (ia->active && road->long_tab_checkPoints >= 4){
-						calcul_next_cp(road, ia);	
+					if (ia->active && road->len_tab_checkPoints >= 4){		
+						// the 
+						road->tab_checkPoints[i].x = x_prev;
+						road->tab_checkPoints[i].y = y_prev;
+						calcul_next_cp(road, ia, car);
 					}
 
 					if (road->nb_valid_checkPoints == 1){//Start
@@ -340,7 +350,7 @@ void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity*
 						startLapTime = SDL_GetTicks();
 					}
 					
-				}else if (road->nb_valid_checkPoints >= road->long_tab_checkPoints && road->tab_valid_checkPoints[i] == Start){
+				}else if (road->nb_valid_checkPoints >= road->len_tab_checkPoints && road->tab_valid_checkPoints[i] == Start){
 					reset_valid_tab(road);
 				}
 			}	
@@ -416,9 +426,9 @@ void calcul_spline(Entity* car, Camera* cam, Road* road, float* x, float* y, flo
 	int centre_x = car->frame.x - cam->x;
 	int centre_y = car->frame.y - cam->y;
 	int p0, p1, p2, p3;	
-	p0 = (int)t % road->long_tab_checkPoints;
-	p1 = (p0 + 1) % road->long_tab_checkPoints;
-	p2 = (p1 + 1) % road->long_tab_checkPoints;
+	p0 = (int)t % road->len_tab_checkPoints;
+	p1 = (p0 + 1) % road->len_tab_checkPoints;
+	p2 = (p1 + 1) % road->len_tab_checkPoints;
 	
 	//if checkpoint not in the screen, go to next
 	int s = road->size * cam->zoom / 2;
@@ -436,7 +446,7 @@ void calcul_spline(Entity* car, Camera* cam, Road* road, float* x, float* y, flo
 		return;	
 	}//end
 
-	p3 = (p2 + 1) % road->long_tab_checkPoints;
+	p3 = (p2 + 1) % road->len_tab_checkPoints;
 	t = t - (int)t;
 	*draw += 3* (*draw == 0)  - (*draw == 2) - (*draw == 3);
 	float tt = t * t;
@@ -478,7 +488,7 @@ void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* road){
 	float t;
 	t = 0;
 	SDL_SetRenderDrawColor(renderer, LINE_ROAD_COLOR);
-	while (t < (float)road->long_tab_checkPoints - 3.0f * (road->long_tab_checkPoints <= 3)){
+	while (t < (float)road->len_tab_checkPoints - 3.0f * (road->len_tab_checkPoints <= 3)){
 		calcul_spline(car, cam, road, &x, &y, &t, &draw);
 
 		if (x  + road->size * cam->zoom / 2 >= 0 && x < cam->winSize_w  + road->size * cam->zoom / 2 && y + road->size * cam->zoom / 2 >= 0 && y < cam->winSize_h + road->size * cam->zoom / 2){

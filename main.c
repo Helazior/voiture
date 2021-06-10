@@ -51,7 +51,7 @@ int main(void){
 
 	//init struct Road;
 	Road road = {
-		.long_tab_checkPoints = 0,
+		.len_tab_checkPoints = 0,
 		.nb_valid_checkPoints = 0,
 		.square_width = 40,
 		.select = False,
@@ -107,17 +107,17 @@ int main(void){
 					switch(event.button.button){
 						case SDL_BUTTON_LEFT:
 							if (event.button.x <= cam.winSize_w){
-								add_checkPoint(&road, &event, &cam, &car);
+								add_checkPoint(&road, &event, &cam, &car, &ia);
 							} else {
 								click_toolbar(&toolbar, &event);
 							}
 							break;
 						case SDL_BUTTON_MIDDLE:
-							if (road.long_tab_checkPoints > 0)
-								del_checkPoint(&road, &event, &cam, &car);
+							if (road.len_tab_checkPoints > 0)
+								del_checkPoint(&road, &event, &cam, &car, &ia);
 							break;
 						case SDL_BUTTON_RIGHT:
-							if (road.long_tab_checkPoints){// if it exist at least 1 checkpoint
+							if (road.len_tab_checkPoints){// if it exist at least 1 checkpoint
 								manage_checkpoint(&road, &event, &cam, &car);
 							}
 							break;
@@ -151,6 +151,10 @@ int main(void){
 		toolbar.size.h = cam.winSize_h;
 		toolbar.size.x = cam.winSize_w;
 		
+		// IA take control of the keys
+		if (ia.active && ia.num_next_cp != -1){
+			ia_manage_keys(&ia, &key, &car);
+		}
 		move_car(&car, &key, &cam);
 		clear(renderer);
 		display(renderer, &car, &road, &cam, &event, &ia, &toolbar);
