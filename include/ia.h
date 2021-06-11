@@ -3,10 +3,12 @@
 
 #include "jeu.h"
 #define IA_ACTIVE True
+#define SHOW_SIMU_TRAJ True
 
 
 typedef struct Ia{
 	Bool active; // active IA or not
+	Bool show_simu_traj; // active IA or not
 	Coord next_cp;
 	int num_next_cp;
 	float angle_cp; // final angle in the cp
@@ -19,6 +21,6 @@ typedef struct Ia{
 
 void init_ia(Ia* ia);
 void calcul_next_cp(Road* road, Ia* ia, Entity* car);
-void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car);
+void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* renderer, Camera* cam);
 
 #endif

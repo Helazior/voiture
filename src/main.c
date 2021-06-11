@@ -69,6 +69,7 @@ int main(void){
 	//init struct Ia;
 	Ia ia = {
 		.active = IA_ACTIVE,
+		.show_simu_traj = SHOW_SIMU_TRAJ,
 		.next_cp.x = 0.,
 		.next_cp.y = 0.,
 		.num_next_cp = -1
@@ -146,18 +147,21 @@ int main(void){
 			change_variable(&toolbar, &event);
 		}
 		// if rezised
-		// à mettre dans une fonction
+		// TODO : à mettre dans une fonction
 		SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
 		cam.winSize_w -= toolbar.size.w;
 		toolbar.size.h = cam.winSize_h;
 		toolbar.size.x = cam.winSize_w;
 		
-		// IA take control of the keys
-		if (ia.active && ia.num_next_cp != -1){
-			ia_manage_keys(&ia, &key, &car);
-		}
 		move_car(&car, &key, &cam);
 		clear(renderer);
+
+		// IA take control of the keys
+		// TODO : mettre avant les contrôles humains
+		if (ia.active && ia.num_next_cp != -1){
+			ia_manage_keys(&ia, &key, &car, renderer, &cam);
+		}
+
 		display(renderer, &car, &road, &cam, &event, &ia, &toolbar);
 		//printf("%d\n", (int)car.speed);
 		//printf("%ld			\r", SDL_GetPerformanceCounter());	//performances

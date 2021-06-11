@@ -10,7 +10,7 @@
 #define COLOR_TOOLBAR ORANGE
 #define SIZE_LINE_TOOLBAR 200
 
-#define NB_SETTINGS 4
+#define NB_SETTINGS 5
 
 typedef enum{
 	Checkbox = 0,

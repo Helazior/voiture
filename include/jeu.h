@@ -137,12 +137,6 @@ void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Ia* 
 void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 //manage a checkpoint:
 void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
-void render_car(SDL_Renderer *renderer, Entity* car, Camera* cam);//_car display_
-void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity* car, SDL_Event* event, Ia* ia);//_road display_
-void render_drift(SDL_Renderer *renderer, Entity* car, Camera* cam);//_drift display_
-void calcul_spline(Entity* car, Camera* cam, Road* road, float* x, float* y, float* pt, short* draw);
-void calcul_road(Camera* cam, Road* road, float* x, float* y, float* prevx, float* prevy, float* tabx, float* taby);
-void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* road);
 void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar);// display all
 void clear(SDL_Renderer *renderer);
 

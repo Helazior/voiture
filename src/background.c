@@ -80,6 +80,7 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
 	// init struct Toolbar:
 	Visible_sitting sub_sittings[NB_SETTINGS] = {
 		{"IA :", (int*)&ia->active, NULL, 0, 1, Checkbox},
+		{"IA show simu traj :", (int*)&ia->show_simu_traj, NULL, 0, 1, Checkbox},
 		{"road->size", &road->size, NULL, 0, 2000, Line},
 		{"car->turn", NULL, &car->turn, 0.1, 30, Line},
 		{"car->acceleration", NULL, &car->acceleration, 0.1, 30, Line}
@@ -140,7 +141,7 @@ void change_variable(Toolbar* toolbar, SDL_Event* event){
 	}
 }
 
-
+// TODO : ne marche plus !
 void change_variable_keys(Toolbar* toolbar, short add){
 	if (toolbar->select_var_int){
 		*(toolbar->select_var_int) += add * (int)(toolbar->settings[toolbar->num_setting].max - toolbar->settings[toolbar->num_setting].min) / SIZE_LINE_TOOLBAR;
