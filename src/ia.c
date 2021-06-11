@@ -114,10 +114,10 @@ static int simu_traj(Ia ia, Entity car, Keys_pressed key, SDL_Renderer* renderer
 	int pos_initx = car.posx;
 	int pos_inity = car.posy;
 	SDL_Rect rect = {0, 0, 4, 4};
-	int w = car.frame.w * cam->zoom;
-	int h = car.frame.h * cam->zoom;
-	int centre_x = car.frame.x + w / 2 - cam->x;
-	int centre_y = car.frame.y + h / 2 - cam->y;
+	float w = (float)car.frame.w * cam->zoom;
+	float h = (float)car.frame.h * cam->zoom;
+	float centre_x = car.posx + w / 2 - cam->x;
+	float centre_y = car.posy + h / 2 - cam->y;
 
 	if (ia.show_simu_traj){
 		SDL_SetRenderDrawColor(renderer, CP_SELECTED_COLOR);

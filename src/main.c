@@ -48,8 +48,8 @@ int main(void){
 	};
 	SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
 
-	cam.x = (int)car.pos_initx - cam.winSize_w / 2;
-	cam.y = (int)car.pos_inity - cam.winSize_h / 2;
+	cam.x = (float)car.pos_initx - (float)cam.winSize_w / 2;
+	cam.y = (float)car.pos_inity - (float)cam.winSize_h / 2;
 
 	//init struct Road;
 	Road road = {

@@ -113,8 +113,8 @@ typedef struct Keys_pressed{
 }Keys_pressed;
 
 typedef struct Camera{
-	int x;
-	int y;
+	float x;
+	float y;
 	int winSize_w;
 	int winSize_h;
 	float zoom;

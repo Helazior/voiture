@@ -118,6 +118,8 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam){
 	}
 	
 	//struct_to_moveCar
+	float old_posx = car->posx;
+	float old_posy = car->posy;
 	car->posx += car->speed * (float)cos(car->angle);
 	car->posy -= car->speed * (float)sin(car->angle);
 	car->frame.x = (int)(car->posx);
@@ -130,8 +132,10 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam){
 		float new_cam_y = car->posy - (float)cam->winSize_h / 2 - REAR_CAMERA * car->speed * ( FRAMES_PER_SECONDE / 60. ) * sin(car->angle);
 		cam->x = (int)((9.*(float)cam->x + new_cam_x) / 10.);
 		cam->y = (int)((9.*(float)cam->y + new_cam_y) / 10.);
+	} else {
+		cam->x += (1 - cam->zoom) * (car->posx - old_posx);
+		cam->y += (1 - cam->zoom) * (car->posy - old_posy);
 	}
-	printf("cam = %d\n", cam->x); 
 }
 
 void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road, Toolbar* toolbar){
@@ -311,7 +315,6 @@ static void render_car(SDL_Renderer *renderer, Entity* car, Camera* cam){
 	car->frame.x += cam->x;
 	car->frame.h = h_prev;
 	car->frame.w = w_prev;
-	printf("pos car = %f \n", car->posx); 
 }
 
 static void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity* car, SDL_Event* event, Ia* ia){
@@ -322,12 +325,9 @@ static void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, 
 	int y_prev;
 	int w_prev;
 	int h_prev;
-	// TODO : regarder si c'est pas 
-	// int w = car.frame.w * cam->zoom;
-	// int centre_x = car.frame.x + w / 2 - cam->x;
 
-	int centre_x = car->frame.x - cam->x;
-	int centre_y = car->frame.y - cam->y;
+	float centre_x = car->posx - cam->x;
+	float centre_y = car->posy - cam->y;
 	int square_w = road->square_width * cam->zoom;
 	if (road->select && event->button.x < 20000 && event->button.y < 20000){
 		int pos_clique_x = event->button.x - (float)road->square_width / 2 + cam->x + (event->button.x + cam->x - car->frame.x) * (float)(-1. + 1/cam->zoom);
@@ -411,8 +411,8 @@ static void render_drift(SDL_Renderer *renderer, Entity* car, Camera* cam){
 
 	SDL_SetRenderDrawColor(renderer, DRIFT_COLOR);//drift's black pixel
 	
-	int centre_x = car->frame.x + w / 2 - cam->x;
-	int centre_y = car->frame.y + h / 2 - cam->y;
+	float centre_x = car->posx + (float)w / 2 - cam->x;
+	float centre_y = car->posy + (float)h / 2 - cam->y;
 	
 	int marks_x, marks_y;
 	double angle;
@@ -440,8 +440,8 @@ static void render_drift(SDL_Renderer *renderer, Entity* car, Camera* cam){
 
 static void calcul_spline(Entity* car, Camera* cam, Road* road, float* x, float* y, float* pt, short* draw){
 	float t = *pt; 
-	int centre_x = car->frame.x - cam->x;
-	int centre_y = car->frame.y - cam->y;
+	float centre_x = car->posx - cam->x;
+	float centre_y = car->posy - cam->y;
 	int p0, p1, p2, p3;	
 	p0 = (int)t % road->len_tab_checkPoints;
 	p1 = (p0 + 1) % road->len_tab_checkPoints;
