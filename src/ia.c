@@ -11,12 +11,6 @@
 #include "../include/ia.h"
 
 
-void init_ia(Ia* ia){
-	ia->active = IA_ACTIVE;
-	ia->next_cp.x = 0.;
-	ia->next_cp.y = 0.;
-	ia->num_next_cp = -1;
-}
 
 static void calcul_angle_next_cp(Road* road, Ia* ia){
 	//moyenne entre vect ortho cp1 et vect cp1cp2
@@ -66,7 +60,7 @@ void calcul_next_cp(Road* road, Ia* ia, Entity* car){
 				break;
 			}
 	}
-	printf("next_cp = %d\n", ia->num_next_cp);
+	/*printf("next_cp = %d\n", ia->num_next_cp);*/
 		
 	ia->next_cp.x = road->tab_checkPoints[ia->num_next_cp].x;
 	ia->next_cp.y = road->tab_checkPoints[ia->num_next_cp].y;
@@ -74,10 +68,10 @@ void calcul_next_cp(Road* road, Ia* ia, Entity* car){
 	/*____2: angle______*/
 	calcul_angle_next_cp(road, ia);
 
-	printf("angle cp = %f\n", ia->angle_cp);
+	/*printf("angle cp = %f\n", ia->angle_cp);*/
 	
 	calcul_angle_car_angle_cp(ia, car);
-	printf("angle car - cp = %f\n", ia->angle_car_cp);
+	/*printf("angle car - cp = %f\n", ia->angle_car_cp);*/
 
 }
 
@@ -104,12 +98,21 @@ static void simu_move_car(Entity* car, Keys_pressed* key){
 	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (fabs(car->speed))) * car->frottement / 640.;
 }
 
-static int simu_traj(Ia ia, Entity car, Keys_pressed key, SDL_Renderer* renderer, Camera* cam){
+static Bool too_far(Entity* car, Ia* ia, int pos_initx, int pos_inity, Road* road){
+	// if dist (traj) > dist(cp) : return True
+	// TODO : vérifier que road->size c'est pas trop 
+	/*return ((car->posx  - pos_initx) * (car->posx  - pos_initx) + (car->posy  - pos_inity) * (car->posy  - pos_inity) > (ia->next_cp.x  - pos_initx) * (ia->next_cp.x  - pos_initx) + (ia->next_cp.y  - pos_inity) * (ia->next_cp.y  - pos_inity) + road->size + 100);*/
+	return (distance(car->posx, car->posy, pos_initx, pos_inity) > distance(ia->next_cp.x, ia->next_cp.y, pos_initx, pos_inity) + 10/* + (float)road->size / 2 - road->square_width - 1*/);
+}
+
+static int simu_traj(Ia ia, Entity car, Keys_pressed key, SDL_Renderer* renderer, Camera* cam, Road* road){
 	// It is a copy of the structure not to modify it!
 	// TODO : voir si la copie est vraiment longue
 	// tant qu'il n'a pas dépassé le checkpoint (par rapport à la parpendiculaire)
 	
 	// TEST : on fait un nombre d'itération assez bas, pour qu'il fasse la stratédie que s'il n'est pas trop loin
+	int pos_initx = car.posx;
+	int pos_inity = car.posy;
 	SDL_Rect rect = {0, 0, 4, 4};
 	int w = car.frame.w * cam->zoom;
 	int h = car.frame.h * cam->zoom;
@@ -121,7 +124,9 @@ static int simu_traj(Ia ia, Entity car, Keys_pressed key, SDL_Renderer* renderer
 	}
 
 	unsigned int nb_iter = 0;
-	while (/*ia.angle_car_angle_cp > - PI / 2 && ia.angle_car_angle_cp < PI / 2 &&*/ nb_iter <= 180){ // while he hasn't passed the cp !
+	calcul_angle_car_cp(&ia, &car);
+	/*printf("ia.angle_car_angle_cp = %f\n", ia.angle_car_angle_cp); */
+	while (ia.angle_car_cp > - PI / 2 && ia.angle_car_cp < PI / 2 && nb_iter <= 1000){ // while he hasn't passed the cp !
 			if (ia.angle_car_cp < 0){
 				key.left = True;
 				key.right = False;
@@ -145,30 +150,50 @@ static int simu_traj(Ia ia, Entity car, Keys_pressed key, SDL_Renderer* renderer
 		}
 		nb_iter++;
 	}
-	if (nb_iter >= 180){
+	int forecast = 0;
+	if (nb_iter >= 1000){
 		/*printf("nb_iter trop gros, simu_traj trop long car voiture trop loin ?\n");*/
+	} else if (too_far(&car, &ia, pos_initx, pos_inity, road)){
+		/*printf("too far\n"); */
+		forecast = 1;
+	} else if(nb_iter == 0){
+		forecast = 1;
 	}
-	printf("nb_iter = %d\n", nb_iter); 
-	// TODO : voir si la pos de la traj est plus loin ou plus prêt que le CP de la voiture
+	/*printf("nb_iter = %d\n", nb_iter); */
 	
-	return 0;
+	return forecast;
 }
 
-void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* renderer, Camera* cam){
+void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* renderer, Camera* cam, Road* road){
 	/*____3: move_to_cp____*/
 	// calculate the next key combinations by simulating the trajectory in advance
 	// (4 cases)
 	// TODO : mettre à jour la position du cp !!!
 	// TODO : bug sur le départ, il ne passe pas par le départ ! (bug vu qu'une fois)
+	/*printf("_____________\n"); */
+	ia->next_cp.x = road->tab_checkPoints[ia->num_next_cp].x;
+	ia->next_cp.y = road->tab_checkPoints[ia->num_next_cp].y;
 	calcul_angle_car_cp(ia, car);
-	simu_traj(*ia, *car, *key, renderer, cam);
+	key->down = False;
+	key->up = True;
+	int forecast = simu_traj(*ia, *car, *key, renderer, cam, road);
+	if (forecast == 1){
+		key->down = True;
+		key->up = False;
+	}
+	printf("angle = %f\n", ia->angle_car_cp); 
 	if (ia->angle_car_cp < 0){
 		key->left = True;
 		key->right = False;
 	} else if (ia->angle_car_cp > 0){
 		key->left = False;
 		key->right = True;
-	}	
-	key->up = True;
-
+	}
 }
+
+// TODO :  à faire quand on appuie sur "IA"
+void init_ia(Ia* ia, Road* road, Entity* car){
+	ia->active = IA_ACTIVE;
+	calcul_next_cp(road, ia, car);
+}
+

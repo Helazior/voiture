@@ -18,9 +18,8 @@ typedef struct Ia{
 	
 }Ia;
 
-
-void init_ia(Ia* ia);
+void init_ia(Ia* ia, Road* road, Entity* car);
 void calcul_next_cp(Road* road, Ia* ia, Entity* car);
-void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* renderer, Camera* cam);
+void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* renderer, Camera* cam, Road* road);
 
 #endif

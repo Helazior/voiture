@@ -56,6 +56,12 @@ SDL_Texture* loadTexture(SDL_Renderer *renderer, const char* p_filePath){
 	return texture;
 }
 
+void pause(){
+	// TODO : ne pas compter le temps du chrono
+	SDL_Event event;
+	SDL_WaitEvent(&event);
+}
+
 void init_car(Entity* car, SDL_Renderer *renderer){
 	car->speed = 0.;//pixels per frame
 	car->angle = 0.;
@@ -118,10 +124,14 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam){
 	car->frame.y = (int)(car->posy);
 	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (fabs(car->speed))) * car->frottement / 640.;
 	//manage cam
-	float new_cam_x = car->posx - (float)cam->winSize_w / 2 + REAR_CAMERA * car->speed * ( FRAMES_PER_SECONDE / 60. ) * cos(car->angle);
-	float new_cam_y = car->posy - (float)cam->winSize_h / 2 - REAR_CAMERA * car->speed * ( FRAMES_PER_SECONDE / 60. ) * sin(car->angle);
-	cam->x = (int)((9.*(float)cam->x + new_cam_x) / 10.);
-	cam->y = (int)((9.*(float)cam->y + new_cam_y) / 10.);
+	//TODO : si on est au bout de la piste, ne pas aller plus loin !
+	if (cam->follow_car){
+		float new_cam_x = car->posx - (float)cam->winSize_w / 2 + REAR_CAMERA * car->speed * ( FRAMES_PER_SECONDE / 60. ) * cos(car->angle);
+		float new_cam_y = car->posy - (float)cam->winSize_h / 2 - REAR_CAMERA * car->speed * ( FRAMES_PER_SECONDE / 60. ) * sin(car->angle);
+		cam->x = (int)((9.*(float)cam->x + new_cam_x) / 10.);
+		cam->y = (int)((9.*(float)cam->y + new_cam_y) / 10.);
+	}
+	printf("cam = %d\n", cam->x); 
 }
 
 void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road, Toolbar* toolbar){
@@ -190,7 +200,9 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Cam
 				change_variable_keys(toolbar, -add_to_var);
 			}
 			break;
-
+		case SDLK_SPACE:
+			pause();
+		break;
 		default:
 			break;
 	}
@@ -299,6 +311,7 @@ static void render_car(SDL_Renderer *renderer, Entity* car, Camera* cam){
 	car->frame.x += cam->x;
 	car->frame.h = h_prev;
 	car->frame.w = w_prev;
+	printf("pos car = %f \n", car->posx); 
 }
 
 static void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity* car, SDL_Event* event, Ia* ia){

@@ -10,7 +10,7 @@
 #define COLOR_TOOLBAR ORANGE
 #define SIZE_LINE_TOOLBAR 200
 
-#define NB_SETTINGS 5
+#define NB_SETTINGS 6
 
 typedef enum{
 	Checkbox = 0,
@@ -46,7 +46,7 @@ typedef struct Toolbar{
 }Toolbar;
 
 //init all the toolbar at the right of the screen
-int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia);
+int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia, Camera* cam);
 
 void click_toolbar(Toolbar* toolbar, SDL_Event* event);
 

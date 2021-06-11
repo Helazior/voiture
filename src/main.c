@@ -42,12 +42,14 @@ int main(void){
 	init_car(&car, renderer);
 
 	//init struct Camera;
-	Camera cam;
+	Camera cam = {
+		.zoom = ZOOM_INIT,
+		.follow_car = CAM_FOLLOW_CAR
+	};
 	SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
 
 	cam.x = (int)car.pos_initx - cam.winSize_w / 2;
 	cam.y = (int)car.pos_inity - cam.winSize_h / 2;
-	cam.zoom = ZOOM_INIT;
 
 	//init struct Road;
 	Road road = {
@@ -77,7 +79,7 @@ int main(void){
 
 	//init struct Toolbar;
 	Toolbar toolbar;
-	if (init_toolbar(&toolbar, renderer, &car, &road, &ia) == EXIT_FAILURE)
+	if (init_toolbar(&toolbar, renderer, &car, &road, &ia, &cam) == EXIT_FAILURE)
 		goto Quit;
 	
 
@@ -159,7 +161,7 @@ int main(void){
 		// IA take control of the keys
 		// TODO : mettre avant les contrôles humains
 		if (ia.active && ia.num_next_cp != -1){
-			ia_manage_keys(&ia, &key, &car, renderer, &cam);
+			ia_manage_keys(&ia, &key, &car, renderer, &cam, &road);
 		}
 
 		display(renderer, &car, &road, &cam, &event, &ia, &toolbar);
