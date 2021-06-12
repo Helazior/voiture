@@ -4,6 +4,10 @@
 -mettre des commentaires pour chaque fonction et structure
 
 
+[BUG à résoudre] :
+- quand j'appuis sur espace et que je veux déplacer un CP, gros bug qui fait disparaitre la route
+- En mode IA, il arrive qu'il ne cherche pas l'arriver, mais reste coincé sur celui d'avant (ce passe quand je supprime ou rajoute un CP pendant qu'il est en mode IA)
+
 OPTIMISATION :
  %   cumulative   self              self     total           
  time   seconds   seconds    calls  us/call  us/call  name    

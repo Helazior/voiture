@@ -59,6 +59,7 @@ int main(void){
 		.select = False,
 		.size = 500
 	};
+	init_road(&road);
 	//init struct Keys_pressed;
 	Keys_pressed key = {
 		.up = False,

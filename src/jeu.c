@@ -59,7 +59,9 @@ SDL_Texture* loadTexture(SDL_Renderer *renderer, const char* p_filePath){
 void pause(){
 	// TODO : ne pas compter le temps du chrono
 	SDL_Event event;
-	SDL_WaitEvent(&event);
+	do{
+		SDL_WaitEvent(&event);
+	} while(event.type != SDL_KEYDOWN);
 }
 
 void init_car(Entity* car, SDL_Renderer *renderer){
@@ -81,6 +83,27 @@ void init_car(Entity* car, SDL_Renderer *renderer){
 	car->frottement = FROTTEMENT;
 	car->turn = TURN;
 	car->turn_drift = TURN_DRIFT;
+}
+
+void init_road(Road* road){
+	road->len_tab_checkPoints = 6;
+	road->tab_checkPoints[0].x = 1760;
+	road->tab_checkPoints[0].y = 534;
+	road->tab_checkPoints[1].x = 1752;
+	road->tab_checkPoints[1].y = -828;
+	road->tab_checkPoints[2].x = 1061;
+	road->tab_checkPoints[2].y = -826;
+	road->tab_checkPoints[3].x = 672;
+	road->tab_checkPoints[3].y = -80;
+	road->tab_checkPoints[4].x = -418;
+	road->tab_checkPoints[4].y = -408;
+	road->tab_checkPoints[5].x = -260;
+	road->tab_checkPoints[5].y = 856;
+	for (int i = 0; i < road->len_tab_checkPoints; i++){
+		road->tab_checkPoints[i].w = road->square_width;;
+		road->tab_checkPoints[i].h = road->square_width;;
+		road->tab_valid_checkPoints[i] = False;
+	} 
 }
 
 float distance(float x1, float y1, float x2, float y2){

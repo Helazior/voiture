@@ -1,8 +1,9 @@
+//ia.h
 #ifndef _IA_H
 #define _IA_H
 
 #include "jeu.h"
-#define IA_ACTIVE True
+#define IA_ACTIVE False
 #define SHOW_SIMU_TRAJ True
 
 

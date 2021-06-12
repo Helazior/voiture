@@ -39,7 +39,7 @@
 
 #define NB_PTS 250.
 
-#define CAM_FOLLOW_CAR True
+#define CAM_FOLLOW_CAR False
 
 typedef enum{
 	False = 0,
@@ -122,7 +122,11 @@ typedef struct Camera{
 }Camera;
 
 void pause();
+
 void init_car(Entity* car, SDL_Renderer *renderer);
+
+void init_road(Road* road);
+
 float distance(float x1, float y1, float x2, float y2);
 void reset_valid_tab(Road* road);
 //drift
