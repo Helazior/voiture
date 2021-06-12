@@ -37,9 +37,14 @@ static void calcul_angle_car_angle_cp(Ia* ia, Entity* car){
 }
 
 static void calcul_angle_car_cp(Ia* ia, Entity* car){
-	float angle_vect_car_cp = atan2f(-(ia->next_cp.y - car->posy), ia->next_cp.x - car->posx); // angle for the vect (car.x, car.y) - (cp.x, cp.y) 
-	ia->angle_car_cp = (float)fmod(car->angle - angle_vect_car_cp + 3*PI, 2 * PI) - PI;
+	ia->angle_vect_car_cp = atan2f(-(ia->next_cp.y - car->posy), ia->next_cp.x - car->posx); // angle for the vect (car.x, car.y) - (cp.x, cp.y) 
+	ia->angle_car_cp = (float)fmod(car->angle - ia->angle_vect_car_cp + 3*PI, 2 * PI) - PI;
 	/*printf("angle  vect car-cp = %f\n", angle_vect_car_cp);*/
+}
+
+static void calcul_car_angle_cp(Ia* ia, Entity* car){
+	calcul_angle_car_cp(ia, car);
+	ia->car_angle_cp = (float)fmod(ia->angle_vect_car_cp - ia->angle_cp + 3*PI, 2 * PI) - PI;
 }
 
 
@@ -102,7 +107,14 @@ static Bool too_far(Entity* car, Ia* ia, int pos_initx, int pos_inity, Road* roa
 	// if dist (traj) > dist(cp) : return True
 	// TODO : vérifier que road->size c'est pas trop 
 	/*return ((car->posx  - pos_initx) * (car->posx  - pos_initx) + (car->posy  - pos_inity) * (car->posy  - pos_inity) > (ia->next_cp.x  - pos_initx) * (ia->next_cp.x  - pos_initx) + (ia->next_cp.y  - pos_inity) * (ia->next_cp.y  - pos_inity) + road->size + 100);*/
-	return (distance(car->posx, car->posy, pos_initx, pos_inity) > distance(ia->next_cp.x, ia->next_cp.y, pos_initx, pos_inity) + 10/* + (float)road->size / 2 - road->square_width - 1*/);
+	return (distance(car->posx, car->posy, pos_initx, pos_inity) > distance(ia->next_cp.x, ia->next_cp.y, pos_initx, pos_inity) + (float)road->size / 2 - car->frame.w);
+}
+
+static Bool too_close(Entity* car, Ia* ia, int pos_initx, int pos_inity, Road* road){
+	// if dist (traj) > dist(cp) : return True
+	// TODO : vérifier que road->size c'est pas trop 
+	/*return ((car->posx  - pos_initx) * (car->posx  - pos_initx) + (car->posy  - pos_inity) * (car->posy  - pos_inity) > (ia->next_cp.x  - pos_initx) * (ia->next_cp.x  - pos_initx) + (ia->next_cp.y  - pos_inity) * (ia->next_cp.y  - pos_inity) + road->size + 100);*/
+	return (distance(car->posx, car->posy, pos_initx, pos_inity) < distance(ia->next_cp.x, ia->next_cp.y, pos_initx, pos_inity) - (float)road->size / 2 + car->frame.w);
 }
 
 static int simu_traj(Ia ia, Entity car, Keys_pressed key, SDL_Renderer* renderer, Camera* cam, Road* road){
@@ -124,9 +136,12 @@ static int simu_traj(Ia ia, Entity car, Keys_pressed key, SDL_Renderer* renderer
 	}
 
 	unsigned int nb_iter = 0;
+	calcul_car_angle_cp(&ia, &car);
+	/*printf("__________\n%f ;%f\n", ia.angle_car_cp, ia.angle_cp); */
+	printf("angle = %f\n", ia.car_angle_cp); 
 	calcul_angle_car_cp(&ia, &car);
 	/*printf("ia.angle_car_angle_cp = %f\n", ia.angle_car_angle_cp); */
-	while (ia.angle_car_cp > - PI / 2 && ia.angle_car_cp < PI / 2 && nb_iter <= 1000){ // while he hasn't passed the cp !
+	while (ia.car_angle_cp > - PI / 2 && ia.car_angle_cp < PI / 2 && nb_iter <= 1000){ // while he hasn't passed the cp !
 			if (ia.angle_car_cp < 0){
 				key.left = True;
 				key.right = False;
@@ -135,8 +150,7 @@ static int simu_traj(Ia ia, Entity car, Keys_pressed key, SDL_Renderer* renderer
 				key.right = True;
 			}
 		simu_move_car(&car, &key);
-		calcul_angle_car_angle_cp(&ia, &car);
-		calcul_angle_car_cp(&ia, &car);
+		calcul_car_angle_cp(&ia, &car);
 		if (ia.show_simu_traj){
 			rect.x = car.posx;
 			rect.y = car.posy;
@@ -155,6 +169,8 @@ static int simu_traj(Ia ia, Entity car, Keys_pressed key, SDL_Renderer* renderer
 		/*printf("nb_iter trop gros, simu_traj trop long car voiture trop loin ?\n");*/
 	} else if (too_far(&car, &ia, pos_initx, pos_inity, road)){
 		/*printf("too far\n"); */
+		forecast = 1;
+	} else if (too_close(&car, &ia, pos_initx, pos_inity, road)){	
 		forecast = 1;
 	} else if(nb_iter == 0){
 		forecast = 1;
@@ -177,11 +193,10 @@ void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* render
 	key->down = False;
 	key->up = True;
 	int forecast = simu_traj(*ia, *car, *key, renderer, cam, road);
-	if (forecast == 1){
+	if (forecast == 1 && car->speed > 3){
 		key->down = True;
 		key->up = False;
 	}
-	printf("angle = %f\n", ia->angle_car_cp); 
 	if (ia->angle_car_cp < 0){
 		key->left = True;
 		key->right = False;

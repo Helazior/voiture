@@ -14,6 +14,8 @@ typedef struct Ia{
 	float angle_cp; // final angle in the cp
 	float angle_car_angle_cp; // angle between the angle car and the final angle in the cp
 	float angle_car_cp; // angle to go to the next cp
+	float car_angle_cp; // angle (car-cp) and angle cp
+	float angle_vect_car_cp; // angle (car-nextCP)
 	Coord next_cp_roadside[2];
 	
 }Ia;
