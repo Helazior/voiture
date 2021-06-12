@@ -107,33 +107,131 @@ static Bool too_far(Entity* car, Ia* ia, int pos_initx, int pos_inity, Road* roa
 	// if dist (traj) > dist(cp) : return True
 	// TODO : vérifier que road->size c'est pas trop 
 	/*return ((car->posx  - pos_initx) * (car->posx  - pos_initx) + (car->posy  - pos_inity) * (car->posy  - pos_inity) > (ia->next_cp.x  - pos_initx) * (ia->next_cp.x  - pos_initx) + (ia->next_cp.y  - pos_inity) * (ia->next_cp.y  - pos_inity) + road->size + 100);*/
-	return (distance(car->posx, car->posy, pos_initx, pos_inity) > distance(ia->next_cp.x, ia->next_cp.y, pos_initx, pos_inity) + (float)road->size / 10);
+	return (distance(car->posx, car->posy, pos_initx, pos_inity) > distance(ia->next_cp.x, ia->next_cp.y, pos_initx, pos_inity) + (float)road->size / 20);
 }
 
 static Bool too_close(Entity* car, Ia* ia, int pos_initx, int pos_inity, Road* road){
 	// if dist (traj) > dist(cp) : return True
 	// TODO : vérifier que road->size c'est pas trop 
 	/*return ((car->posx  - pos_initx) * (car->posx  - pos_initx) + (car->posy  - pos_inity) * (car->posy  - pos_inity) > (ia->next_cp.x  - pos_initx) * (ia->next_cp.x  - pos_initx) + (ia->next_cp.y  - pos_inity) * (ia->next_cp.y  - pos_inity) + road->size + 100);*/
-	return (distance(car->posx, car->posy, pos_initx, pos_inity) < distance(ia->next_cp.x, ia->next_cp.y, pos_initx, pos_inity) - (float)road->size / 10);
+	return (distance(car->posx, car->posy, pos_initx, pos_inity) < distance(ia->next_cp.x, ia->next_cp.y, pos_initx, pos_inity) - (float)road->size / 20);
 }
 
 static Bool is_angle_positive(Ia* ia){
-	return (ia->angle_car_angle_cp > 0.2);
+	return (ia->angle_car_angle_cp > 0.4);
 }
 
 static Bool is_angle_negative(Ia* ia){
-	return (ia->angle_car_angle_cp < -0.2);
+	return (ia->angle_car_angle_cp < -0.4);
 }
 
-static int simu_traj(Ia ia, Entity car, Keys_pressed key, SDL_Renderer* renderer, Camera* cam, Road* road){
+static void show_simu_traj(Entity* car, Camera* cam, SDL_Renderer* renderer, float centre_x, float centre_y){
+	SDL_Rect rect = {
+		car->posx - cam->x, 
+		car->posy - cam->y,
+		4, 
+		4
+	};
+	
+	rect.x = (1 - cam->zoom) * centre_x + cam->zoom * rect.x;
+	rect.y = (1 - cam->zoom) * centre_y + cam->zoom * rect.y;
+	if (rect.x > 0 && rect.x < cam->winSize_w && rect.y > 0 && rect.y < cam->winSize_h){
+		SDL_RenderFillRect(renderer, &rect);
+	}
+
+
+}
+
+typedef enum{
+	LEFT,
+	RIGHT
+}Turn;
+
+
+static void simu_traj_no_line(int* forecast, unsigned int nb_iter, Entity* car, Camera* cam, Ia* ia, Keys_pressed* key, SDL_Renderer* renderer, float centre_x, float centre_y, unsigned int nb_iter_line){
+	// TODO : pour optimiser on pourrait repprendre au moment de la ligne droite !
+	// TODO : ATTENTION, il ne faut pas qu'il remonte trop ! Donc limiter la remonter
+	// TODO : laisser un peu plus decsendre ! Il freine souvent pour rien
+	if (ia->show_simu_traj){
+		SDL_SetRenderDrawColor(renderer, CP_START_COLOR);
+	}
+
+
+	while (nb_iter > 2 * nb_iter_line){ // while he hasn't passed the cp !
+		if (ia->angle_car_cp < 0){
+			key->left = True;
+			key->right = False;
+		} else if (ia->angle_car_cp > 0){
+			key->left = False;
+			key->right = True;
+		}
+		simu_move_car(car, key);
+		calcul_car_angle_cp(ia, car);
+		nb_iter --;
+	}
+
+	unsigned int nb_iter_second_turn = nb_iter_line;
+	// we turn to get a better angle (first turn !)
+	/*if (first_turn == LEFT){*/
+	if (*forecast == 2){
+		key->left = True;
+		key->right = False;
+	} else {
+		key->left = False;
+		key->right = True;
+	}
+
+	while (nb_iter_line){ // while he hasn't passed the cp !
+		simu_move_car(car, key);
+		calcul_car_angle_cp(ia, car);
+		nb_iter_line --;
+
+		if (ia->show_simu_traj){
+			show_simu_traj(car, cam, renderer, centre_x, centre_y);
+		}
+	}
+
+	if (ia->show_simu_traj){
+		SDL_SetRenderDrawColor(renderer, NEXT_CP_COLOR);
+	}
+
+	// we come back from the turn in the opposite direction (2nd turn)
+	/*if (first_turn == RIGHT){*/
+	if (*forecast == 3){
+		key->left = True;
+		key->right = False;
+	} else {
+		key->left = False;
+		key->right = True;
+	}
+
+	while (nb_iter_second_turn){ // while he hasn't passed the cp !
+		simu_move_car(car, key);
+		calcul_car_angle_cp(ia, car);
+		nb_iter_second_turn --;
+
+		if (ia->show_simu_traj){
+			show_simu_traj(car, cam, renderer, centre_x, centre_y);
+		}
+	}
+	
+	// check the angle
+	calcul_angle_car_angle_cp(ia, car);
+	// if it turn to much it's ok, if no enough -> drift or slow down
+	// nothing change -> slow down or drift to turn more
+	if (*forecast == 2 && is_angle_positive(ia)){
+		*forecast = 4;
+	} else if (*forecast == 3 && is_angle_negative(ia)){
+		*forecast = 5;
+	}
+}
+
+static int simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, SDL_Renderer* renderer, Camera* cam, Road* road){
 	// It is a copy of the structure not to modify it!
 	// TODO : voir si la copie est vraiment longue
 	// tant qu'il n'a pas dépassé le checkpoint (par rapport à la parpendiculaire)
 	
 	// TEST : on fait un nombre d'itération assez bas, pour qu'il fasse la stratédie que s'il n'est pas trop loin
-	int pos_initx = car.posx;
-	int pos_inity = car.posy;
-	SDL_Rect rect = {0, 0, 4, 4};
 	float w = (float)car.frame.w * cam->zoom;
 	float h = (float)car.frame.h * cam->zoom;
 	float centre_x = car.posx + w / 2 - cam->x;
@@ -144,52 +242,59 @@ static int simu_traj(Ia ia, Entity car, Keys_pressed key, SDL_Renderer* renderer
 	}
 
 	unsigned int nb_iter = 0;
+	unsigned int nb_iter_line = 0;
 	calcul_car_angle_cp(&ia, &car);
 	/*printf("__________\n%f ;%f\n", ia.angle_car_cp, ia.angle_cp); */
 	/*printf("angle = %f\n", ia.car_angle_cp); */
 	calcul_angle_car_cp(&ia, &car);
 	/*printf("ia.angle_car_angle_cp = %f\n", ia.angle_car_angle_cp); */
+	Turn first_turn;
+	if (ia.angle_car_cp < 0){
+		first_turn = LEFT;
+	} else {
+		first_turn = RIGHT;
+	}
 	while (ia.car_angle_cp > - PI / 2 && ia.car_angle_cp < PI / 2 && nb_iter <= 1000){ // while he hasn't passed the cp !
 			if (ia.angle_car_cp < 0){
 				key.left = True;
 				key.right = False;
+				if (first_turn == RIGHT){
+					nb_iter_line ++;
+				}
 			} else if (ia.angle_car_cp > 0){
 				key.left = False;
 				key.right = True;
+				if (first_turn == LEFT){
+					nb_iter_line ++;
+				}
 			}
 		simu_move_car(&car, &key);
 		calcul_car_angle_cp(&ia, &car);
 		if (ia.show_simu_traj){
-			rect.x = car.posx;
-			rect.y = car.posy;
-			rect.x -= cam->x;
-			rect.y -= cam->y;
-			rect.x = (1 - cam->zoom) * centre_x + cam->zoom * rect.x;
-			rect.y = (1 - cam->zoom) * centre_y + cam->zoom * rect.y;
-			if (rect.x > 0 && rect.x < cam->winSize_w && rect.y > 0 && rect.y < cam->winSize_h){
-				SDL_RenderFillRect(renderer, &rect);
-			}
+			show_simu_traj(&car, cam, renderer, centre_x, centre_y);
 		}
 		nb_iter++;
 	}
+	// TODO : faire un type enum
 	int forecast = 0;
 	calcul_angle_car_angle_cp(&ia, &car);
 	if (nb_iter >= 1000){
 		/*printf("nb_iter trop gros, simu_traj trop long car voiture trop loin ?\n");*/
-	} else if (too_far(&car, &ia, pos_initx, pos_inity, road)){
+	} else if (too_far(&car, &ia, car_init.posx, car_init.posy, road)){
 		/*printf("too far\n"); */
 		forecast = 1;
-	} else if (too_close(&car, &ia, pos_initx, pos_inity, road)){	
+	} else if (too_close(&car, &ia, car_init.posx, car_init.posy, road)){	
 		forecast = 1;
 	} else if (nb_iter == 0){
 		forecast = 1;
 	} else if (is_angle_positive(&ia)){
 		forecast = 2;
+		simu_traj_no_line(&forecast, nb_iter, &car_init, cam, &ia, &key, renderer, centre_x, centre_y, nb_iter_line);
 	} else if (is_angle_negative(&ia)){
 		forecast = 3;
+		simu_traj_no_line(&forecast, nb_iter, &car_init, cam, &ia, &key, renderer, centre_x, centre_y, nb_iter_line);
 	}
 	/*printf("nb_iter = %d\n", nb_iter); */
-	
 	return forecast;
 }
 
@@ -205,8 +310,8 @@ void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* render
 	calcul_angle_car_cp(ia, car);
 	key->down = False;
 	key->up = True;
-	int forecast = simu_traj(*ia, *car, *key, renderer, cam, road);
-	if (forecast == 1 && car->speed > 3){
+	int forecast = simu_traj(*ia, *car, *car, *key, renderer, cam, road);
+	if ((forecast == 1 && car->speed > 10) || ((forecast == 4 || forecast == 5) && car->speed > 10)){
 		key->down = True;
 		key->up = False;
 	}
@@ -219,12 +324,12 @@ void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* render
 	}	
 	// TODO : à suppr
 	calcul_angle_car_angle_cp(ia, car);
-	if (forecast == 2){
-		printf("ok -> gauche %f %f %f\n", ia->angle_car_angle_cp, car->angle, ia->angle_cp); 
+	if (forecast == 2 || forecast == 4){
+		/*printf("ok -> gauche %f %f %f\n", ia->angle_car_angle_cp, car->angle, ia->angle_cp); */
 		key->left = True;
 		key->right = False;
-	} else if (forecast == 3){
-		printf("ok -> droite %f %f %f\n", ia->angle_car_angle_cp,car->angle, ia->angle_cp ); 
+	} else if (forecast == 3 || forecast == 5){
+		/*printf("ok -> droite %f %f %f\n", ia->angle_car_angle_cp,car->angle, ia->angle_cp ); */
 		key->left = False;
 		key->right = True;
 	}
