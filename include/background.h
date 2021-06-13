@@ -9,6 +9,7 @@
 #define FONT_SIZE 18
 #define COLOR_TOOLBAR ORANGE
 #define SIZE_LINE_TOOLBAR 200
+#define WIDTH_TOOLBAR 300
 
 #define NB_SETTINGS 6
 
@@ -50,13 +51,12 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
 
 void click_toolbar(Toolbar* toolbar, SDL_Event* event);
 
-//check if the user click in a box of setting
-Bool is_in(int x, int y, SDL_Rect* size);
-
 void change_variable(Toolbar* toolbar, SDL_Event* event);
 
 void change_variable_keys(Toolbar* toolbar, short add);
 
 void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar);
+
+void render_keys(SDL_Renderer *renderer, Keys_pressed* key, Camera* cam);
 
 #endif

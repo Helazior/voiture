@@ -106,6 +106,11 @@ void init_road(Road* road){
 	} 
 }
 
+void init_cam(Camera* cam, Entity* car){
+	cam->x = (float)car->pos_initx - (float)cam->winSize_w / 2. - (float)WIDTH_TOOLBAR / 2.;
+	cam->y = (float)car->pos_inity - (float)cam->winSize_h / 2. - (float)WIDTH_TOOLBAR / 2.;
+}
+
 float distance(float x1, float y1, float x2, float y2){
 	return sqrt(pow((float)x1 - (float)x2, 2) + pow(((float)y1 - (float)y2), 2)); // TODO : faire x*x au lieu de pow(x,2) pour opti
 	// TODO : a-t-on vraiment besoin de sqrt ?
@@ -161,7 +166,8 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam){
 	}
 }
 
-void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road, Toolbar* toolbar){
+void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road, Toolbar* toolbar, Ia* ia){
+	// TODO : faire un enum !
 	short add_to_var;
 	add_to_var = 1;
 	switch(event->key.keysym.sym){
@@ -204,6 +210,10 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Cam
 			car->posy = car->pos_inity;
 			car->speed = 0.;
 			reset_valid_tab(road);
+			if (ia->active)
+				init_ia(ia, road, car);
+			if (cam->follow_car == False)
+				init_cam(cam, car);
 			break;
 		case SDLK_p:
 			cam->zoom *= 1.1;
@@ -558,7 +568,7 @@ static void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* 
 }
 
 
-void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar){
+void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar, Keys_pressed* key){
 	//____spline display____
 	render_road(car, renderer, cam, road);
 
@@ -570,6 +580,9 @@ void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_E
 	
 	//_____toolbar display___
 	render_toolbar(renderer, toolbar);
+
+	//_____key display_______
+	render_keys(renderer, key, cam);
 
 	//default color background
 	SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);

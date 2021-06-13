@@ -127,6 +127,8 @@ void init_car(Entity* car, SDL_Renderer *renderer);
 
 void init_road(Road* road);
 
+void init_cam(Camera* cam, Entity* car);
+
 float distance(float x1, float y1, float x2, float y2);
 void reset_valid_tab(Road* road);
 //drift
@@ -134,7 +136,7 @@ void manage_skid_marks(Entity* car, Keys_pressed* key);
 //car
 void move_car(Entity *car, Keys_pressed* key, Camera* cam);
 //key
-void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road, Toolbar* toolbar);
+void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road, Toolbar* toolbar, Ia* ia);
 //put the 3 last checkpoints into the 3 first:
 void close_circuit(Road road);
 //add a checkpoint:
@@ -145,7 +147,7 @@ void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Ia* 
 void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 //manage a checkpoint:
 void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
-void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar);// display all
+void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar, Keys_pressed* key);// display all
 void clear(SDL_Renderer *renderer);
 
 #endif

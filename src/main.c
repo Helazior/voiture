@@ -46,10 +46,10 @@ int main(void){
 		.zoom = ZOOM_INIT,
 		.follow_car = CAM_FOLLOW_CAR
 	};
-	SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
 
-	cam.x = (float)car.pos_initx - (float)cam.winSize_w / 2;
-	cam.y = (float)car.pos_inity - (float)cam.winSize_h / 2;
+	SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
+	init_cam(&cam, &car);
+
 
 	//init struct Road;
 	Road road = {
@@ -77,6 +77,9 @@ int main(void){
 		.next_cp.y = 0.,
 		.num_next_cp = -1
 	};
+	if (ia.active){
+	init_ia(&ia, &road, &car);
+	}
 
 	//init struct Toolbar;
 	Toolbar toolbar;
@@ -103,10 +106,10 @@ int main(void){
 					gameRunning = False;
 					break;
 				case SDL_KEYDOWN:
-					manage_key(&event, &key, True, &car, &cam, &road, &toolbar);
+					manage_key(&event, &key, True, &car, &cam, &road, &toolbar, &ia);
 					break;
 				case SDL_KEYUP:
-					manage_key(&event, &key, False, &car, &cam, &road, &toolbar);
+					manage_key(&event, &key, False, &car, &cam, &road, &toolbar, &ia);
 					break;
 				case SDL_MOUSEBUTTONDOWN://clique souris
 					switch(event.button.button){
@@ -138,6 +141,27 @@ int main(void){
 						toolbar.is_selecting = False;
 						if (toolbar.settings[toolbar.num_setting].type == Checkbox && toolbar.select_var_int == toolbar.settings[toolbar.num_setting].int_variable){
 							*toolbar.settings[toolbar.num_setting].int_variable = (*toolbar.settings[toolbar.num_setting].int_variable + 1) % 2;
+							
+							// the box has just been checked
+							if (*toolbar.settings[toolbar.num_setting].int_variable == True){
+								// the box is ia->active
+								if (toolbar.settings[toolbar.num_setting].int_variable == (int*)&ia.active){
+									init_ia(&ia, &road, &car);
+
+								}
+							// the box has just been unchecked
+							} else {
+								// the box is ia->active
+								if (toolbar.settings[toolbar.num_setting].int_variable == (int*)&ia.active){
+									// the ia change keys, so we need to fixe them to False
+									// TODO : faire une fonction qui le fait
+									key.up = False;
+									key.down = False;
+									key.left = False;
+									key.right = False;
+									key.drift = none;
+								}
+							}
 							toolbar.select_var_int = NULL;
 						}
 					}
@@ -165,7 +189,7 @@ int main(void){
 			ia_manage_keys(&ia, &key, &car, renderer, &cam, &road);
 		}
 
-		display(renderer, &car, &road, &cam, &event, &ia, &toolbar);
+		display(renderer, &car, &road, &cam, &event, &ia, &toolbar, &key);
 		//printf("%d\n", (int)car.speed);
 		//printf("%ld			\r", SDL_GetPerformanceCounter());	//performances
 	}

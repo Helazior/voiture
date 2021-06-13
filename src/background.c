@@ -61,7 +61,7 @@ static void init_setting(
 }
 
 int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia, Camera* cam){
-	toolbar->size.w = 300;
+	toolbar->size.w = WIDTH_TOOLBAR;
 	toolbar->size.y = 0;
 	
 	toolbar->select_var_int = NULL;
@@ -93,6 +93,13 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
 	return EXIT_SUCCESS;
 }
 
+//check if the user click in a box of setting
+static Bool is_in(int x, int y, SDL_Rect* size){
+	int x_mean;
+	x_mean = size->x + size->w / 2;
+	return x >= x_mean - SIZE_LINE_TOOLBAR / 2 - 10 && x <= x_mean + SIZE_LINE_TOOLBAR / 2 + 10 && y > size->y && y < size->y + 3 * size->h;
+}
+
 void click_toolbar(Toolbar* toolbar, SDL_Event* event){
 	toolbar->pos_click_x = event->button.x;
 	// click on something ?
@@ -107,12 +114,6 @@ void click_toolbar(Toolbar* toolbar, SDL_Event* event){
 			break;
 		}
 	}
-}
-
-Bool is_in(int x, int y, SDL_Rect* size){
-	int x_mean;
-	x_mean = size->x + size->w / 2;
-	return x >= x_mean - SIZE_LINE_TOOLBAR / 2 - 10 && x <= x_mean + SIZE_LINE_TOOLBAR / 2 + 10 && y > size->y && y < size->y + 3 * size->h;
 }
 
 void change_variable(Toolbar* toolbar, SDL_Event* event){
@@ -139,7 +140,7 @@ void change_variable(Toolbar* toolbar, SDL_Event* event){
 		}
 		// TODO : vérifier que le clique est dans la fenêtre !
 		toolbar->pos_click_x = event->button.x;
-	}
+	}  
 }
 
 void change_variable_keys(Toolbar* toolbar, short add){
@@ -219,4 +220,71 @@ void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar){
 			printf("Error: bad toolbar->settings[%d].type. Must be Line or Checkbox. \n", i);
 		}
 	}
+}
+
+void render_keys(SDL_Renderer *renderer, Keys_pressed* key, Camera* cam){
+	// 3/4 of the screen
+	SDL_Rect key_square = {
+		.x = 3 * cam->winSize_w / 4,
+		.y = cam->winSize_h - 200,
+		.w = 75,
+		.h = 75
+	};
+	// left
+	// dift
+	if (key->drift == drift_left){
+		SDL_SetRenderDrawColor(renderer, CP_SELECTED_COLOR);
+		SDL_RenderFillRect(renderer, &key_square);
+	// active
+	} else if (key->left == True) {
+		SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR);
+		SDL_RenderFillRect(renderer, &key_square);
+	// unactive	
+	} else {
+		SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR);
+		SDL_RenderDrawRect(renderer, &key_square);
+	}
+	
+	// down
+	key_square.x += key_square.w + 2;
+	// active
+	if (key->down == True) {
+		SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR);
+		SDL_RenderFillRect(renderer, &key_square);
+	// unactive	
+	} else {
+		SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR);
+		SDL_RenderDrawRect(renderer, &key_square);
+	}
+
+	// up
+	key_square.y -= key_square.h + 2;
+	// active
+	if (key->up == True) {
+		SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR);
+		SDL_RenderFillRect(renderer, &key_square);
+	// unactive	
+	} else {
+		SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR);
+		SDL_RenderDrawRect(renderer, &key_square);
+	}
+
+
+	// right
+	key_square.y += key_square.h + 2;
+	key_square.x += key_square.w + 2;
+	// dift
+	if (key->drift == drift_right){
+		SDL_SetRenderDrawColor(renderer, CP_SELECTED_COLOR);
+		SDL_RenderFillRect(renderer, &key_square);
+	// active
+	} else if (key->right == True) {
+		SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR);
+		SDL_RenderFillRect(renderer, &key_square);
+	// unactive	
+	} else {
+		SDL_SetRenderDrawColor(renderer, NEXT_CP_COLOR);
+		SDL_RenderDrawRect(renderer, &key_square);
+	}
+
 }

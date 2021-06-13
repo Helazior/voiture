@@ -11,6 +11,12 @@
 #include "../include/ia.h"
 
 
+void init_ia(Ia* ia, Road* road, Entity* car){
+	ia->active = True;
+	ia->num_next_cp = -1;
+	calcul_next_cp(road, ia, car);
+}
+
 
 static void calcul_angle_next_cp(Road* road, Ia* ia){
 	//moyenne entre vect ortho cp1 et vect cp1cp2
@@ -51,7 +57,7 @@ static void calcul_car_angle_cp(Ia* ia, Entity* car){
 void calcul_next_cp(Road* road, Ia* ia, Entity* car){
 	/*____1: next_cp____*/
 	if (ia->num_next_cp == -1 && road->nb_valid_checkPoints > 1){
-		ia->num_next_cp = 0;
+		ia->num_next_cp = 0; // TODO à changer, faut prendre le prochain CP, pas le premier car il peut avoir été pris
 		while (road->tab_valid_checkPoints[ia->num_next_cp++] != Start);
 		if (ia->num_next_cp > road->len_tab_checkPoints)
 			printf("error\n");
@@ -147,32 +153,26 @@ typedef enum{
 	RIGHT
 }Turn;
 
+static float calcul_angle_vect_car_cp_vect_initCar_cp(Entity* car, Ia* ia, float car_initx, float car_inity){
+	float angle_vect_car_cp = atan2f(-(ia->next_cp.y - car->posy), ia->next_cp.x - car->posx); // angle for the vect (car.x, car.y) - (cp.x, cp.y) 
+	float angle_vect_initCar_cp = atan2f(-(ia->next_cp.y - car_inity), ia->next_cp.x - car_initx); // angle for the vect (car.x, car.y) - (cp.x, cp.y) 
+	return (float)fmod(angle_vect_car_cp - angle_vect_initCar_cp + 3*PI, 2 * PI) - PI;
+}
 
 static void simu_traj_no_line(int* forecast, unsigned int nb_iter, Entity* car, Camera* cam, Ia* ia, Keys_pressed* key, SDL_Renderer* renderer, float centre_x, float centre_y, unsigned int nb_iter_line){
 	// TODO : pour optimiser on pourrait repprendre au moment de la ligne droite !
 	// TODO : ATTENTION, il ne faut pas qu'il remonte trop ! Donc limiter la remonter
 	// TODO : laisser un peu plus decsendre ! Il freine souvent pour rien
+	
+	float car_initx = car->posx;
+	float car_inity = car->posy;
+
 	if (ia->show_simu_traj){
 		SDL_SetRenderDrawColor(renderer, CP_START_COLOR);
 	}
 
+	unsigned int nb_iter_second_turn = 2 * nb_iter_line;
 
-	while (nb_iter > 2 * nb_iter_line){ // while he hasn't passed the cp !
-		if (ia->angle_car_cp < 0){
-			key->left = True;
-			key->right = False;
-		} else if (ia->angle_car_cp > 0){
-			key->left = False;
-			key->right = True;
-		}
-		simu_move_car(car, key);
-		calcul_car_angle_cp(ia, car);
-		nb_iter --;
-	}
-
-	unsigned int nb_iter_second_turn = nb_iter_line;
-	// we turn to get a better angle (first turn !)
-	/*if (first_turn == LEFT){*/
 	if (*forecast == 2){
 		key->left = True;
 		key->right = False;
@@ -180,6 +180,18 @@ static void simu_traj_no_line(int* forecast, unsigned int nb_iter, Entity* car, 
 		key->left = False;
 		key->right = True;
 	}
+
+	while (nb_iter > 2 * nb_iter_line){ // while he hasn't began the straight line
+		simu_move_car(car, key);
+		calcul_car_angle_cp(ia, car);
+		if (ia->show_simu_traj){
+			show_simu_traj(car, cam, renderer, centre_x, centre_y);
+		}
+		nb_iter --;
+	}
+
+	// we turn to get a better angle (first turn !)
+	/*if (first_turn == LEFT){*/
 
 	while (nb_iter_line){ // while he hasn't passed the cp !
 		simu_move_car(car, key);
@@ -205,7 +217,7 @@ static void simu_traj_no_line(int* forecast, unsigned int nb_iter, Entity* car, 
 		key->right = True;
 	}
 
-	while (nb_iter_second_turn){ // while he hasn't passed the cp !
+	while (ia->car_angle_cp > - PI / 2 && ia->car_angle_cp < PI / 2 && nb_iter_second_turn){ // while he hasn't passed the cp !
 		simu_move_car(car, key);
 		calcul_car_angle_cp(ia, car);
 		nb_iter_second_turn --;
@@ -219,9 +231,11 @@ static void simu_traj_no_line(int* forecast, unsigned int nb_iter, Entity* car, 
 	calcul_angle_car_angle_cp(ia, car);
 	// if it turn to much it's ok, if no enough -> drift or slow down
 	// nothing change -> slow down or drift to turn more
-	if (*forecast == 2 && is_angle_positive(ia)){
+	float angle_vect_car_cp_vect_init = calcul_angle_vect_car_cp_vect_initCar_cp(car, ia, car_initx, car_inity);
+	Bool went_to_cp = (fabs(angle_vect_car_cp_vect_init) > PI / 2.0); // NOT > PI/2 => too far from the CP => no need to slow down !
+	if (*forecast == 2 && is_angle_positive(ia) && went_to_cp){
 		*forecast = 4;
-	} else if (*forecast == 3 && is_angle_negative(ia)){
+	} else if (*forecast == 3 && is_angle_negative(ia) && went_to_cp){
 		*forecast = 5;
 	}
 }
@@ -335,10 +349,3 @@ void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* render
 	}
 
 }
-
-// TODO :  à faire quand on appuie sur "IA"
-void init_ia(Ia* ia, Road* road, Entity* car){
-	ia->active = IA_ACTIVE;
-	calcul_next_cp(road, ia, car);
-}
-
