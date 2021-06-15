@@ -130,6 +130,9 @@ void init_road(Road* road);
 void init_cam(Camera* cam, Entity* car);
 
 float distance(float x1, float y1, float x2, float y2);
+
+float dist2(float x1, float y1, float x2, float y2);
+
 void reset_valid_tab(Road* road);
 //drift
 void manage_skid_marks(Entity* car, Keys_pressed* key);

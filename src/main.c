@@ -75,7 +75,8 @@ int main(void){
 		.show_simu_traj = SHOW_SIMU_TRAJ,
 		.next_cp.x = 0.,
 		.next_cp.y = 0.,
-		.num_next_cp = -1
+		.num_next_cp = -1,
+		.go_ahead = False
 	};
 	if (ia.active){
 	init_ia(&ia, &road, &car);

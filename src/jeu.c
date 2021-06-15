@@ -113,8 +113,10 @@ void init_cam(Camera* cam, Entity* car){
 
 float distance(float x1, float y1, float x2, float y2){
 	return sqrt(pow((float)x1 - (float)x2, 2) + pow(((float)y1 - (float)y2), 2)); // TODO : faire x*x au lieu de pow(x,2) pour opti
-	// TODO : a-t-on vraiment besoin de sqrt ?
-	// TODO : faire static inside pour opti si possible (c99)
+}
+
+float dist2(float x1, float y1, float x2, float y2){
+	return pow((float)x1 - (float)x2, 2) + pow(((float)y1 - (float)y2), 2); // TODO : faire x*x au lieu de pow(x,2) pour opti
 }
 
 void manage_skid_marks(Entity* car, Keys_pressed* key){
@@ -131,7 +133,7 @@ void manage_skid_marks(Entity* car, Keys_pressed* key){
 void move_car(Entity* car, Keys_pressed* key, Camera* cam){
 	manage_skid_marks(car, key);
 	//keys_to_struct
-	if (car->speed < 0.5 && key->drift){
+	if (car->speed < 1 && key->drift){
 		key->drift = none;
 		car->angle += car->angle_drift;
 		car->angle_drift = 0.;
@@ -482,13 +484,13 @@ static void calcul_spline(Entity* car, Camera* cam, Road* road, float* x, float*
 	
 	//if checkpoint not in the screen, go to next
 	int s = road->size * cam->zoom / 2;
-	int cx = road->tab_checkPoints[p1].x - cam->x;
+	float cx = road->tab_checkPoints[p1].x - cam->x;
 	cx = (1 - cam->zoom) * centre_x + cam->zoom * cx;
-	int cy = road->tab_checkPoints[p1].y - cam->y;
+	float cy = road->tab_checkPoints[p1].y - cam->y;
 	cy = (1 - cam->zoom) * centre_y + cam->zoom * cy;
-	int cx2 = road->tab_checkPoints[p2].x - cam->x;
+	float cx2 = road->tab_checkPoints[p2].x - cam->x;
 	cx2 = (1 - cam->zoom) * centre_x + cam->zoom * cx2;
-	int cy2 = road->tab_checkPoints[p2].y - cam->y;
+	float cy2 = road->tab_checkPoints[p2].y - cam->y;
 	cy2 = (1 - cam->zoom) * centre_y + cam->zoom * cy2;
 	if ((cx + s < 0 && cx2 + s < 0) || (cy + s < 0 && cy2 + s < 0) || (cx - s > cam->winSize_w && cx2 - s > cam->winSize_w) || (cy - s > cam->winSize_h && cy2 - s > cam->winSize_h)){
 		*draw = 0;// then don't draw
