@@ -168,14 +168,14 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam){
 	}
 }
 
-void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road, Toolbar* toolbar, Ia* ia){
+void manage_key(SDL_Event* event, Keys_pressed* key, Bool status, Entity* car, Camera* cam, Road* road, Toolbar* toolbar, Ia* ia){
 	// TODO : faire un enum !
 	short add_to_var;
 	add_to_var = 1;
 	switch(event->key.keysym.sym){
 		case SDLK_UP:
-			key->up = stat;
-			if (key->drift && stat){
+			key->up = status;
+			if (key->drift && status){
 				key->drift = none;
 				car->angle += car->angle_drift;
 				car->angle_drift = 0.;
@@ -183,25 +183,22 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Cam
 			break;
 		case SDLK_LCTRL:
 		case SDLK_DOWN:
-			key->down = stat;
-			if (stat == True && (key->left ^ key->right) && key->up == False && car->speed > 1.)
-			{
+			key->down = status;
+			if (status == True && (key->left ^ key->right) && key->up == False && car->speed > 3.){
 				key->drift = drift_left * (key->left) + drift_right * (key->right);
 			}
 			break;
 		case SDLK_RIGHT:
-			key->right = stat;
-			if (key->drift == drift_right && stat == False)
-			{
+			key->right = status;
+			if (key->drift == drift_right && status == False){
 				key->drift = none;
 				car->angle += car->angle_drift;
 				car->angle_drift = 0.;
 			}
 			break;
 		case SDLK_LEFT:
-			key->left = stat;
-			if (key->drift == drift_left && stat == False)
-			{
+			key->left = status;
+			if (key->drift == drift_left && status == False){
 				key->drift = none;
 				car->angle += car->angle_drift;
 				car->angle_drift = 0.;
@@ -304,7 +301,7 @@ void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 }
 
 //del a checkpoint:
-void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Ia* ia){
+void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 	closest_checkpoint(road, event, cam, car);
 	int i;
 	if (road->tab_valid_checkPoints[road->num_clos_check] != False){
@@ -318,9 +315,6 @@ void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Ia* 
 		road->tab_valid_checkPoints[i] = road->tab_valid_checkPoints[i+1];
 	}
 	road->len_tab_checkPoints--;
-	if (road->len_tab_checkPoints == 3){
-		ia->num_next_cp = -1;	
-	}
 }
 
 void clear(SDL_Renderer *renderer){
@@ -345,6 +339,7 @@ static void render_car(SDL_Renderer *renderer, Entity* car, Camera* cam){
 	double angle = car->angle + car->angle_drift;
 	car->frame.x -= cam->x;
 	car->frame.y -= cam->y;
+	// TODO essayer de mettre NULL à la place de &src
 	SDL_RenderCopyEx(renderer, car->tex, &src, &car->frame, 360. * (1. - angle / (2. * PI)), &center, SDL_FLIP_NONE);
 	car->frame.y += cam->y;
 	car->frame.x += cam->x;
@@ -570,7 +565,10 @@ static void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* 
 }
 
 
-void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar, Keys_pressed* key){
+void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar, Keys_pressed* key, Background* bg){
+	//____background display_____
+	fill_background(renderer, bg, road);
+
 	//____spline display____
 	render_road(car, renderer, cam, road);
 

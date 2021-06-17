@@ -10,6 +10,9 @@
 - dans simu_traj_no_line, si la simu remonte trop, elle va passer derrière et va tourner en rond. Il faut détecter ce cas et laisser passer sans freiner.
 
 OPTIMISATION :
+
+-> Utiliser SDL_RenderDrawPoints à la place de SDL_RenderDrawPoint pour les dérapages !
+
  %   cumulative   self              self     total           
  time   seconds   seconds    calls  us/call  us/call  name    
  51.62      0.65     0.65     4326   150.35   150.35  render_drift		// wtf à changer ! Voir si c'est l'affichage où les calcules, mais je pense que c'est les sin/cos qui prennent beaucoup de temps !
@@ -17,6 +20,21 @@ OPTIMISATION :
  10.32      1.10     0.13  1398013     0.09     0.13  calcul_road		// voir si on peut opti mais ça semble compliqué
   8.74      1.21     0.11     4326    25.44   140.98  render_road
   3.97      1.26     0.05  1413044     0.04     0.04  distance			// enlever pow ?
+
+avec IA et sans drift : 
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  us/call  us/call  name    
+ 55.58      0.25     0.25  1191920     0.21     0.21  calcul_spline
+ 13.34      0.31     0.06  1191920     0.05     0.06  calcul_road
+ 11.12      0.36     0.05     3170    15.78   116.65  render_road
+  6.67      0.39     0.03   141772     0.21     0.21  simu_move_car
+  2.22      0.40     0.01  1235096     0.01     0.01  distance
+  2.22      0.41     0.01     3112     3.21     3.21  calcul_angle_next_cp
+  2.22      0.42     0.01     3058     3.27    19.64  ia_manage_keys
+  2.22      0.43     0.01     3058     3.27    13.14  simu_traj
+  2.22      0.44     0.01                             main
+  1.11      0.45     0.01     3170     1.58     1.58  manage_skid_marks
+  1.11      0.45     0.01     3170     1.58     3.16  move_car
 
 
 

@@ -11,7 +11,7 @@
 #define SIZE_LINE_TOOLBAR 200
 #define WIDTH_TOOLBAR 300
 
-#define NB_SETTINGS 6
+#define NB_SETTINGS 7
 
 typedef enum{
 	Checkbox = 0,
@@ -46,6 +46,11 @@ typedef struct Toolbar{
 	int pos_click_x;
 }Toolbar;
 
+
+typedef struct Background{
+	SDL_Texture* texture;
+}Background;
+
 //init all the toolbar at the right of the screen
 int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia, Camera* cam);
 
@@ -58,5 +63,9 @@ void change_variable_keys(Toolbar* toolbar, short add);
 void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar);
 
 void render_keys(SDL_Renderer *renderer, Keys_pressed* key, Camera* cam);
+//create the tiles textures to put to the background
+int init_background(SDL_Renderer* renderer, Background* bg);
+
+void fill_background(SDL_Renderer* renderer, Background* bg, Road* road);
 
 #endif

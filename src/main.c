@@ -72,21 +72,35 @@ int main(void){
 	//init struct Ia;
 	Ia ia = {
 		.active = IA_ACTIVE,
+		.drift = IA_DRIFT,
 		.show_simu_traj = SHOW_SIMU_TRAJ,
-		.next_cp.x = 0.,
-		.next_cp.y = 0.,
+		.next_cp = {0,0},
 		.num_next_cp = -1,
-		.go_ahead = False
+		.angle_cp = 0,
+		.angle_car_angle_cp = 0,
+		.angle_car_cp = 0,
+		.car_angle_cp = 0,
+		.angle_vect_car_cp = 0,
+		.prev_cp = {0,0},
+		.next_next_cp = {0,0},
+		.go_ahead = False,
+		.active_traj = False,
 	};
 	if (ia.active){
 	init_ia(&ia, &road, &car);
 	}
 
 	//init struct Toolbar;
-	Toolbar toolbar;
+	Toolbar toolbar = {
+		.select_var_int = NULL
+	};
 	if (init_toolbar(&toolbar, renderer, &car, &road, &ia, &cam) == EXIT_FAILURE)
 		goto Quit;
 	
+	//init struct Background;
+	Background bg = {NULL};
+	if (init_background(renderer, &bg) == EXIT_FAILURE)
+		goto Quit;
 
 	//__________________Start________________
 	int remain_time;
@@ -123,7 +137,13 @@ int main(void){
 							break;
 						case SDL_BUTTON_MIDDLE:
 							if (road.len_tab_checkPoints > 0)
-								del_checkPoint(&road, &event, &cam, &car, &ia);
+							{
+								del_checkPoint(&road, &event, &cam, &car);
+								if (road.len_tab_checkPoints == 3){
+									stop_ia(&key);
+								}
+							}
+
 							break;
 						case SDL_BUTTON_RIGHT:
 							if (road.len_tab_checkPoints){// if it exist at least 1 checkpoint
@@ -155,12 +175,7 @@ int main(void){
 								// the box is ia->active
 								if (toolbar.settings[toolbar.num_setting].int_variable == (int*)&ia.active){
 									// the ia change keys, so we need to fixe them to False
-									// TODO : faire une fonction qui le fait
-									key.up = False;
-									key.down = False;
-									key.left = False;
-									key.right = False;
-									key.drift = none;
+									stop_ia(&key);
 								}
 							}
 							toolbar.select_var_int = NULL;
@@ -190,13 +205,15 @@ int main(void){
 			ia_manage_keys(&ia, &key, &car, renderer, &cam, &road);
 		}
 
-		display(renderer, &car, &road, &cam, &event, &ia, &toolbar, &key);
+		display(renderer, &car, &road, &cam, &event, &ia, &toolbar, &key, &bg);
 		//printf("%d\n", (int)car.speed);
 		//printf("%ld			\r", SDL_GetPerformanceCounter());	//performances
 	}
     status = EXIT_SUCCESS;
 
 Quit:
+    if(NULL != bg.texture)
+		SDL_DestroyTexture(bg.texture);
     if(NULL != renderer)
         SDL_DestroyRenderer(renderer);
     if(NULL != window)

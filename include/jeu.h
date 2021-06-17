@@ -64,6 +64,8 @@ typedef struct Coord{
 
 typedef struct Ia Ia;
 
+typedef struct Background Background;
+
 typedef struct Entity{
 	float posx;
 	float posy;
@@ -145,12 +147,12 @@ void close_circuit(Road road);
 //add a checkpoint:
 void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Ia* ia);
 //del a checkpoint:
-void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Ia* ia);
+void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 //found the closest checkpoint to the clic:
 void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 //manage a checkpoint:
 void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
-void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar, Keys_pressed* key);// display all
+void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar, Keys_pressed* key, Background* bg);// display all
 void clear(SDL_Renderer *renderer);
 
 #endif

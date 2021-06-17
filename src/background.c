@@ -80,6 +80,7 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
 	// init struct Toolbar:
 	Visible_sitting sub_sittings[NB_SETTINGS] = {
 		{"IA :", (int*)&ia->active, NULL, 0, 1, Checkbox},
+		{"IA drift:", (int*)&ia->drift, NULL, 0, 1, Checkbox},
 		{"IA show simu traj :", (int*)&ia->show_simu_traj, NULL, 0, 1, Checkbox},
 		{"cam follow car :", (int*)&cam->follow_car, NULL, 0, 1, Checkbox},
 		{"road->size", &road->size, NULL, 0, 2000, Line},
@@ -287,4 +288,40 @@ void render_keys(SDL_Renderer *renderer, Keys_pressed* key, Camera* cam){
 		SDL_RenderDrawRect(renderer, &key_square);
 	}
 
+}
+
+int init_background(SDL_Renderer* renderer, Background* bg){
+	bg->texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 1000, 1000);
+	if (bg->texture == NULL){
+		fprintf(stderr, "Erreur SDL_CreateTexture : %s\n", SDL_GetError());
+		return EXIT_FAILURE;
+	}
+	return EXIT_SUCCESS;
+}
+
+
+void fill_background(SDL_Renderer* renderer, Background* bg, Road* road){
+#if 1
+	SDL_Rect points[100 * 100];
+	SDL_SetRenderDrawColor(renderer, NEXT_CP_COLOR);
+	for (int i = 0; i < 100; i++){
+		for (int j = 0; j < 100; j++){
+			// mettre un table de SDL_Point !
+			// avec SDL_RenderDrawPoints
+			points[i + 100 * j].x = 5 * i;
+			points[i + 100 * j].y = 5 * j;
+			points[i + 100 * j].w = 4;
+			points[i + 100 * j].h = 4;
+		}
+	}
+	// draw on the texture
+	SDL_Rect dst = {0, 0, 1000, 1000};
+	SDL_Rect scr = {0, 0, 1000, 1000};
+	SDL_SetRenderTarget(renderer, bg->texture);
+	SDL_RenderFillRects(renderer, points, 100 * 100);
+	SDL_SetRenderTarget(renderer, NULL);
+	if (SDL_RenderCopy(renderer, bg->texture, NULL, &dst) == 0){
+		fprintf(stderr, "Erreur SDL_RenderCopy : %s\n", SDL_GetError());
+	};
+#endif
 }
