@@ -23,7 +23,7 @@ typedef struct visible_sitting{
 	Type_of_settings type;
 }Visible_sitting;
 
-static void init_setting(
+static int init_setting(
 		Setting settings[NB_SETTINGS],
 		Visible_sitting sub_sittings[NB_SETTINGS],
 		SDL_Renderer *renderer,
@@ -46,11 +46,13 @@ static void init_setting(
 		SDL_Surface* text = TTF_RenderText_Shaded(font, sub_sittings[num_var].name, fg_color, bg_color);
 		if (!text){
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[DEBUG] > %s", TTF_GetError());
+			return EXIT_FAILURE;
 		}
 		int tex_size_w;
 		int tex_size_h;
 		if (!(settings[num_var].texture = SDL_CreateTextureFromSurface(renderer, text))){ // settings[num_var].texture
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[DEBUG] > %s", TTF_GetError());
+			return EXIT_FAILURE;
 		}
 		SDL_QueryTexture(settings[num_var].texture, NULL, NULL, &tex_size_w, &tex_size_h);
 		settings[num_var].tex_size.y = 100 + 100 * num_var;
@@ -58,6 +60,7 @@ static void init_setting(
 		settings[num_var].tex_size.h = tex_size_h;
 		SDL_FreeSurface(text);
 	}
+	return EXIT_SUCCESS;
 }
 
 int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia, Camera* cam){
@@ -88,7 +91,9 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
 		{"car->acceleration", NULL, &car->acceleration, 0.1, 30, Line}
 	};
 
-	init_setting(toolbar->settings, sub_sittings, renderer, font, fg_color, bg_color);
+	if (init_setting(toolbar->settings, sub_sittings, renderer, font, fg_color, bg_color) == EXIT_FAILURE){
+		return EXIT_FAILURE;
+	}
 
 	TTF_CloseFont(font);
 	return EXIT_SUCCESS;
@@ -291,7 +296,8 @@ void render_keys(SDL_Renderer *renderer, Keys_pressed* key, Camera* cam){
 }
 
 int init_background(SDL_Renderer* renderer, Background* bg){
-	bg->texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 1000, 1000);
+	/*bg->texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 1000, 1000);*/
+	bg->texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 1000, 1000);
 	if (bg->texture == NULL){
 		fprintf(stderr, "Erreur SDL_CreateTexture : %s\n", SDL_GetError());
 		return EXIT_FAILURE;
@@ -299,29 +305,28 @@ int init_background(SDL_Renderer* renderer, Background* bg){
 	return EXIT_SUCCESS;
 }
 
-
+SDL_MapRGBA
 void fill_background(SDL_Renderer* renderer, Background* bg, Road* road){
-#if 1
-	SDL_Rect points[100 * 100];
-	SDL_SetRenderDrawColor(renderer, NEXT_CP_COLOR);
-	for (int i = 0; i < 100; i++){
-		for (int j = 0; j < 100; j++){
-			// mettre un table de SDL_Point !
-			// avec SDL_RenderDrawPoints
-			points[i + 100 * j].x = 5 * i;
-			points[i + 100 * j].y = 5 * j;
-			points[i + 100 * j].w = 4;
-			points[i + 100 * j].h = 4;
-		}
-	}
+	#define NB_PT_X 1000
+	#define NB_PT_Y 1000
 	// draw on the texture
 	SDL_Rect dst = {0, 0, 1000, 1000};
-	SDL_Rect scr = {0, 0, 1000, 1000};
+	/*SDL_Rect scr = {0, 0, 1000, 1000};*/
 	SDL_SetRenderTarget(renderer, bg->texture);
-	SDL_RenderFillRects(renderer, points, 100 * 100);
+	SDL_SetRenderDrawColor(renderer, CP_START_COLOR);
+	SDL_RenderClear(renderer);
+	SDL_SetRenderDrawColor(renderer, NEXT_CP_COLOR);
+
+	/*for (int i = 0; i < NB_PT_X; i++){*/
+		/*for (int j = 0; j < NB_PT_Y; j++){*/
+			/*// mettre un table de SDL_Rect !*/
+			/*// avec SDL_RenderDrawRects*/
+			/*SDL_RenderDrawPoint(renderer, i, j);*/
+		/*}*/
+	/*}*/
 	SDL_SetRenderTarget(renderer, NULL);
-	if (SDL_RenderCopy(renderer, bg->texture, NULL, &dst) == 0){
+    SDL_QueryTexture(bg->texture, NULL, NULL, &dst.w, &dst.h);
+	if (SDL_RenderCopy(renderer, bg->texture, NULL, &dst) < 0){
 		fprintf(stderr, "Erreur SDL_RenderCopy : %s\n", SDL_GetError());
 	};
-#endif
 }

@@ -34,8 +34,8 @@ int main(void){
 	SDL_Window *window = NULL;
 	SDL_Renderer *renderer = NULL;
 	if (init(&window, &renderer, 1851, 1050)){
-			goto Quit;
-		}
+		goto Quit;
+	}
 	
 
 	Entity car;
@@ -94,13 +94,14 @@ int main(void){
 	Toolbar toolbar = {
 		.select_var_int = NULL
 	};
+
 	if (init_toolbar(&toolbar, renderer, &car, &road, &ia, &cam) == EXIT_FAILURE)
 		goto Quit;
 	
 	//init struct Background;
 	Background bg = {NULL};
 	if (init_background(renderer, &bg) == EXIT_FAILURE)
-		goto Quit;
+		goto Quit_texture;
 
 	//__________________Start________________
 	int remain_time;
@@ -211,9 +212,10 @@ int main(void){
 	}
     status = EXIT_SUCCESS;
 
-Quit:
+Quit_texture:
     if(NULL != bg.texture)
 		SDL_DestroyTexture(bg.texture);
+Quit:
     if(NULL != renderer)
         SDL_DestroyRenderer(renderer);
     if(NULL != window)
