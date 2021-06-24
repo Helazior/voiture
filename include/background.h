@@ -48,7 +48,7 @@ typedef struct Toolbar{
 
 
 typedef struct Background{
-	SDL_Texture* texture;
+	SDL_Texture* texture[3];
 }Background;
 
 //init all the toolbar at the right of the screen
@@ -63,6 +63,8 @@ void change_variable_keys(Toolbar* toolbar, short add);
 void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar);
 
 void render_keys(SDL_Renderer *renderer, Keys_pressed* key, Camera* cam);
+
+void destroy_texture(Background* bg);
 //create the tiles textures to put to the background
 int init_background(SDL_Renderer* renderer, Background* bg);
 

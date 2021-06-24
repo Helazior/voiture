@@ -322,11 +322,12 @@ void clear(SDL_Renderer *renderer){
 }
 
 static void render_car(SDL_Renderer *renderer, Entity* car, Camera* cam){
-	SDL_Rect src;
-	src.x = 0;
-	src.y = 0;
-	src.w = 641;
-	src.h = 258;
+	SDL_Rect src = {
+		.x = 0,
+		.y = 0,
+		.w = 641,
+		.h = 258
+	};
 	
 	int w_prev = car->frame.w;
 	int h_prev = car->frame.h;
