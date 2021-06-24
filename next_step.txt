@@ -8,6 +8,7 @@
 - quand j'appuis sur espace et que je veux déplacer un CP, gros bug qui fait disparaitre la route
 - En mode IA, il arrive qu'il ne cherche pas l'arriver, mais reste coincé sur celui d'avant (ce passe quand je supprime ou rajoute un CP pendant qu'il est en mode IA)
 - dans simu_traj_no_line, si la simu remonte trop, elle va passer derrière et va tourner en rond. Il faut détecter ce cas et laisser passer sans freiner.
+- Si IA se retrouve perpendiculaire au CP, il continue tout droit
 
 OPTIMISATION :
 

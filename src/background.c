@@ -301,7 +301,7 @@ int init_background(SDL_Renderer* renderer, Background* bg){
 
 
 void fill_background(SDL_Renderer* renderer, Background* bg, Road* road){
-#if 1
+#if 0
 	SDL_Rect points[100 * 100];
 	SDL_SetRenderDrawColor(renderer, NEXT_CP_COLOR);
 	for (int i = 0; i < 100; i++){
@@ -316,7 +316,6 @@ void fill_background(SDL_Renderer* renderer, Background* bg, Road* road){
 	}
 	// draw on the texture
 	SDL_Rect dst = {0, 0, 1000, 1000};
-	SDL_Rect scr = {0, 0, 1000, 1000};
 	SDL_SetRenderTarget(renderer, bg->texture);
 	SDL_RenderFillRects(renderer, points, 100 * 100);
 	SDL_SetRenderTarget(renderer, NULL);
