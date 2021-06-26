@@ -38,6 +38,8 @@ avec IA et sans drift :
   1.11      0.45     0.01     3170     1.58     3.16  move_car
 
 
+[AMELIORATIONS]
+- Dans la traj d'IA -> angle_cp, mettre les checkpoints à la même distance pour avoir moins à tourner si le prochain CP est loin, et plus s'il est prêt.
 
 /*autre*/
 (fait)// pouvoir modifier les FPS sans changer la vitesse du jeu

@@ -102,7 +102,7 @@ int main(void){
 	Background bg = {NULL};
 	if (init_background(renderer, &bg) == EXIT_FAILURE)
 		goto Quit_texture;
-
+	init_collision_grid(&road);
 	//__________________Start________________
 	int remain_time;
 	Bool gameRunning = True;
@@ -205,7 +205,6 @@ int main(void){
 		if (ia.active && ia.num_next_cp != -1){
 			ia_manage_keys(&ia, &key, &car, renderer, &cam, &road);
 		}
-
 		display(renderer, &car, &road, &cam, &event, &ia, &toolbar, &key, &bg);
 		//printf("%d\n", (int)car.speed);
 		//printf("%ld			\r", SDL_GetPerformanceCounter());	//performances

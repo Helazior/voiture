@@ -68,6 +68,6 @@ void destroy_texture(Background* bg);
 //create the tiles textures to put to the background
 int init_background(SDL_Renderer* renderer, Background* bg);
 
-void fill_background(SDL_Renderer* renderer, Background* bg, Road* road);
+void fill_background(SDL_Renderer* renderer, Background* bg, Road* road, Camera* cam);
 
 #endif

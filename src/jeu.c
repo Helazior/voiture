@@ -103,6 +103,15 @@ void init_road(Road* road){
 		road->tab_checkPoints[i].w = road->square_width;;
 		road->tab_checkPoints[i].h = road->square_width;;
 		road->tab_valid_checkPoints[i] = False;
+	}
+}
+
+void init_collision_grid(Road* road){
+	for (int i = 0; i < NB_GRID_COLUMN; i++){
+		for (int j = 0; j < NB_GRID_ROW; j++){
+			road->collision_grid[j][i].x = 0;
+			road->collision_grid[j][i].y = 0;
+		}
 	} 
 }
 
@@ -512,6 +521,14 @@ static void calcul_spline(Entity* car, Camera* cam, Road* road, float* x, float*
 	*x = (1 - cam->zoom) * centre_x + cam->zoom * *x;
 	*y -= cam->y - (float)road->square_width / 2;
 	*y = (1 - cam->zoom) * centre_y + cam->zoom * *y;
+	// TODO : mettre un set pour plus tard
+	// TODO mettre *x et *y
+	// TODO rajouter un point spécial pour le cerntre (comme ça pas de calcul)
+	if (*x >= 0. && *x <= cam->winSize_w&& *y >= 0. && *y <= cam->winSize_h){
+		road->collision_grid[(int)(NB_GRID_ROW * (*y) / (float)cam->winSize_h)][(int)(NB_GRID_COLUMN * (*x) / (float)cam->winSize_w)].x = *x;
+		road->collision_grid[(int)(NB_GRID_ROW * (*y) / (float)cam->winSize_h)][(int)(NB_GRID_COLUMN * (*x) / (float)cam->winSize_w)].y = *y;
+		/*printf("(int)*y / cam->winSize_h = %d, %d\n",NB_GRID_ROW *  (int)*y / cam->winSize_h, NB_GRID_COLUMN * (int)*x / cam->winSize_w);*/
+	}
 }
 
 static void calcul_road(Camera* cam, Road* road, float* x, float* y, float* prevx, float* prevy, float* tabx, float* taby){
@@ -522,7 +539,20 @@ static void calcul_road(Camera* cam, Road* road, float* x, float* y, float* prev
 	taby[2] = *y - (distx * road->size * cam->zoom) / dist;
 	tabx[3] = *x - (disty * road->size * cam->zoom) / dist;
 	taby[3] = *y + (distx * road->size * cam->zoom) / dist;
+
+	if (tabx[2] >= 0. && tabx[2] <= cam->winSize_w && taby[2] >= 0. && taby[2] <= cam->winSize_h){
+		road->collision_grid[(int)(NB_GRID_ROW * (taby[2]) / (float)cam->winSize_h)][(int)(NB_GRID_COLUMN * (tabx[2]) / (float)cam->winSize_w)].x = *x;
+		road->collision_grid[(int)(NB_GRID_ROW * (taby[2]) / (float)cam->winSize_h)][(int)(NB_GRID_COLUMN * (tabx[2]) / (float)cam->winSize_w)].y = *y;
+		/*printf("(int)taby[2] / cam->winSize_h = %d, %d\n",NB_GRID_ROW *  (int)taby[2] / cam->winSize_h, NB_GRID_COLUMN * (int)tabx[2] / cam->winSize_w);*/
+	}
+
+	if (tabx[3] >= 0. && tabx[3] <= cam->winSize_w && taby[3] >= 0. && taby[3] <= cam->winSize_h){
+		road->collision_grid[(int)(NB_GRID_ROW * (taby[3]) / (float)cam->winSize_h)][(int)(NB_GRID_COLUMN * (tabx[3]) / (float)cam->winSize_w)].x = *x;
+		road->collision_grid[(int)(NB_GRID_ROW * (taby[3]) / (float)cam->winSize_h)][(int)(NB_GRID_COLUMN * (tabx[3]) / (float)cam->winSize_w)].y = *y;
+		/*printf("(int)taby[2] / cam->winSize_h = %d, %d\n",NB_GRID_ROW *  (int)taby[2] / cam->winSize_h, NB_GRID_COLUMN * (int)tabx[2] / cam->winSize_w);*/
+	}
 }
+
 
 static void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* road){
 	// Draw Spline
@@ -561,14 +591,15 @@ static void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* 
 		} else {
 			draw = 0;
 		}
-		t += 1. / (NB_PTS * cam->zoom);	
+		t += 1. / (NB_PTS * cam->zoom);
 	}
 }
 
 
 void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar, Keys_pressed* key, Background* bg){
 	//____background display_____
-	fill_background(renderer, bg, road);
+	fill_background(renderer, bg, road, cam);
+	init_collision_grid(road);
 
 	//____spline display____
 	render_road(car, renderer, cam, road);

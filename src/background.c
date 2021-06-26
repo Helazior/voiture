@@ -303,10 +303,8 @@ void destroy_texture(Background* bg){
 	} 
 }
 
-#define NB_PT_X 30
-#define NB_PT_Y 60
-#define SIZE_PT_X 20
-#define SIZE_PT_Y 20
+#define NB_PT_X 150
+#define NB_PT_Y 220
 int init_background(SDL_Renderer* renderer, Background* bg){
 	/*bg->texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, NB_PT_X, NB_PT_Y);*/
 	/*SDL_Rect rect = {0, 0, SIZE_PT_X, SIZE_PT_Y};*/
@@ -333,26 +331,45 @@ int init_background(SDL_Renderer* renderer, Background* bg){
 }
 
 /*SDL_MapRGBA*/
-void fill_background(SDL_Renderer* renderer, Background* bg, Road* road){
+void fill_background(SDL_Renderer* renderer, Background* bg, Road* road, Camera* cam){
 #if 1
+	int size_pt_x = cam->winSize_w / NB_PT_X;
+	int size_pt_y = cam->winSize_h / NB_PT_Y;
 	// draw on the texture
-	SDL_Rect dst = {0, 0, SIZE_PT_X, SIZE_PT_Y};
+	SDL_Rect dst = {0, 0, size_pt_x, size_pt_y};
 	/*SDL_Rect scr = {0, 0, 1000, 1000};*/
-
+	float coll_grid_x = 0.;
+	float coll_grid_y = 0.;
+	int is_in_road = 0;
 	for (int i = 0; i < NB_PT_X; i++){
 		for (int j = 0; j < NB_PT_Y; j++){
 			// mettre un table de SDL_Rect !
 			// avec SDL_RenderDrawRects
 			/*SDL_RenderDrawPoint(renderer, i, j);*/
-			for (int k = 0; k < 3; k++){
-				dst.x = SIZE_PT_X*(3 * i + k);
-				dst.y = SIZE_PT_Y*(j);
-				if (SDL_RenderCopy(renderer, bg->texture[k], NULL, &dst) < 0){
-					fprintf(stderr, "Erreur SDL_RenderCopy : %s\n", SDL_GetError());
-				};
+			dst.x = size_pt_x * i;
+			dst.y = size_pt_y * j;
+			/*printf("dst.y / cam->winSize_h = %d, %d \n", NB_GRID_ROW * dst.y / cam->winSize_h, NB_GRID_COLUMN * dst.x / cam->winSize_w);*/
+			/*printf("road->collision_grid[NB_GRID_ROW * dst.y / cam->winSize_h][NB_GRID_COLUMN * dst.x / cam->winSize_w].x = %d \n",*/
+					/*(int)road->collision_grid[NB_GRID_ROW * dst.y / cam->winSize_h][NB_GRID_COLUMN * dst.x / cam->winSize_w].x);*/
+			coll_grid_x = road->collision_grid[NB_GRID_ROW * dst.y / cam->winSize_h][NB_GRID_COLUMN * dst.x / cam->winSize_w].x;
+			coll_grid_y = road->collision_grid[NB_GRID_ROW * dst.y / cam->winSize_h][NB_GRID_COLUMN * dst.x / cam->winSize_w].y;
+
+			is_in_road = coll_grid_x != 0.;
+			/*if (is_in_road > 2 || is_in_road < 0){*/
+				/*printf("%d\n",is_in_road);*/
+				/*continue;*/
+			/*}*/
+			if (is_in_road){
+				/*printf("dst.x, dst.y, coll_grid_x, coll_grid_y = %d, %d, %f, %f \n",dst.x, dst.y, coll_grid_x, coll_grid_y ); */
+				/*printf("dist = %f > %f \n", distance((float)dst.x, (float)dst.y, coll_grid_x, coll_grid_y), (float)road->size / 2.); */
 			}
+			if (is_in_road && distance((float)dst.x, (float)dst.y, coll_grid_x, coll_grid_y) > 90.){
+				SDL_RenderCopy(renderer, bg->texture[1], NULL, &dst);
+				continue;
+			}
+			SDL_RenderCopy(renderer, bg->texture[2 - 2 * is_in_road], NULL, &dst);
 		}
 	}
-    /*SDL_QueryTexture(bg->texture, NULL, NULL, &dst.w, &dst.h);*/
+/*SDL_QueryTexture(bg->texture, NULL, NULL, &dst.w, &dst.h);*/
 #endif
 }

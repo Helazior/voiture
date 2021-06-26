@@ -37,7 +37,10 @@
 
 #define REAR_CAMERA 20.
 
-#define NB_PTS 250.
+#define NB_PTS 150.
+
+#define NB_GRID_ROW 15
+#define NB_GRID_COLUMN 27
 
 #define CAM_FOLLOW_CAR False
 
@@ -100,6 +103,7 @@ typedef struct Road{
 	int selectx;
 	int selecty;
 	int size;
+	Coord collision_grid[NB_GRID_ROW][NB_GRID_COLUMN]; // [row][column]
 }Road;
 
 typedef struct Keys_pressed{
@@ -129,6 +133,8 @@ void init_car(Entity* car, SDL_Renderer *renderer);
 
 void init_road(Road* road);
 
+void init_collision_grid(Road* road);
+
 void init_cam(Camera* cam, Entity* car);
 
 float distance(float x1, float y1, float x2, float y2);
@@ -152,7 +158,9 @@ void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 //manage a checkpoint:
 void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
+
 void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar, Keys_pressed* key, Background* bg);// display all
+
 void clear(SDL_Renderer *renderer);
 
 #endif
