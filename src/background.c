@@ -169,6 +169,21 @@ void change_variable_keys(Toolbar* toolbar, short add){
 	}
 }
 
+void move_screen(Camera* cam, Toolbar* toolbar){
+	// TODO à reprendre
+	SDL_GetMouseState(&cam->cursor_x, &cam->cursor_y);
+	if (cam->cursor_x < 20){
+		cam->x -= (180. / FRAMES_PER_SECONDE);
+	} else if (cam->cursor_x > cam->winSize_w + toolbar->size.w - 20){
+		cam->x += (180. / FRAMES_PER_SECONDE);
+	}
+	if (cam->cursor_y < 20){
+		cam->y -= (180. / FRAMES_PER_SECONDE);
+	} else if (cam->cursor_y > cam->winSize_h - 20){
+		cam->y += (180. / FRAMES_PER_SECONDE);
+	}
+}
+
 void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar){
 	// choose color
 	SDL_SetRenderDrawColor(renderer, COLOR_TOOLBAR);
@@ -364,10 +379,12 @@ void fill_background(SDL_Renderer* renderer, Background* bg, Road* road, Camera*
 				/*printf("dist = %f > %f \n", distance((float)dst.x, (float)dst.y, coll_grid_x, coll_grid_y), (float)road->size / 2.); */
 			}
 			if (is_in_road && distance((float)dst.x, (float)dst.y, coll_grid_x, coll_grid_y) > 90.){
-				SDL_RenderCopy(renderer, bg->texture[1], NULL, &dst);
+				SDL_RenderCopy(renderer, bg->texture[2], NULL, &dst);
 				continue;
 			}
-			SDL_RenderCopy(renderer, bg->texture[2 - 2 * is_in_road], NULL, &dst);
+			if (is_in_road == 0){	
+				SDL_RenderCopy(renderer, bg->texture[2 - 2 * is_in_road], NULL, &dst);
+			}
 		}
 	}
 /*SDL_QueryTexture(bg->texture, NULL, NULL, &dst.w, &dst.h);*/

@@ -125,6 +125,8 @@ typedef struct Camera{
 	int winSize_h;
 	float zoom;
 	Bool follow_car;
+	int cursor_x;
+	int cursor_y;
 }Camera;
 
 void pause();

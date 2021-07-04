@@ -64,6 +64,9 @@ void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar);
 
 void render_keys(SDL_Renderer *renderer, Keys_pressed* key, Camera* cam);
 
+// move cam if mouse in the edge of the screen
+void move_screen(Camera* cam, Toolbar* toolbar);
+
 void destroy_texture(Background* bg);
 //create the tiles textures to put to the background
 int init_background(SDL_Renderer* renderer, Background* bg);

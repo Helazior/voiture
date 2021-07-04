@@ -44,7 +44,9 @@ int main(void){
 	//init struct Camera;
 	Camera cam = {
 		.zoom = ZOOM_INIT,
-		.follow_car = CAM_FOLLOW_CAR
+		.follow_car = CAM_FOLLOW_CAR,
+		.cursor_x = 0,
+		.cursor_y = 0
 	};
 
 	SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
@@ -197,6 +199,10 @@ int main(void){
 		toolbar.size.h = cam.winSize_h;
 		toolbar.size.x = cam.winSize_w;
 		
+		if (cam.follow_car == False){
+			// move cam if mouse in the edge of the screen
+			move_screen(&cam, &toolbar);
+		}
 		move_car(&car, &key, &cam);
 		clear(renderer);
 
