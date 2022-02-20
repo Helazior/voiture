@@ -664,7 +664,7 @@ static void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* 
 void display(SDL_Renderer *renderer, Player* player, Road* road, Camera* cam, Toolbar* toolbar, Background* bg, int nb_fps){
 	//____background display_____
 	//fill_background(renderer, bg, road, cam);
-	init_collision_grid(road);
+//	init_collision_grid(road);
 
 	//____spline display____
 	render_road(&player[0].car, renderer, cam, road, bg);
@@ -694,7 +694,7 @@ void display(SDL_Renderer *renderer, Player* player, Road* road, Camera* cam, To
     }
 	//_____car display____
     for (int i = 0; i < NB_OF_PLAYERS; ++i) {
-        render_car(renderer, &player[1].car, cam);
+        render_car(renderer, &player[i].car, cam);
     }
 	SDL_RenderPresent(renderer);
 }

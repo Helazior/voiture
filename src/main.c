@@ -237,9 +237,9 @@ int main(void) {
             // move cam if mouse in the edge of the screen
             move_screen(&cam, &toolbar);
         }
+
         for (int i = 0; i < NB_OF_PLAYERS; ++i) {
             move_car(&player[i].car, &player[i].key, &cam);
-            clear(renderer);
 
             // IA take control of the keys
             // TODO : mettre avant les contrôles humains
@@ -247,6 +247,7 @@ int main(void) {
                 ia_manage_keys(player[i].ia, &player[i].key, &player[i].car, renderer, &cam, &road);
             }
         }
+        clear(renderer);
         display(renderer, player, &road, &cam, &toolbar, &bg, nb_fps);
         //printf("%d\n", (int)car.speed);
         //printf("%ld			\r", SDL_GetPerformanceCounter());	//performances
