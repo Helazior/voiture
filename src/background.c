@@ -376,7 +376,7 @@ void destroy_texture(Background* bg){
     }
 }
 
-
+#if 1
 #define NB_PT_X 150
 #define NB_PT_Y 220
 int init_background(SDL_Renderer* renderer, Background* bg){
@@ -385,7 +385,7 @@ int init_background(SDL_Renderer* renderer, Background* bg){
 
     /*bg->texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, NB_PT_X, NB_PT_Y);*/
     /*SDL_Rect rect = {0, 0, SIZE_PT_X, SIZE_PT_Y};*/
-#if 1
+#if 0
     for (int i = 0; i < NB_COLORS_BG; i++){
         bg->texture[i] = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, NB_PT_X, NB_PT_Y);
 
@@ -416,6 +416,7 @@ int init_background(SDL_Renderer* renderer, Background* bg){
 #endif
 	return EXIT_SUCCESS;
 }
+#endif
 
 #if 0
 static int det(int x1, int x2, int y1, int y2) {

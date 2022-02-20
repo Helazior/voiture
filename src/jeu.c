@@ -65,12 +65,12 @@ void pause(){
 	} while(event.type != SDL_KEYDOWN);
 }
 
-void init_car(Entity* car, SDL_Renderer *renderer){
+void init_car(Entity* car, SDL_Renderer *renderer, uint8_t num){
 	car->speed = 0.f;//pixels per frame
 	car->angle = 0.f;
 	car->angle_drift = 0.f;
 	car->pos_initx = 700.f;
-	car->pos_inity = 700.f;
+	car->pos_inity = 700.f + 100.f * num;
 	car->posx = car->pos_initx;
 	car->posy = car->pos_inity;
 	car->frame.x = (int)(car->posx);
@@ -137,7 +137,7 @@ void manage_skid_marks(Entity* car, Keys_pressed* key){
 	}
 }
 
-void move_car(Entity* car, Keys_pressed* key, Camera* cam){
+void move_car(Entity* car, Keys_pressed* key, Camera* cam, Bool first_car) {
 	manage_skid_marks(car, key);
 	//keys_to_struct
 	if (car->speed < 1 && key->drift){
@@ -164,15 +164,19 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam){
 	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (fabsf(car->speed))) * car->frottement / 640.;
 	//manage cam
 	//TODO : si on est au bout de la piste, ne pas aller plus loin !
-	if (cam->follow_car){
-		float new_cam_x = car->posx - (float)cam->winSize_w / 2 + REAR_CAMERA * car->speed * ( FRAMES_PER_SECONDE / 60. ) * cos(car->angle);
-		float new_cam_y = car->posy - (float)cam->winSize_h / 2 - REAR_CAMERA * car->speed * ( FRAMES_PER_SECONDE / 60. ) * sin(car->angle);
-		cam->x = (int)((9.*(float)cam->x + (float)new_cam_x) / 10.);
-		cam->y = (int)((9.*(float)cam->y + (float)new_cam_y) / 10.);
-	} else {
-		cam->x += (1 - cam->zoom) * (car->posx - old_posx);
-		cam->y += (1 - cam->zoom) * (car->posy - old_posy);
-	}
+    if (first_car) {
+        if (cam->follow_car) {
+            float new_cam_x = car->posx - (float) cam->winSize_w / 2 +
+                              REAR_CAMERA * car->speed * (FRAMES_PER_SECONDE / 60.) * cos(car->angle);
+            float new_cam_y = car->posy - (float) cam->winSize_h / 2 -
+                              REAR_CAMERA * car->speed * (FRAMES_PER_SECONDE / 60.) * sin(car->angle);
+            cam->x = (int) ((9. * (float) cam->x + (float) new_cam_x) / 10.);
+            cam->y = (int) ((9. * (float) cam->y + (float) new_cam_y) / 10.);
+        } else {
+            cam->x += (1 - cam->zoom) * (car->posx - old_posx);
+            cam->y += (1 - cam->zoom) * (car->posy - old_posy);
+        }
+    }
 }
 
 void manage_key(SDL_Event* event, Keys_pressed* key, Bool status, Entity* car, Camera* cam, Road* road, Toolbar* toolbar, Ia* ia){
@@ -328,31 +332,73 @@ void clear(SDL_Renderer *renderer){
 	SDL_RenderClear(renderer);
 }
 
-static void render_car(SDL_Renderer *renderer, Entity* car, Camera* cam){
-	SDL_Rect src = {
-		.x = 0,
-		.y = 0,
-		.w = 641,
-		.h = 258
-	};
+static void render_car(SDL_Renderer *renderer, Player* player, Camera* cam) {
+    // TODO : tout mettre avec des floats pour éviter les tremblements ?
+    int w_prev = player[0].car.frame.w;
+    int h_prev = player[0].car.frame.h;
+    player[0].car.frame.w *= cam->zoom;
+    player[0].car.frame.h *= cam->zoom;
+    SDL_Point center;
+    center.x = player[0].car.frame.w / 2;
+    center.y = player[0].car.frame.h / 2;
 
-	int w_prev = car->frame.w;
-	int h_prev = car->frame.h;
-	car->frame.w *= cam->zoom;
-	car->frame.h *= cam->zoom;
-	SDL_Point center;
-	center.x = car->frame.w/2;
-	center.y = car->frame.h/2;
+    double angle = player[0].car.angle + player[0].car.angle_drift;
+    player[0].car.frame.x -= cam->x;
+    player[0].car.frame.y -= cam->y;
+    // TODO essayer de mettre NULL à la place de &src
+    SDL_RenderCopyEx(
+            renderer,
+            player[0].car.tex,
+            NULL,
+            &player[0].car.frame,
+            360. * (1. - angle / (2. * PI)),
+            &center,
+            SDL_FLIP_NONE);
 
-	double angle = car->angle + car->angle_drift;
-	car->frame.x -= cam->x;
-	car->frame.y -= cam->y;
-	// TODO essayer de mettre NULL à la place de &src
-	SDL_RenderCopyEx(renderer, car->tex, &src, &car->frame, 360. * (1. - angle / (2. * PI)), &center, SDL_FLIP_NONE);
-	car->frame.y += cam->y;
-	car->frame.x += cam->x;
-	car->frame.h = h_prev;
-	car->frame.w = w_prev;
+    player[0].car.frame.y += cam->y;
+    player[0].car.frame.x += cam->x;
+    player[0].car.frame.h = h_prev;
+    player[0].car.frame.w = w_prev;
+    //____________________________________________________________________________
+    // Other players
+    int x;
+    int y;
+    int x_prev;
+    int y_prev;
+
+    float centre_x = player[0].car.posx - cam->x;
+    float centre_y = player[0].car.posy - cam->y;
+    int square_w = w_prev * cam->zoom;
+
+    // TODO : factoriser avec l'affichage de checkpoint
+    for (int i = 1; i < NB_OF_PLAYERS; i++){
+        x_prev = player[i].car.frame.x;
+        y_prev = player[i].car.frame.y;
+        player[i].car.frame.x -= cam->x;
+        player[i].car.frame.x = (1 - cam->zoom) * centre_x + cam->zoom * player[i].car.frame.x;
+        player[i].car.frame.y -= cam->y;
+        player[i].car.frame.y = (1 - cam->zoom) * centre_y + cam->zoom * player[i].car.frame.y;
+        player[i].car.frame.w *= cam->zoom;
+        player[i].car.frame.h *= cam->zoom;
+        x = player[i].car.frame.x;
+        y = player[i].car.frame.y;
+        if (x + square_w > 0 && x - square_w < cam->winSize_w && y + square_w > 0 && y - square_w < cam->winSize_h){
+            angle = player[i].car.angle + player[i].car.angle_drift;
+            //display:
+            SDL_RenderCopyEx(
+                    renderer,
+                    player[i].car.tex,
+                    NULL,
+                    &player[i].car.frame,
+                    360. * (1. - angle / (2. * PI)),
+                    &center,
+                    SDL_FLIP_NONE);
+        }
+        player[i].car.frame.h = h_prev;
+        player[i].car.frame.w = w_prev;
+        player[i].car.frame.x = x_prev;
+        player[i].car.frame.y = y_prev;
+    }
 }
 
 static void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity* car, Ia* ia){
@@ -371,15 +417,18 @@ static void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, 
 	float centre_y = car->posy - cam->y;
 	int square_w = road->square_width * cam->zoom;
 
+    // TODO : changer en un truc mieux
 	if (road->select && mouse_x < 20000 && mouse_y < 20000){
 		int pos_clique_x = mouse_x - (float)road->square_width / 2 + cam->x + (mouse_x + cam->x - car->frame.x) * (float)(-1. + 1/cam->zoom);
 		int pos_clique_y = mouse_y - (float)road->square_width / 2 + cam->y + (mouse_y + cam->y - car->frame.y) * (float)(-1. + 1/cam->zoom);
 		road->tab_checkPoints[road->num_clos_check].x = pos_clique_x + road->selectx;
 		road->tab_checkPoints[road->num_clos_check].y = pos_clique_y + road->selecty;
 	}
+
 	for (i = 0; i < road->len_tab_checkPoints; i++){
 		x_prev = road->tab_checkPoints[i].x;
 		y_prev = road->tab_checkPoints[i].y;
+        // TODO : à mettre en dehors du for
 		w_prev = road->tab_checkPoints[i].w;
 		h_prev = road->tab_checkPoints[i].h;
 		road->tab_checkPoints[i].x -= cam->x;
@@ -678,8 +727,6 @@ void display(SDL_Renderer *renderer, Player* player, Road* road, Camera* cam, To
         SDL_SetRenderDrawColor(renderer, WHITE);
     }
 	//_____car display____
-    for (int i = 0; i < NB_OF_PLAYERS; ++i) {
-        render_car(renderer, &player[i].car, cam);
-    }
+    render_car(renderer, player, cam);
 	SDL_RenderPresent(renderer);
 }

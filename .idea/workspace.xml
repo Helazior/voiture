@@ -12,6 +12,7 @@
       <config projectName="voiture" targetName="debug" />
       <config projectName="voiture" targetName="opti" />
       <config projectName="voiture" targetName="all" />
+      <config projectName="voiture" targetName="voiture" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -21,30 +22,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/include/collision_car.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/include/create_map.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/obj/collision_car.o" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/obj/create_map.o" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/collision_car.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/create_map.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/vgcore.25760" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/exec" beforeDir="false" afterPath="$PROJECT_DIR$/exec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/background.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/background.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/ia.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/ia.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/jeu.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/jeu.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next_step.txt" beforeDir="false" afterPath="$PROJECT_DIR$/next_step.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/background.o" beforeDir="false" afterPath="$PROJECT_DIR$/obj/background.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/ia.o" beforeDir="false" afterPath="$PROJECT_DIR$/obj/ia.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/jeu.o" beforeDir="false" afterPath="$PROJECT_DIR$/obj/jeu.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/main.o" beforeDir="false" afterPath="$PROJECT_DIR$/obj/main.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/background.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/background.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ia.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/ia.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/jeu.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/jeu.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vgcore.146009" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vgcore.146828" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vgcore.170998" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,38 +62,19 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/src/background.c" root0="FORCE_HIGHLIGHTING" />
   </component>
-  <component name="MakefileLocalSettings">
-    <option name="availableProjects">
-      <map>
-        <entry>
-          <key>
-            <ExternalProjectPojo>
-              <option name="name" value="voiture" />
-              <option name="path" value="$PROJECT_DIR$" />
-            </ExternalProjectPojo>
-          </key>
-          <value>
-            <list>
-              <ExternalProjectPojo>
-                <option name="name" value="voiture" />
-                <option name="path" value="$PROJECT_DIR$" />
-              </ExternalProjectPojo>
-            </list>
-          </value>
-        </entry>
-      </map>
-    </option>
-    <option name="projectSyncType">
-      <map>
-        <entry key="$PROJECT_DIR$" value="RE_IMPORT" />
-      </map>
-    </option>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="jt5j93d8" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectApplicationVersion">
+    <option name="ide" value="CLion" />
+    <option name="majorVersion" value="2021" />
+    <option name="minorVersion" value="3.3" />
   </component>
   <component name="ProjectId" id="1uRmDqsb7rqwrNevPzHAP8udfoj" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -122,43 +92,25 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="cf.first.check.clang-format" value="false" />
     <property name="cidr.known.project.marker" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="cmake.loaded.for.project" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/Makefile" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="CLionExternalConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/include" />
     </key>
   </component>
-  <component name="RunManager" selected="Makefile Application.all">
+  <component name="RunManager" selected="Makefile Target.run">
     <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="all" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="voiture" TARGET_NAME="all" CONFIG_NAME="all" version="1" RUN_PATH="exec">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
-        <option name="CLION.COMPOUND.BUILD" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="exec" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="voiture" TARGET_NAME="exec" CONFIG_NAME="exec" version="1">
-      <method v="2">
-        <option name="CLION.COMPOUND.BUILD" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="gprof" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="voiture" TARGET_NAME="gprof" CONFIG_NAME="gprof" version="1">
-      <method v="2">
-        <option name="CLION.COMPOUND.BUILD" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="opti" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="voiture" TARGET_NAME="opti" CONFIG_NAME="opti" version="1">
-      <method v="2">
-        <option name="CLION.COMPOUND.BUILD" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="run" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="voiture" TARGET_NAME="run" CONFIG_NAME="run" version="1">
-      <method v="2">
-        <option name="CLION.COMPOUND.BUILD" enabled="true" />
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
       </method>
     </configuration>
     <configuration name="run" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="voiture" TARGET_NAME="all" CONFIG_NAME="all" version="1" RUN_PATH="exec">
@@ -166,18 +118,20 @@
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
       </method>
     </configuration>
-    <configuration name="valgrind" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="voiture" TARGET_NAME="valgrind" CONFIG_NAME="valgrind" version="1">
+    <configuration name="voiture" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="voiture" TARGET_NAME="voiture" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="voiture" RUN_TARGET_NAME="voiture">
       <method v="2">
-        <option name="CLION.COMPOUND.BUILD" enabled="true" />
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="run" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="run" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
     <list>
-      <item itemvalue="Makefile Application.valgrind" />
-      <item itemvalue="Makefile Application.all" />
-      <item itemvalue="Makefile Application.exec" />
-      <item itemvalue="Makefile Application.gprof" />
-      <item itemvalue="Makefile Application.opti" />
-      <item itemvalue="Makefile Application.run" />
+      <item itemvalue="CMake Application.voiture" />
+      <item itemvalue="Makefile Target.run" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -200,7 +154,30 @@
       <workItem from="1640435981112" duration="6257000" />
       <workItem from="1640539268339" duration="10045000" />
       <workItem from="1644946211310" duration="244000" />
+      <workItem from="1645377049091" duration="16958000" />
     </task>
+    <task id="LOCAL-00001" summary="Correction voiture sans cam">
+      <created>1645378970581</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1645378970581</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Correction voiture et enlevé warning dans IA">
+      <created>1645380661170</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1645380661170</updated>
+    </task>
+    <task id="LOCAL-00003" summary="correction IA qui se mettait pas en route">
+      <created>1645382611871</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1645382611871</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -208,5 +185,9 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="Correction voiture sans cam" />
+    <MESSAGE value="Correction voiture et enlevé warning dans IA" />
+    <MESSAGE value="correction IA qui se mettait pas en route" />
+    <option name="LAST_COMMIT_MESSAGE" value="correction IA qui se mettait pas en route" />
   </component>
 </project>

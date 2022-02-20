@@ -19,6 +19,7 @@
 #include "../include/background.h"
 
 #define ZOOM_INIT 0.24
+//#define ZOOM_INIT 1
 
 extern unsigned int startLapTime;
 
@@ -40,8 +41,6 @@ int main(void) {
 	}
 	
 
-
-
 	//init struct Road;
 	Road road = {
 		.len_tab_checkPoints = 0,
@@ -59,10 +58,9 @@ int main(void) {
     // TODO : passer car, key et ia en pointeur et les allouer.
     // TODO : les passer dans player
     Player player[NB_OF_PLAYERS];
-    printf("%d\n", NB_OF_PLAYERS);
     for (int i = 0; i < NB_OF_PLAYERS; ++i) {
         // init struct Entity
-        init_car(&player[i].car, renderer);
+        init_car(&player[i].car, renderer, i);
         // init struct Keys_pressed;
         player[i].key.up = False;
         player[i].key.down = False;
@@ -113,7 +111,7 @@ int main(void) {
 	Background bg = {
             .texture = {NULL},
             .nb_sq_fill = 1,
-            .show = true
+            .show = false
     };
 	if (init_background(renderer, &bg) == EXIT_FAILURE)
 		goto Quit_texture;
@@ -236,17 +234,18 @@ int main(void) {
             // move cam if mouse in the edge of the screen
             move_screen(&cam, &toolbar);
         }
-        printf("%d\n", player[0].ia->num_next_cp);
         for (int i = 0; i < NB_OF_PLAYERS; ++i) {
-            move_car(&player[i].car, &player[i].key, &cam);
+            move_car(&player[i].car, &player[i].key, &cam, (i == 0));
+        }
 
+        clear(renderer);
+        for (int i = 0; i < NB_OF_PLAYERS; ++i) {
             // IA take control of the keys
             // TODO : mettre avant les contrôles humains
             if (player[i].ia->active && player[i].ia->num_next_cp != -1) {
                 ia_manage_keys(player[i].ia, &player[i].key, &player[i].car, renderer, &cam, &road);
             }
         }
-        clear(renderer);
         display(renderer, player, &road, &cam, &toolbar, &bg, nb_fps);
         //printf("%d\n", (int)car.speed);
         //printf("%ld			\r", SDL_GetPerformanceCounter());	//performances

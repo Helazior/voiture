@@ -8,7 +8,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
-#define NB_OF_PLAYERS 1
+#define NB_OF_PLAYERS 3
 
 #define FRAMES_PER_SECONDE 60
 
@@ -147,7 +147,7 @@ typedef struct player {
 
 void pause();
 
-void init_car(Entity* car, SDL_Renderer *renderer);
+void init_car(Entity* car, SDL_Renderer *renderer, uint8_t num);
 
 void init_road(Road* road);
 
@@ -163,7 +163,7 @@ void reset_valid_tab(Road* road);
 //drift
 void manage_skid_marks(Entity* car, Keys_pressed* key);
 //car
-void move_car(Entity *car, Keys_pressed* key, Camera* cam);
+void move_car(Entity *car, Keys_pressed* key, Camera* cam, Bool first_car);
 //key
 void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road, Toolbar* toolbar, Ia* ia);
 //put the 3 last checkpoints into the 3 first:
