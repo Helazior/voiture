@@ -80,7 +80,7 @@ int main(void) {
         player[i].ia->show_simu_traj = SHOW_SIMU_TRAJ;
         player[i].ia->next_cp.x = 0;
         player[i].ia->next_cp.y = 0;
-        player[i].ia->num_next_cp = -1;
+        player[i].ia->num_next_cp = 1;
         player[i].ia->angle_cp = 0;
         player[i].ia->angle_car_angle_cp = 0;
         player[i].ia->angle_car_cp = 0;
@@ -138,13 +138,13 @@ int main(void) {
         count_ms += SDL_GetTicks() - lastTime;
         if (count_loops >= FRAMES_PER_SECONDE) {
             //printf("%u\n", (uint32_t) (1000 * (float)count_loops / (float)count_ms));
-            nb_fps = 1000 * (float) count_loops / (float) count_ms;
+            nb_fps = (int)(1000 * (float) count_loops / (float) count_ms);
             count_loops = 0;
             count_ms = 0;
         }
         //limited fps
-        remain_time = lroundf(1000. / FRAMES_PER_SECONDE + lastTime - SDL_GetTicks());
-        remain_time *= (int) (remain_time > 0);
+        remain_time = (int)lroundf(1000.f / FRAMES_PER_SECONDE + (float)lastTime - (float)SDL_GetTicks());
+        remain_time *= (int)(remain_time > 0);
         SDL_Delay(remain_time); // wait*/
         lastTime = SDL_GetTicks();
         while (SDL_PollEvent(&event))//events
@@ -236,7 +236,7 @@ int main(void) {
             // move cam if mouse in the edge of the screen
             move_screen(&cam, &toolbar);
         }
-
+        printf("%d\n", player[0].ia->num_next_cp);
         for (int i = 0; i < NB_OF_PLAYERS; ++i) {
             move_car(&player[i].car, &player[i].key, &cam);
 

@@ -100,7 +100,7 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
 }
 
 //check if the user click in a box of setting
-static Bool is_in(int x, int y, SDL_Rect* size){
+static Bool is_in(int x, int y, SDL_Rect* size) {
 	int x_mean;
 	x_mean = size->x + size->w / 2;
 	return x >= x_mean - SIZE_LINE_TOOLBAR / 2 - 10 && x <= x_mean + SIZE_LINE_TOOLBAR / 2 + 10 && y > size->y && y < size->y + 3 * size->h;
@@ -114,7 +114,7 @@ void click_toolbar(Toolbar* toolbar){
 	int i;
 	for (i = 0; i < NB_SETTINGS; i++){
 		if (is_in(toolbar->pos_click_x, mouse_y , &(toolbar->settings[i].tex_size))){
-			//put the carresponding variable in select_var
+			//put the corresponding variable in select_var
 			toolbar->select_var_int = toolbar->settings[i].int_variable;
 			toolbar->select_var_float = toolbar->settings[i].float_variable;
 			toolbar->is_selecting = True;
@@ -162,7 +162,7 @@ void change_variable_keys(Toolbar* toolbar, short add){
 		*(toolbar->select_var_int) += add * minor_by_1((int)(toolbar->settings[toolbar->num_setting].max - toolbar->settings[toolbar->num_setting].min) / SIZE_LINE_TOOLBAR);
 		if (*(toolbar->select_var_int) > (int)toolbar->settings[toolbar->num_setting].max){
 			*(toolbar->select_var_int) = (int)toolbar->settings[toolbar->num_setting].max;
-		}else if (*(toolbar->select_var_int) < (int)toolbar->settings[toolbar->num_setting].min){
+		} else if (*(toolbar->select_var_int) < (int)toolbar->settings[toolbar->num_setting].min){
 			*(toolbar->select_var_int) = (int)toolbar->settings[toolbar->num_setting].min;
 		}
 	} else if (toolbar->select_var_float) {
