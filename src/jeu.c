@@ -1,5 +1,6 @@
 /*jeu.c*/
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
@@ -35,13 +36,13 @@ int init(SDL_Window **window, SDL_Renderer **renderer, int w, int h){
     return 0;
 }
 
-int setWindowColor(SDL_Renderer *renderer, SDL_Color color){
+__attribute__((unused)) int setWindowColor(SDL_Renderer *renderer, SDL_Color color){
 	if(SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a) < 0){
-		printf("Erreur SDL_SetRenderDrawColor : %s", SDL_GetError());
+		fprintf(stderr, "Erreur SDL_SetRenderDrawColor : %s", SDL_GetError());
         return -1;
 	}
     if(SDL_RenderClear(renderer) < 0){
-		printf("Erreur SDL_SetRenderDrawColor : %s", SDL_GetError());
+		fprintf(stderr, "Erreur SDL_SetRenderDrawColor : %s", SDL_GetError());
         return -1;
 	}
     return 0;
@@ -65,11 +66,11 @@ void pause(){
 }
 
 void init_car(Entity* car, SDL_Renderer *renderer){
-	car->speed = 0.;//pixels per frame
-	car->angle = 0.;
-	car->angle_drift = 0.;
-	car->pos_initx = 700.;
-	car->pos_inity = 700.;
+	car->speed = 0.f;//pixels per frame
+	car->angle = 0.f;
+	car->angle_drift = 0.f;
+	car->pos_initx = 700.f;
+	car->pos_inity = 700.f;
 	car->posx = car->pos_initx;
 	car->posy = car->pos_inity;
 	car->frame.x = (int)(car->posx);
@@ -100,28 +101,38 @@ void init_road(Road* road){
 	road->tab_checkPoints[5].x = -260;
 	road->tab_checkPoints[5].y = 856;
 	for (int i = 0; i < road->len_tab_checkPoints; i++){
-		road->tab_checkPoints[i].w = road->square_width;;
-		road->tab_checkPoints[i].h = road->square_width;;
+		road->tab_checkPoints[i].w = road->square_width;
+		road->tab_checkPoints[i].h = road->square_width;
 		road->tab_valid_checkPoints[i] = False;
 	}
 }
 
 void init_collision_grid(Road* road){
-	for (int i = 0; i < NB_GRID_COLUMN; i++){
-		for (int j = 0; j < NB_GRID_ROW; j++){
-			road->collision_grid[j][i].x = 0;
-			road->collision_grid[j][i].y = 0;
-		}
-	} 
+/*
+    // on dit qu'il n'y a aucun point dans chaque case de la grille de collision
+    // permet de ne pas tout remettre à 0 à chaque fois
+    for (unsigned int j = 0; j < NB_GRID_ROW; j++) {
+        for (unsigned int i = 0; i < NB_GRID_COLUMN; i++) {
+            road->nb_pts_collision[j][i] = 0;
+            road->pt_in_road[j][i] = false;
+        }
+	}
+ */
 }
 
 void init_cam(Camera* cam, Entity* car){
-	cam->x = (float)car->pos_initx - (float)cam->winSize_w / 2. - (float)WIDTH_TOOLBAR / 2.;
-	cam->y = (float)car->pos_inity - (float)cam->winSize_h / 2. - (float)WIDTH_TOOLBAR / 2.;
+	cam->x = (float)car->pos_initx - (float)cam->winSize_w / 2.;
+	cam->y = (float)car->pos_inity - (float)cam->winSize_h / 2.;
+}
+
+void free_players(Player* player) {
+    for (int i = 0; i < NB_OF_PLAYERS; ++i) {
+        free(player[i].ia);
+    }
 }
 
 float distance(float x1, float y1, float x2, float y2){
-	return sqrt(pow((float)x1 - (float)x2, 2) + pow(((float)y1 - (float)y2), 2)); // TODO : faire x*x au lieu de pow(x,2) pour opti
+	return sqrtf(pow((float)x1 - (float)x2, 2) + pow(((float)y1 - (float)y2), 2)); // TODO : faire x*x au lieu de pow(x,2) pour opti
 }
 
 float dist2(float x1, float y1, float x2, float y2){
@@ -149,13 +160,13 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam){
 	}
 	car->angle_drift += ((key->drift == drift_left) - 2*(key->drift == drift_right)) * car->turn_drift * (60. / FRAMES_PER_SECONDE) / 320.;
 	car->speed += ((float)(key->up) - (float)(key->down)/2.) * car->acceleration * (60. / FRAMES_PER_SECONDE) / 20.;
-	if (fabs(car->speed) > 3.){
-		car->angle += (double)(car->turn * (60. / FRAMES_PER_SECONDE) * ((double)(key->left) - (double)(key->right))) / (10 * (1. - 2. * (double)((car->speed) < 0.)) * 6 * sqrt(fabs(car->speed)));
+	if (fabsf(car->speed) > 3.){
+		car->angle += (double)(car->turn * (60. / FRAMES_PER_SECONDE) * ((double)(key->left) - (double)(key->right))) / (10 * (1. - 2. * (double)((car->speed) < 0.)) * 6 * sqrtf(fabsf(car->speed)));
 	}
-	else if (fabs(car->speed) <= 3.){
+	else if (fabsf(car->speed) <= 3.){
 		car->angle += (double)((double)(key->left) - (double)(key->right)) * (car->speed) * car->turn * (60. / FRAMES_PER_SECONDE) / 1280;
 	}
-	
+
 	//struct_to_moveCar
 	float old_posx = car->posx;
 	float old_posy = car->posy;
@@ -163,14 +174,14 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam){
 	car->posy -= car->speed * (float)sin(car->angle);
 	car->frame.x = (int)(car->posx);
 	car->frame.y = (int)(car->posy);
-	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (fabs(car->speed))) * car->frottement / 640.;
+	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (fabsf(car->speed))) * car->frottement / 640.;
 	//manage cam
 	//TODO : si on est au bout de la piste, ne pas aller plus loin !
 	if (cam->follow_car){
 		float new_cam_x = car->posx - (float)cam->winSize_w / 2 + REAR_CAMERA * car->speed * ( FRAMES_PER_SECONDE / 60. ) * cos(car->angle);
 		float new_cam_y = car->posy - (float)cam->winSize_h / 2 - REAR_CAMERA * car->speed * ( FRAMES_PER_SECONDE / 60. ) * sin(car->angle);
-		cam->x = (int)((9.*(float)cam->x + new_cam_x) / 10.);
-		cam->y = (int)((9.*(float)cam->y + new_cam_y) / 10.);
+		cam->x = (int)((9.*(float)cam->x + (float)new_cam_x) / 10.);
+		cam->y = (int)((9.*(float)cam->y + (float)new_cam_y) / 10.);
 	} else {
 		cam->x += (1 - cam->zoom) * (car->posx - old_posx);
 		cam->y += (1 - cam->zoom) * (car->posy - old_posy);
@@ -259,7 +270,7 @@ void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Ia* 
 		road->tab_checkPoints[road->len_tab_checkPoints].x = event->button.x - (float)road->square_width / 2 + cam->x + (event->button.x + cam->x - car->frame.x) * (float)(-1. + 1/cam->zoom);
 		road->tab_checkPoints[road->len_tab_checkPoints].y = event->button.y - (float)road->square_width / 2 + cam->y + (event->button.y + cam->y - car->frame.y) * (float)(-1. + 1/cam->zoom);
 		road->tab_checkPoints[road->len_tab_checkPoints].w = road->square_width;
-		road->tab_checkPoints[road->len_tab_checkPoints].h = road->square_width;	
+		road->tab_checkPoints[road->len_tab_checkPoints].h = road->square_width;
 		road->tab_valid_checkPoints[road->len_tab_checkPoints] = False;
 		startLapTime = SDL_GetTicks();
 
@@ -274,7 +285,7 @@ void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Ia* 
 
 //found the closest checkpoint to the clic:
 void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
-	int dist = 0;
+	int dist;
 	int pos_clique_x = event->button.x - (float)road->square_width / 2 + cam->x + (event->button.x + cam->x - car->frame.x) * (float)(-1. + 1/cam->zoom);
 	int pos_clique_y = event->button.y - (float)road->square_width / 2 + cam->y + (event->button.y + cam->y - car->frame.y) * (float)(-1. + 1/cam->zoom);
 	road->num_clos_check = 0;
@@ -286,7 +297,7 @@ void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
 			road->num_clos_check = i;
 			min_dist = dist;
 		}
-	}	 
+	}
 	road->selectx = road->tab_checkPoints[road->num_clos_check].x - pos_clique_x;
 	road->selecty = road->tab_checkPoints[road->num_clos_check].y - pos_clique_y;
 }
@@ -301,7 +312,7 @@ void reset_valid_tab(Road* road){
 		road->tab_valid_checkPoints[i] = 0;
 	}
 	road->nb_valid_checkPoints = 0;
-}	
+}
 
 //manage a checkpoint:
 void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
@@ -337,7 +348,7 @@ static void render_car(SDL_Renderer *renderer, Entity* car, Camera* cam){
 		.w = 641,
 		.h = 258
 	};
-	
+
 	int w_prev = car->frame.w;
 	int h_prev = car->frame.h;
 	car->frame.w *= cam->zoom;
@@ -357,7 +368,7 @@ static void render_car(SDL_Renderer *renderer, Entity* car, Camera* cam){
 	car->frame.w = w_prev;
 }
 
-static void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity* car, SDL_Event* event, Ia* ia){
+static void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, Entity* car, Ia* ia){
 	int i;
 	int x;
 	int y;
@@ -365,13 +376,17 @@ static void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, 
 	int y_prev;
 	int w_prev;
 	int h_prev;
+    int mouse_x, mouse_y;
 
-	float centre_x = car->posx - cam->x;
+    SDL_GetMouseState(&mouse_x, &mouse_y);
+
+    float centre_x = car->posx - cam->x;
 	float centre_y = car->posy - cam->y;
 	int square_w = road->square_width * cam->zoom;
-	if (road->select && event->button.x < 20000 && event->button.y < 20000){
-		int pos_clique_x = event->button.x - (float)road->square_width / 2 + cam->x + (event->button.x + cam->x - car->frame.x) * (float)(-1. + 1/cam->zoom);
-		int pos_clique_y = event->button.y - (float)road->square_width / 2 + cam->y + (event->button.y + cam->y - car->frame.y) * (float)(-1. + 1/cam->zoom);
+
+	if (road->select && mouse_x < 20000 && mouse_y < 20000){
+		int pos_clique_x = mouse_x - (float)road->square_width / 2 + cam->x + (mouse_x + cam->x - car->frame.x) * (float)(-1. + 1/cam->zoom);
+		int pos_clique_y = mouse_y - (float)road->square_width / 2 + cam->y + (mouse_y + cam->y - car->frame.y) * (float)(-1. + 1/cam->zoom);
 		road->tab_checkPoints[road->num_clos_check].x = pos_clique_x + road->selectx;
 		road->tab_checkPoints[road->num_clos_check].y = pos_clique_y + road->selecty;
 	}
@@ -387,16 +402,16 @@ static void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, 
 		road->tab_checkPoints[i].w *= cam->zoom;
 		road->tab_checkPoints[i].h *= cam->zoom;
 		x = road->tab_checkPoints[i].x;
-		y = road->tab_checkPoints[i].y;	
+		y = road->tab_checkPoints[i].y;
 		if (x + square_w > 0 && x - square_w < cam->winSize_w && y + square_w > 0 && y - square_w < cam->winSize_h){
 			//check if collision between car and CP:
 			// TODO optimiser ça
-			if (road->len_tab_checkPoints > 1 && (distance(x_prev, y_prev, car->posx, car->posy) <= (float)road->size / 2 + (float)car->frame.h / 2)){	
+			if (road->len_tab_checkPoints > 1 && (distance(x_prev, y_prev, car->posx, car->posy) <= (float)road->size / 2 + (float)car->frame.h / 2)){
 				if (road->tab_valid_checkPoints[i] == False){ // CP not already valid
 					road->nb_valid_checkPoints++;
 					road->tab_valid_checkPoints[i] = True;
-					if (ia->active && road->len_tab_checkPoints >= 4){		
-						// the 
+					if (ia->active && road->len_tab_checkPoints >= 4){
+						// the
 						road->tab_checkPoints[i].x = x_prev;
 						road->tab_checkPoints[i].y = y_prev;
 						calcul_next_cp(road, ia, car);
@@ -406,12 +421,12 @@ static void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, 
 						road->tab_valid_checkPoints[i] = Start;
 						startLapTime = SDL_GetTicks();
 					}
-					
+
 				} else if (road->nb_valid_checkPoints >= road->len_tab_checkPoints && road->tab_valid_checkPoints[i] == Start){
 					reset_valid_tab(road);
 				}
-			}	
-			//display: 
+			}
+			//display:
 			if (road->select && road->num_clos_check == i){
 				SDL_SetRenderDrawColor(renderer, CP_SELECTED_COLOR); // checkpoint selected
 				SDL_RenderFillRect(renderer, &road->tab_checkPoints[i]);
@@ -430,7 +445,7 @@ static void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, 
 				SDL_SetRenderDrawColor(renderer, CP_START_COLOR); // start checkpoint
 				SDL_RenderFillRect(renderer, &road->tab_checkPoints[i]);
 			}
-		
+
 		}
 		road->tab_checkPoints[i].h = h_prev;
 		road->tab_checkPoints[i].w = w_prev;
@@ -445,15 +460,15 @@ static void render_drift(SDL_Renderer *renderer, Entity* car, Camera* cam){
 	h = car->frame.h * cam->zoom;
 	float dist;
 	dist = (sqrt(pow((float)w / 2.5, 2) + pow((float)h/3, 2)));
-	
+
 	int x[4] = {0};
 	int y[4] = {0};
 
 	SDL_SetRenderDrawColor(renderer, DRIFT_COLOR);//drift's black pixel
-	
+
 	float centre_x = car->posx + (float)w / 2 - cam->x;
 	float centre_y = car->posy + (float)h / 2 - cam->y;
-	
+
 	int marks_x, marks_y;
 	double angle;
 	unsigned int i;
@@ -478,15 +493,28 @@ static void render_drift(SDL_Renderer *renderer, Entity* car, Camera* cam){
 	}
 }
 
+/*
+__attribute__((unused)) static void fill_collision_grid(Road* road, int row, int column, const float* x, const float* y) {
+// TODO : à voir si c'est problématique de mettre juste *x ou pas
+road->collision_grid[row][column][road->nb_pts_collision[row][column]].x = *x;
+road->collision_grid[row][column][road->nb_pts_collision[row][column]].y = *y;
+road->nb_pts_collision[row][column] ++;
+// TODO : temporaire, à rendre plus beau
+if (road->nb_pts_collision[row][column] > NB_PTS_COLL) {
+    road->nb_pts_collision[row][column] --;
+}
+}
+ */
+
 static void calcul_spline(Entity* car, Camera* cam, Road* road, float* x, float* y, float* pt, short* draw){
-	float t = *pt; 
+	float t = *pt;
 	float centre_x = car->posx - cam->x;
 	float centre_y = car->posy - cam->y;
-	int p0, p1, p2, p3;	
+	int p0, p1, p2, p3;
 	p0 = (int)t % road->len_tab_checkPoints;
 	p1 = (p0 + 1) % road->len_tab_checkPoints;
 	p2 = (p1 + 1) % road->len_tab_checkPoints;
-	
+
 	//if checkpoint not in the screen, go to next
 	int s = road->size * cam->zoom / 2;
 	float cx = road->tab_checkPoints[p1].x - cam->x;
@@ -500,7 +528,7 @@ static void calcul_spline(Entity* car, Camera* cam, Road* road, float* x, float*
 	if ((cx + s < 0 && cx2 + s < 0) || (cy + s < 0 && cy2 + s < 0) || (cx - s > cam->winSize_w && cx2 - s > cam->winSize_w) || (cy - s > cam->winSize_h && cy2 - s > cam->winSize_h)){
 		*draw = 0;// then don't draw
 		*pt = (int)t + 1;
-		return;	
+		return;
 	}//end
 
 	p3 = (p2 + 1) % road->len_tab_checkPoints;
@@ -516,22 +544,28 @@ static void calcul_spline(Entity* car, Camera* cam, Road* road, float* x, float*
 
 	*x = 0.5f * (road->tab_checkPoints[p0].x * q1 + road->tab_checkPoints[p1].x * q2 + road->tab_checkPoints[p2].x * q3 + road->tab_checkPoints[p3].x * q4);
 	*y = 0.5f * (road->tab_checkPoints[p0].y * q1 + road->tab_checkPoints[p1].y * q2 + road->tab_checkPoints[p2].y * q3 + road->tab_checkPoints[p3].y * q4);
-	
+
 	*x -= cam->x - (float)road->square_width / 2;
 	*x = (1 - cam->zoom) * centre_x + cam->zoom * *x;
 	*y -= cam->y - (float)road->square_width / 2;
 	*y = (1 - cam->zoom) * centre_y + cam->zoom * *y;
-	// TODO : mettre un set pour plus tard
-	// TODO mettre *x et *y
-	// TODO rajouter un point spécial pour le cerntre (comme ça pas de calcul)
-	if (*x >= 0. && *x <= cam->winSize_w&& *y >= 0. && *y <= cam->winSize_h){
-		road->collision_grid[(int)(NB_GRID_ROW * (*y) / (float)cam->winSize_h)][(int)(NB_GRID_COLUMN * (*x) / (float)cam->winSize_w)].x = *x;
-		road->collision_grid[(int)(NB_GRID_ROW * (*y) / (float)cam->winSize_h)][(int)(NB_GRID_COLUMN * (*x) / (float)cam->winSize_w)].y = *y;
+
+	// TODO : Mettre un set pour plus tard
+	// TODO Mettre *x et *y
+	// TODO Rajouter un point spécial pour le centre (comme ça pas de calcul)
+    //int row = NB_GRID_ROW * (*y) / (float)cam->winSize_h;
+    //int column = NB_GRID_COLUMN * (*x) / (float)cam->winSize_w;
+	//if (*x >= 0. && *x <= cam->winSize_w && *y >= 0. && *y <= cam->winSize_h){
+		// TODO à revoir :
+        //  road->collision_grid[(unsigned int)(NB_GRID_ROW * (*y) / (float)cam->winSize_h)][(unsigned int)(NB_GRID_COLUMN * (*x) / (float)cam->winSize_w)][(unsigned int)(t*NB_PTS*cam->zoom)].x = *x;
+        // TODO : plus tard mettre un truc qui dit que c'est forcément dedans, donc pas besoin d'enregistrer *x et *y, juste changer la première valeur par : true
+        //road->pt_in_road[row][column] = true;
+		//printf("-> %u \n", road->nb_pts_collision[row][column]);
 		/*printf("(int)*y / cam->winSize_h = %d, %d\n",NB_GRID_ROW *  (int)*y / cam->winSize_h, NB_GRID_COLUMN * (int)*x / cam->winSize_w);*/
-	}
+	//}
 }
 
-static void calcul_road(Camera* cam, Road* road, float* x, float* y, float* prevx, float* prevy, float* tabx, float* taby){
+static void calcul_road(Camera* cam, Road* road, const float* x, const float* y, const float* prevx, const float* prevy, float* tabx, float* taby){
 	float distx = *prevx - *x;
 	float disty = *prevy - *y;
 	float dist = 2 * distance(*prevx, *prevy, *x, *y);
@@ -540,85 +574,127 @@ static void calcul_road(Camera* cam, Road* road, float* x, float* y, float* prev
 	tabx[3] = *x - (disty * road->size * cam->zoom) / dist;
 	taby[3] = *y + (distx * road->size * cam->zoom) / dist;
 
+    /*
+   int row;
+   int column;
+    // si dans la fenêtre
 	if (tabx[2] >= 0. && tabx[2] <= cam->winSize_w && taby[2] >= 0. && taby[2] <= cam->winSize_h){
-		road->collision_grid[(int)(NB_GRID_ROW * (taby[2]) / (float)cam->winSize_h)][(int)(NB_GRID_COLUMN * (tabx[2]) / (float)cam->winSize_w)].x = *x;
-		road->collision_grid[(int)(NB_GRID_ROW * (taby[2]) / (float)cam->winSize_h)][(int)(NB_GRID_COLUMN * (tabx[2]) / (float)cam->winSize_w)].y = *y;
-		/*printf("(int)taby[2] / cam->winSize_h = %d, %d\n",NB_GRID_ROW *  (int)taby[2] / cam->winSize_h, NB_GRID_COLUMN * (int)tabx[2] / cam->winSize_w);*/
+        row = NB_GRID_ROW * taby[2] / (float)cam->winSize_h;
+        column = NB_GRID_COLUMN * tabx[2] / (float)cam->winSize_w;
+        fill_collision_grid(road, row, column, &tabx[2], &taby[2]);
+        // left of the road
+        road->edge_right[row][column] = false;
 	}
 
+    // si dans la fenêtre
 	if (tabx[3] >= 0. && tabx[3] <= cam->winSize_w && taby[3] >= 0. && taby[3] <= cam->winSize_h){
-		road->collision_grid[(int)(NB_GRID_ROW * (taby[3]) / (float)cam->winSize_h)][(int)(NB_GRID_COLUMN * (tabx[3]) / (float)cam->winSize_w)].x = *x;
-		road->collision_grid[(int)(NB_GRID_ROW * (taby[3]) / (float)cam->winSize_h)][(int)(NB_GRID_COLUMN * (tabx[3]) / (float)cam->winSize_w)].y = *y;
-		/*printf("(int)taby[2] / cam->winSize_h = %d, %d\n",NB_GRID_ROW *  (int)taby[2] / cam->winSize_h, NB_GRID_COLUMN * (int)tabx[2] / cam->winSize_w);*/
+        row = NB_GRID_ROW * taby[3] / (float)cam->winSize_h;
+        column = NB_GRID_COLUMN * tabx[3] / (float)cam->winSize_w;
+        fill_collision_grid(road, row, column, &tabx[3], &taby[3]);
+        road->edge_right[row][column] = true;
 	}
+     */
 }
 
+static int max (int a, int b) {
+    return a < b ? b : a;
+}
 
-static void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* road){
+static void fill_road(SDL_Renderer* renderer, float tabx[4], float taby[4]) {
+    // TODO : remplacer le 10 par la distance
+    int n = max((int)distance(tabx[0], taby[0], tabx[2], taby[2]), (int)distance(tabx[1], taby[1], tabx[3], taby[3])) + 1;
+    for (int i = 0; i < n; ++i) {
+        SDL_RenderDrawLine(renderer, (int)((n - i) * tabx[0] + i *tabx[2]) / n, (int)((n - i) * taby[0] + i * taby[2]) / n, (int)((n - i) * tabx[1] + i * tabx[3]) / n, (int)((n - i) * taby[1] + i * taby[3]) / n);
+        SDL_RenderDrawLine(renderer, (int)((n - i) * tabx[0] + i *tabx[2]) / n + 1, (int)((n - i) * taby[0] + i * taby[2]) / n, (int)((n - i) * tabx[1] + i * tabx[3]) / n + 1, (int)((n - i) * taby[1] + i * taby[3]) / n);
+    }
+}
+
+static void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* road, Background* bg){
 	// Draw Spline
 	float x, y;
 	x = 0.;
 	y = 0.;
 	float prevx = 0, prevy = 0;
 	float tabx[4] = {0., 0.};
-	float taby[4] = {0., 0.};
-	short draw = 0;
-	float t;
-	t = 0;
-	SDL_SetRenderDrawColor(renderer, LINE_ROAD_COLOR);
-	while (t < (float)road->len_tab_checkPoints - 3.0f * (road->len_tab_checkPoints <= 3)){
-		calcul_spline(car, cam, road, &x, &y, &t, &draw);
+    float taby[4] = {0., 0.};
+    short draw = 0;
+    float t;
+    t = 0;
 
-		if (x  + road->size * cam->zoom / 2 >= 0 && x < cam->winSize_w  + road->size * cam->zoom / 2 && y + road->size * cam->zoom / 2 >= 0 && y < cam->winSize_h + road->size * cam->zoom / 2){
-			//SDL_RenderDrawPoint(renderer, (int)x, (int)y);//original spline
-			calcul_road(cam, road, &x, &y, &prevx, &prevy, tabx, taby);//calcul 2 points of the road
-			//display road:
-			//test
-			//SDL_RenderDrawPoint(renderer, (int)tabx[2], (int)taby[2]);//original road
-			//SDL_RenderDrawPoint(renderer, (int)tabx[3], (int)taby[3]);
-			//SDL_RenderDrawLine(renderer, (int)tabx[2], (int)taby[2], (int)tabx[3], (int)taby[3]);
-			if (draw == 1){
-				//fill
-				SDL_RenderDrawLine(renderer, (int)tabx[0], (int)taby[0], (int)tabx[2], (int)taby[2]);
-				SDL_RenderDrawLine(renderer, (int)tabx[1], (int)taby[1], (int)tabx[3], (int)taby[3]);
-				//SDL_RenderDrawLine(renderer, (int)prevx, (int)prevy, (int)x, (int)y);
-			}
-			prevx = x; prevy = y;
+    if (bg->show)
+        SDL_SetRenderDrawColor(renderer, LINE_ROAD_COLOR);
+    else
+        SDL_SetRenderDrawColor(renderer, BLACK);
 
-			//end
-			tabx[0] = tabx[2]; taby[0] = taby[2];
-			tabx[1] = tabx[3]; taby[1] = taby[3];
-		} else {
-			draw = 0;
-		}
-		t += 1. / (NB_PTS * cam->zoom);
-	}
+    while (t < (float)road->len_tab_checkPoints - 3.0f * (road->len_tab_checkPoints <= 3)){
+        calcul_spline(car, cam, road, &x, &y, &t, &draw);
+
+        if (x  + road->size * cam->zoom / 2 >= 0 && x < cam->winSize_w  + road->size * cam->zoom / 2 && y + road->size * cam->zoom / 2 >= 0 && y < cam->winSize_h + road->size * cam->zoom / 2){
+            //SDL_RenderDrawPoint(renderer, (int)x, (int)y);//original spline
+            calcul_road(cam, road, &x, &y, &prevx, &prevy, tabx, taby);//calcul 2 points of the road
+            //display road:
+            //test
+            //SDL_RenderDrawPoint(renderer, (int)tabx[2], (int)taby[2]);//original road
+            //SDL_RenderDrawPoint(renderer, (int)tabx[3], (int)taby[3]);
+            //SDL_RenderDrawLine(renderer, (int)tabx[2], (int)taby[2], (int)tabx[3], (int)taby[3]);
+            if (draw == 1){
+                // TODO SDL_RenderDrawLines plus opti
+                //fill
+                if (!bg->show) {
+                    SDL_RenderDrawLine(renderer, (int) tabx[0], (int) taby[0], (int) tabx[2], (int) taby[2]);
+                    SDL_RenderDrawLine(renderer, (int) tabx[1], (int) taby[1], (int) tabx[3], (int) taby[3]);
+                    //SDL_RenderDrawLine(renderer, (int)prevx, (int)prevy, (int)x, (int)y);
+                } else {
+                    fill_road(renderer, tabx, taby);
+                }
+            }
+            prevx = x; prevy = y;
+
+            //end
+            tabx[0] = tabx[2]; taby[0] = taby[2];
+            tabx[1] = tabx[3]; taby[1] = taby[3];
+        } else {
+            draw = 0;
+        }
+        t += 1. / (NB_PTS * cam->zoom);
+    }
 }
 
 
-void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar, Keys_pressed* key, Background* bg){
+void display(SDL_Renderer *renderer, Player* player, Road* road, Camera* cam, Toolbar* toolbar, Background* bg, int nb_fps){
 	//____background display_____
-	fill_background(renderer, bg, road, cam);
+	//fill_background(renderer, bg, road, cam);
 	init_collision_grid(road);
 
 	//____spline display____
-	render_road(car, renderer, cam, road);
+	render_road(&player[0].car, renderer, cam, road, bg);
 
 	//____road display____
-	render_checkPoints(renderer, road, cam, car, event, ia);
+	render_checkPoints(renderer, road, cam, &player[0].car, player[0].ia);
 
 	//_____drift display_____
-	render_drift(renderer, car, cam);
-	
+    for (int i = 0; i < NB_OF_PLAYERS; i++) {
+        render_drift(renderer, &player[i].car, cam);
+    }
+
 	//_____toolbar display___
 	render_toolbar(renderer, toolbar);
 
+    //_____fps display ______
+    render_number(renderer, bg, nb_fps, cam->winSize_w + toolbar->size.w - 5, 5);
+
 	//_____key display_______
-	render_keys(renderer, key, cam);
+	render_keys(renderer, &player[0].key, cam);
 
 	//default color background
-	SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);
+    if (bg->show) {
+        SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);
+    } else {
+        SDL_SetRenderDrawColor(renderer, WHITE);
+    }
 	//_____car display____
-	render_car(renderer, car, cam);
-	SDL_RenderPresent(renderer); 
+    for (int i = 0; i < NB_OF_PLAYERS; ++i) {
+        render_car(renderer, &player[1].car, cam);
+    }
+	SDL_RenderPresent(renderer);
 }

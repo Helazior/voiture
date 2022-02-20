@@ -11,7 +11,9 @@
 #define SIZE_LINE_TOOLBAR 200
 #define WIDTH_TOOLBAR 300
 
-#define NB_SETTINGS 7
+#define NB_SETTINGS 9
+
+#define NB_COLORS_BG 6
 
 typedef enum{
 	Checkbox = 0,
@@ -48,15 +50,20 @@ typedef struct Toolbar{
 
 
 typedef struct Background{
-	SDL_Texture* texture[3];
+	SDL_Texture* texture[NB_COLORS_BG];
+    int nb_sq_fill;
+    // TODO : mettre un enum
+    bool show;
+    SDL_Texture* number[10]; // 0 to 9
+    SDL_Rect number_size;
 }Background;
 
 //init all the toolbar at the right of the screen
-int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia, Camera* cam);
+int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia, Camera* cam, Background* bg);
 
-void click_toolbar(Toolbar* toolbar, SDL_Event* event);
+void click_toolbar(Toolbar* toolbar);
 
-void change_variable(Toolbar* toolbar, SDL_Event* event);
+void change_variable(Toolbar* toolbar);
 
 void change_variable_keys(Toolbar* toolbar, short add);
 
@@ -67,10 +74,12 @@ void render_keys(SDL_Renderer *renderer, Keys_pressed* key, Camera* cam);
 // move cam if mouse in the edge of the screen
 void move_screen(Camera* cam, Toolbar* toolbar);
 
+void render_number(SDL_Renderer* renderer, Background* bg, int number, int pos_x, int pos_y);
+
 void destroy_texture(Background* bg);
 //create the tiles textures to put to the background
 int init_background(SDL_Renderer* renderer, Background* bg);
 
-void fill_background(SDL_Renderer* renderer, Background* bg, Road* road, Camera* cam);
+//void fill_background(SDL_Renderer* renderer, Background* bg, Road* road, Camera* cam);
 
 #endif

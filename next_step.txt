@@ -5,10 +5,15 @@
 
 
 [BUG à résoudre] :
-- quand j'appuis sur espace et que je veux déplacer un CP, gros bug qui fait disparaitre la route
+(Done (c'était event->button le pb)) - quand j'appuie sur espace et que je veux déplacer un CP, gros bug qui fait disparaitre la route
+- Les traces de prédiction de l'IA sont sous le bg
+- appuyer sur "+" lorsqu'on démarre fait segfault des fois
+- Glisser la barre avec une var int marche mal à basse vitesse
+- En pause (espace), gérer les touches qui peuvent rester appuyées
 - En mode IA, il arrive qu'il ne cherche pas l'arriver, mais reste coincé sur celui d'avant (ce passe quand je supprime ou rajoute un CP pendant qu'il est en mode IA)
 - dans simu_traj_no_line, si la simu remonte trop, elle va passer derrière et va tourner en rond. Il faut détecter ce cas et laisser passer sans freiner.
 - Si IA se retrouve perpendiculaire au CP, il continue tout droit
+- Zoom ? puis Alt tab plusieurs fois = seg fault, se voit directement avec valgrind
 
 OPTIMISATION :
 
@@ -55,16 +60,16 @@ avec IA et sans drift :
 /*À faire*/
 (fait)// barre et touche pour agrandir la largeur de route
 (fait)// barre pour gerer la vitesse/acceleration/frottement/virage/derapage
-// case à cocher pour que la caméra ne suive plus la voiture, dans ce cas, on peut se déplacer avec les flêches ou avec la souris au bord de l'écran
+(un peu fait)// case à cocher pour que la caméra ne suive plus la voiture, dans ce cas, on peut se déplacer avec les flêches ou avec la souris au bord de l'écran
 (fait)// case à cocher pour mettre/enlever l'IA
 
-//trajectoire optimal sans dérapage
+(un peu)//trajectoire optimal sans dérapage
 //trajectoire optimal sans sortir de la route
 //trajectoire optimal avec dérapage
 //pouvoir mettre des obstacles sur la route (mur etc.)
 //IA opti
 //IA deep learning
-//jeu pause
+(un peu)//jeu pause
 //fantome de la course
 //retenir plusieurs circuits
 
@@ -145,13 +150,4 @@ et une voiture en 3D
 
 Pour finir :
 Faire un générateur de map aléatoire avec tout parametrable.
-En bonus, mettre un algo du voyageur de commerce pour la route.
-
-
-/*Dans IA:
-	remplir ia->next_cp_bord[0].x = ...;
-	lorsque dans calcul_road
-	x = ia->next_cp.x;
-...
-	ne pas oublier de rajouter struct Ia* ia en parametre
-*/
+En bonus, mettre un algo du voyageur de commerce pour créer la route à partir des CP.

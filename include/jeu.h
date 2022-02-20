@@ -3,9 +3,12 @@
 #ifndef _JEU_H
 #define _JEU_H
 
+#include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+
+#define NB_OF_PLAYERS 2
 
 #define FRAMES_PER_SECONDE 60
 
@@ -19,8 +22,8 @@
 #define YELLOW 200, 150, 0, 255
 
 #define DRIFT_COLOR BLACK
-#define LINE_ROAD_COLOR BLACK
-#define BACKGROUND_COLOR WHITE
+#define LINE_ROAD_COLOR WHITE
+#define BACKGROUND_COLOR GREEN
 #define CP_TAKEN_COLOR GREEN
 #define CP_COLOR ORANGE
 #define CP_START_COLOR YELLOW
@@ -37,14 +40,16 @@
 
 #define REAR_CAMERA 20.
 
-#define NB_PTS 150.
+//#define NB_PTS_COLL 3
+#define NB_PTS 300.
 
 #define NB_GRID_ROW 15
 #define NB_GRID_COLUMN 27
 
 #define CAM_FOLLOW_CAR False
 
-typedef enum{
+
+typedef enum {
 	False = 0,
 	True = 1,
 	Start = 2
@@ -52,24 +57,22 @@ typedef enum{
 
 int init(SDL_Window** window, SDL_Renderer** renderer, int w, int h); //initialisation SDL
 
-int setWindowColor(SDL_Renderer *renderer, SDL_Color color); //to have a new color
+__attribute__((unused)) int setWindowColor(SDL_Renderer *renderer, SDL_Color color); //to have a new color
 
 SDL_Texture* loadTexture(SDL_Renderer *renderer, const char* p_filePath);
 
 typedef struct Setting Setting;
-
 typedef struct Toolbar Toolbar;
+typedef struct Ia Ia;
+typedef struct Background Background;
 
 typedef struct Coord{
 	float x;
 	float y;
 }Coord;
 
-typedef struct Ia Ia;
 
-typedef struct Background Background;
-
-typedef struct Entity{
+typedef struct Entity {
 	float posx;
 	float posy;
 	float pos_initx;
@@ -92,8 +95,8 @@ typedef struct Entity{
 	unsigned int count_pos_tab;//stay max
 }Entity;
 
-typedef struct Road{
-	SDL_Rect tab_checkPoints[NB_SQUARE];//bien vérifier qu'on ne dépasse pas 100.
+typedef struct Road {
+	SDL_Rect tab_checkPoints[NB_SQUARE];
 	Bool tab_valid_checkPoints[NB_SQUARE];
 	int len_tab_checkPoints;
 	int nb_valid_checkPoints;
@@ -103,10 +106,17 @@ typedef struct Road{
 	int selectx;
 	int selecty;
 	int size;
-	Coord collision_grid[NB_GRID_ROW][NB_GRID_COLUMN]; // [row][column]
+    // TODO : à changer par un set ou alors faire un dico c'est mieux
+    /*
+    Coord collision_grid[NB_GRID_ROW][NB_GRID_COLUMN][(unsigned int)NB_PTS_COLL]; // [row][column]
+	unsigned int nb_pts_collision[NB_GRID_ROW][NB_GRID_COLUMN];
+    bool edge_right[NB_GRID_ROW][NB_GRID_COLUMN];
+    bool pt_in_road[NB_GRID_ROW][NB_GRID_COLUMN];
+     */
+
 }Road;
 
-typedef struct Keys_pressed{
+typedef struct Keys_pressed {
 	Bool up;
 	Bool down;
 	Bool left;
@@ -118,7 +128,7 @@ typedef struct Keys_pressed{
 	}drift;
 }Keys_pressed;
 
-typedef struct Camera{
+typedef struct Camera {
 	float x;
 	float y;
 	int winSize_w;
@@ -129,6 +139,12 @@ typedef struct Camera{
 	int cursor_y;
 }Camera;
 
+typedef struct player {
+    Entity car;
+    Ia *ia;
+    Keys_pressed key;
+}Player;
+
 void pause();
 
 void init_car(Entity* car, SDL_Renderer *renderer);
@@ -138,6 +154,8 @@ void init_road(Road* road);
 void init_collision_grid(Road* road);
 
 void init_cam(Camera* cam, Entity* car);
+
+void free_players(Player* player);
 
 float distance(float x1, float y1, float x2, float y2);
 
@@ -151,7 +169,7 @@ void move_car(Entity *car, Keys_pressed* key, Camera* cam);
 //key
 void manage_key(SDL_Event* event, Keys_pressed* key, Bool stat, Entity* car, Camera* cam, Road* road, Toolbar* toolbar, Ia* ia);
 //put the 3 last checkpoints into the 3 first:
-void close_circuit(Road road);
+__attribute__((unused)) void close_circuit(Road road);
 //add a checkpoint:
 void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Ia* ia);
 //del a checkpoint:
@@ -161,7 +179,7 @@ void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 //manage a checkpoint:
 void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 
-void display(SDL_Renderer *renderer, Entity* car, Road* road, Camera* cam, SDL_Event* event, Ia* ia, Toolbar* toolbar, Keys_pressed* key, Background* bg);// display all
+void display(SDL_Renderer *renderer, Player* player, Road* road, Camera* cam, Toolbar* toolbar, Background* bg, int nb_fps);// display all
 
 void clear(SDL_Renderer *renderer);
 

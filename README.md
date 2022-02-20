@@ -29,3 +29,5 @@ with gcc -O3 optimisations :
 make opti
 ```
 
+# Lancer
+`./exec`

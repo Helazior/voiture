@@ -1,10 +1,7 @@
 /*ia.c*/
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
 
 #include <math.h>
 #include "../include/jeu.h"
@@ -17,12 +14,22 @@ void init_ia(Ia* ia, Road* road, Entity* car){
 	calcul_next_cp(road, ia, car);
 }
 
-void stop_ia(Keys_pressed* key){
-	key->up = False;
-	key->down = False;
-	key->left = False;
-	key->right = False;
-	key->drift = none;
+void stop_ia(Player* player){
+    for (int i = 0; i < NB_OF_PLAYERS; ++i) {
+        player[i].key.up = False;
+        player[i].key.down = False;
+        player[i].key.left = False;
+        player[i].key.right = False;
+        player[i].key.drift = none;
+    }
+}
+
+void stop_first_ia(Keys_pressed* key){
+    key->up = False;
+    key->down = False;
+    key->left = False;
+    key->right = False;
+    key->drift = none;
 }
 
 static void calcul_angle_next_cp(Road* road, Ia* ia){
@@ -43,6 +50,16 @@ static void calcul_angle_next_cp(Road* road, Ia* ia){
 	ia->prev_cp.y = prev_cp_y;
 	ia->next_next_cp.x = next_cp_x;
 	ia->next_next_cp.y = next_cp_y;
+
+	// to have the same distance between the 3 CP
+	// // TODO ça rend l'IA pire : pourquoi ?
+
+	/*if (ia->show_simu_traj){*/
+		/*float coeff = distance(ia->next_cp.x, ia->next_cp.y, prev_cp_x, prev_cp_y) / distance(ia->next_cp.x, ia->next_cp.y, ia->next_next_cp.x, ia->next_next_cp.y);*/
+		/*next_cp_x = ia->next_cp.x + (ia->next_next_cp.x - ia->next_cp.x) * coeff;*/
+		/*next_cp_y = ia->next_cp.y + (ia->next_next_cp.y - ia->next_cp.y) * coeff;*/
+	/*}*/
+
 
 	// y are inversed
 	ia->angle_cp = atan2f(-(next_cp_y - prev_cp_y), next_cp_x - prev_cp_x);
@@ -143,17 +160,17 @@ static void simu_move_car(Entity* car, Keys_pressed* key){
 	}
 	car->angle_drift += ((key->drift == drift_left) - 2*(key->drift == drift_right)) * car->turn_drift * (60. / FRAMES_PER_SECONDE) / 320.;
 	car->speed += ((float)(key->up) - (float)(key->down)/2.) * car->acceleration * (60. / FRAMES_PER_SECONDE) / 20.;
-	if (fabs(car->speed) > 3.){
-		car->angle += (double)(car->turn * (60. / FRAMES_PER_SECONDE) * ((double)(key->left) - (double)(key->right))) / (10 * (1. - 2. * (double)((car->speed) < 0.)) * 6 * sqrt(fabs(car->speed)));
+	if (fabsf(car->speed) > 3.){
+		car->angle += (double)(car->turn * (60. / FRAMES_PER_SECONDE) * ((double)(key->left) - (double)(key->right))) / (10 * (1. - 2. * (double)((car->speed) < 0.)) * 6 * sqrtf(fabsf(car->speed)));
 	}
-	else if (fabs(car->speed) <= 3.){
+	else if (fabsf(car->speed) <= 3.){
 		car->angle += (double)((double)(key->left) - (double)(key->right)) * (car->speed) * car->turn * (60. / FRAMES_PER_SECONDE) / 1280;
 	}
 	
 	//struct_to_moveCar
 	car->posx += car->speed * (float)cos(car->angle);
 	car->posy -= car->speed * (float)sin(car->angle);
-	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (fabs(car->speed))) * car->frottement / 640.;
+	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (fabsf(car->speed))) * car->frottement / 640.;
 }
 
 static Bool too_far(Entity* car, Ia* ia, int pos_initx, int pos_inity, float tolerance){
@@ -204,7 +221,7 @@ typedef enum{
 static Bool calcul_went_to_cp(Entity* car, Ia* ia){
 	calcul_car_angle_cp(ia, car);
 	/*printf("______angle = %f | %f - %f____\n\n", ia->car_angle_cp, ia->angle_vect_car_cp, ia->angle_cp);*/
-	return (fabs(ia->car_angle_cp) > PI / 2.0); // NOT < PI/2 => too far from the CP => no need to slow down !
+	return (fabsf(ia->car_angle_cp) > PI / 2.0); // NOT < PI/2 => too far from the CP => no need to slow down !
 }
 
 
@@ -305,14 +322,14 @@ static void simu_traj_no_line(int* forecast, int nb_iter, Entity* car, Camera* c
 	// 1 : does not go to the cp
 	// 2 : 
 	if (too_close(car, ia, car_initx, car_inity, (float)road->size + 1./6. + (float)car->frame.h / 2.)){
-		//printf("pas le temps de tourner %d \n", have_time_to_turn)
-		;}
+		//printf("pas le temps de tourner %d \n", have_time_to_turn);
+        }
 	if (too_far(car, ia, car_initx, car_inity, (float)road->size * 2/6)){
 		//printf("traj trop loin\n")
-		;}
+        }
 	if (went_to_cp == 0){
-		//printf("n'arrive pas au CP \n")
-		;}
+		//printf("n'arrive pas au CP \n");
+        }
 			
 	if (went_to_cp && zero_turn && ((*forecast == 2 && first_turn == RIGHT) || (*forecast == 3 && first_turn == LEFT))){ // everything like the other trajectory in the right direction
 		// TODO vérifier qu'il tourne dans le bon sens, sinon freiner !

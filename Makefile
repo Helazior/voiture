@@ -13,8 +13,12 @@ EXEC = exec
 
 all : $(EXEC)
 
+run : $(EXEC)
+run : ;./exec
+
 debug : CFLAGS += -DDEBUG -g3
 debug : $(EXEC)
+debug : ;gdb exec
 
 opti : CFLAGS += -O3
 opti : $(EXEC)
@@ -26,6 +30,7 @@ gprof : $(EXEC)
 
 valgrind : CFLAGS += -g
 valgrind : $(EXEC)
+valgrind : ;valgrind ./exec
 
 $(EXEC) : $(OBJ_FILES)
 	$(LD) $(OBJ_FILES) $(LDFLAGS) -o $@
