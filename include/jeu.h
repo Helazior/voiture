@@ -151,8 +151,6 @@ void init_car(Entity* car, SDL_Renderer *renderer);
 
 void init_road(Road* road);
 
-void init_collision_grid(Road* road);
-
 void init_cam(Camera* cam, Entity* car);
 
 void free_players(Player* player);

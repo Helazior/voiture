@@ -117,7 +117,6 @@ int main(void) {
     };
 	if (init_background(renderer, &bg) == EXIT_FAILURE)
 		goto Quit_texture;
-	init_collision_grid(&road);
 
     //init struct Toolbar;
     Toolbar toolbar = {

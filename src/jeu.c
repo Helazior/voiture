@@ -107,19 +107,6 @@ void init_road(Road* road){
 	}
 }
 
-void init_collision_grid(Road* road){
-/*
-    // on dit qu'il n'y a aucun point dans chaque case de la grille de collision
-    // permet de ne pas tout remettre à 0 à chaque fois
-    for (unsigned int j = 0; j < NB_GRID_ROW; j++) {
-        for (unsigned int i = 0; i < NB_GRID_COLUMN; i++) {
-            road->nb_pts_collision[j][i] = 0;
-            road->pt_in_road[j][i] = false;
-        }
-	}
- */
-}
-
 void init_cam(Camera* cam, Entity* car){
 	cam->x = (float)car->pos_initx - (float)cam->winSize_w / 2.;
 	cam->y = (float)car->pos_inity - (float)cam->winSize_h / 2.;
@@ -663,8 +650,6 @@ static void render_road(Entity* car, SDL_Renderer *renderer, Camera* cam, Road* 
 
 void display(SDL_Renderer *renderer, Player* player, Road* road, Camera* cam, Toolbar* toolbar, Background* bg, int nb_fps){
 	//____background display_____
-	//fill_background(renderer, bg, road, cam);
-//	init_collision_grid(road);
 
 	//____spline display____
 	render_road(&player[0].car, renderer, cam, road, bg);
