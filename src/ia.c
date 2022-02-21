@@ -8,10 +8,10 @@
 #include "../include/ia.h"
 
 
-void init_ia(Ia* ia, Road* road, Entity* car){
+void init_ia(Ia* ia, Road* road, Entity* car, PlayerCP* cp){
 	ia->active = True;
 	ia->num_next_cp = -1;
-	calcul_next_cp(road, ia, car);
+	calcul_next_cp(road, ia, cp, car);
 }
 
 void stop_ia(Player* player){
@@ -125,24 +125,24 @@ static void calcul_coord_cp(Road* road, Ia* ia, Entity* car){
 }
 
 
-void calcul_next_cp(Road* road, Ia* ia, Entity* car){
+void calcul_next_cp(Road* road, Ia* ia, PlayerCP* cp, Entity* car){
 	/*____1: next_cp____*/
 	//printf("\n"); 
 	ia->go_ahead = False;
 	if (ia->active_traj == False){
 		ia->go_ahead = True;
 	}
-	if (ia->num_next_cp == -1 && road->nb_valid_checkPoints > 1){
+	if (ia->num_next_cp == -1 && cp->nb_valid_checkPoints > 1){
 		ia->num_next_cp = 0; // TODO à changer, faut prendre le prochain CP, pas le premier car il peut avoir été pris
-		while (road->tab_valid_checkPoints[ia->num_next_cp++] != Start);
+		while (cp->tab_valid_checkPoints[ia->num_next_cp++] != Start);
 		if (ia->num_next_cp > road->len_tab_checkPoints)
 			printf("error\n");
 	}
-	if (!road->tab_valid_checkPoints[ia->num_next_cp] && ia->num_next_cp >= 0){
+	if (!cp->tab_valid_checkPoints[ia->num_next_cp] && ia->num_next_cp >= 0){
 		return;
 	}
-	while (road->tab_valid_checkPoints[ia->num_next_cp = (ia->num_next_cp + 1) % road->len_tab_checkPoints]){ 
-		if (road->nb_valid_checkPoints == road->len_tab_checkPoints){
+	while (cp->tab_valid_checkPoints[ia->num_next_cp = (ia->num_next_cp + 1) % road->len_tab_checkPoints]){
+		if (cp->nb_valid_checkPoints == road->len_tab_checkPoints){
 			ia->num_next_cp = 0;
 			break;
 		}

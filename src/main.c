@@ -44,11 +44,10 @@ int main(void) {
 	//init struct Road;
 	Road road = {
 		.len_tab_checkPoints = 0,
-		.nb_valid_checkPoints = 0,
 		.square_width = 40,
+        .num_clos_check = 0,
 		.select = False,
 		.size = 500,
-        .num_clos_check = 0,
         .selectx = 0,
         .selecty = 0,
 	};
@@ -73,7 +72,7 @@ int main(void) {
             fprintf(stderr, "Error: malloc IA");
             goto Quit;
         }
-        player[i].ia->active = (i == 0)?IA_ACTIVE:false;
+        player[i].ia->active = (i == 0)?IA_ACTIVE:True;
         player[i].ia->drift = IA_DRIFT;
         player[i].ia->show_simu_traj = SHOW_SIMU_TRAJ;
         player[i].ia->next_cp.x = 0;
@@ -91,8 +90,10 @@ int main(void) {
         player[i].ia->go_ahead = False;
         player[i].ia->active_traj = False;
         if (player[i].ia->active){
-            init_ia(player[i].ia, &road, &player[i].car);
+            init_ia(player[i].ia, &road, &player[i].car, &player[i].cp);
         }
+        player[i].cp.nb_valid_checkPoints = 0;
+        init_player_cp(&player[i].cp, road.len_tab_checkPoints);
     }
 
     //init struct Camera;
@@ -152,16 +153,16 @@ int main(void) {
                     gameRunning = False;
                     break;
                 case SDL_KEYDOWN:
-                    manage_key(&event, &player[0].key, True, &player[0].car, &cam, &road, &toolbar, player[0].ia);
+                    manage_key(&event, &player[0].key, True, &cam, &road, &toolbar, player, 0);
                     break;
                 case SDL_KEYUP:
-                    manage_key(&event, &player[0].key, False, &player[0].car, &cam, &road, &toolbar, player[0].ia);
+                    manage_key(&event, &player[0].key, False, &cam, &road, &toolbar, player, 0);
                     break;
                 case SDL_MOUSEBUTTONDOWN://clique souris
                     switch (event.button.button) {
                         case SDL_BUTTON_LEFT:
                             if (event.button.x <= cam.winSize_w) {
-                                add_checkPoint(&road, &event, &cam, &player[0].car, player[0].ia);
+                                add_checkPoint(&road, &event, &cam, &player[0].car, player);
                             } else {
                                 click_toolbar(&toolbar);
                             }
@@ -169,7 +170,7 @@ int main(void) {
                         case SDL_BUTTON_MIDDLE:
                             if (road.len_tab_checkPoints > 0) {
                                 // TODO : mettre pour tous
-                                del_checkPoint(&road, &event, &cam, &player[0].car);
+                                del_checkPoint(&road, &event, &cam, player);
                                 if (road.len_tab_checkPoints == 3) {
                                     stop_ia(player);
                                 }
@@ -201,7 +202,7 @@ int main(void) {
                             if (*toolbar.settings[toolbar.num_setting].int_variable == True) {
                                 // the box is ia->active
                                 if (toolbar.settings[toolbar.num_setting].int_variable == (int *) player[0].ia->active) {
-                                    init_ia(player[0].ia, &road, &player[0].car);
+                                    init_ia(player[0].ia, &road, &player[0].car, &player[0].cp);
 
                                 }
                                 // the box has just been unchecked

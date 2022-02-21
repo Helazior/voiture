@@ -25,11 +25,11 @@ typedef struct Ia {
 	Bool active_traj;
 }Ia;
 
-void init_ia(Ia* ia, Road* road, Entity* car);
+void init_ia(Ia* ia, Road* road, Entity* car, PlayerCP* cp);
 //to initialize the keys after the stop of the ia
 void stop_ia(Player* player);
 void stop_first_ia(Keys_pressed* key);
-void calcul_next_cp(Road* road, Ia* ia, Entity* car);
+void calcul_next_cp(Road* road, Ia* ia, PlayerCP* cp, Entity* car);
 void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* renderer, Camera* cam, Road* road);
 
 #endif

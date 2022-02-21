@@ -22,16 +22,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/exec" beforeDir="false" afterPath="$PROJECT_DIR$/exec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/ia.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/ia.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/jeu.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/jeu.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/background.o" beforeDir="false" afterPath="$PROJECT_DIR$/obj/background.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/ia.o" beforeDir="false" afterPath="$PROJECT_DIR$/obj/ia.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/jeu.o" beforeDir="false" afterPath="$PROJECT_DIR$/obj/jeu.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/main.o" beforeDir="false" afterPath="$PROJECT_DIR$/obj/main.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/background.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/background.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ia.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/ia.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/jeu.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/jeu.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.c" afterDir="false" />
     </list>
@@ -131,6 +129,7 @@
     </configuration>
     <list>
       <item itemvalue="CMake Application.voiture" />
+      <item itemvalue="Makefile Application.run" />
       <item itemvalue="Makefile Target.run" />
     </list>
   </component>
@@ -154,7 +153,7 @@
       <workItem from="1640435981112" duration="6257000" />
       <workItem from="1640539268339" duration="10045000" />
       <workItem from="1644946211310" duration="244000" />
-      <workItem from="1645377049091" duration="16958000" />
+      <workItem from="1645377049091" duration="22529000" />
     </task>
     <task id="LOCAL-00001" summary="Correction voiture sans cam">
       <created>1645378970581</created>
@@ -177,7 +176,14 @@
       <option name="project" value="LOCAL" />
       <updated>1645382611871</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Reste que l'IA à gérer pour les autres joueurs.&#10;&#10;Faut modifier Road pour en mettre une partie dans IA">
+      <created>1645396258399</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1645396258399</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -188,6 +194,7 @@
     <MESSAGE value="Correction voiture sans cam" />
     <MESSAGE value="Correction voiture et enlevé warning dans IA" />
     <MESSAGE value="correction IA qui se mettait pas en route" />
-    <option name="LAST_COMMIT_MESSAGE" value="correction IA qui se mettait pas en route" />
+    <MESSAGE value="Reste que l'IA à gérer pour les autres joueurs.&#10;&#10;Faut modifier Road pour en mettre une partie dans IA" />
+    <option name="LAST_COMMIT_MESSAGE" value="Reste que l'IA à gérer pour les autres joueurs.&#10;&#10;Faut modifier Road pour en mettre une partie dans IA" />
   </component>
 </project>
