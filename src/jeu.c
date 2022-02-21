@@ -77,7 +77,11 @@ void init_car(Entity* car, SDL_Renderer *renderer, uint8_t num){
 	car->frame.y = (int)(car->posy);
 	car->frame.w = 128;
 	car->frame.h = 52;
-	car->tex = loadTexture(renderer, "image/car.png");//car image
+    if (num == 0) {
+        car->tex = loadTexture(renderer, "image/first_car.png");//car image
+    } else {
+        car->tex = loadTexture(renderer, "image/car.png");//car image
+    }
 	car->pos_tab = 0;
 	car->count_pos_tab = 0;
 	car->acceleration = ACCELERATION;
@@ -226,12 +230,12 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool status, Camera* cam, R
                 player[i].car.posx = player[i].car.pos_initx;
                 player[i].car.posy = player[i].car.pos_inity;
                 player[i].car.speed = 0.;
-                reset_valid_tab(road, &player[i].cp);
+                reset_valid_tab(road, &player[i].cp, i == 0);
                 if (player[i].ia->active)
                     init_ia(player[i].ia, road, &player[i].car, &player[i].cp);
-                if (cam->follow_car == False)
-                    init_cam(cam, &player[i].car);
             }
+            if (cam->follow_car == False)
+                init_cam(cam, &player[0].car);
             break;
         case SDLK_p:
             cam->zoom *= 1.1;
@@ -303,8 +307,10 @@ void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car) 
 	road->selecty = road->tab_checkPoints[road->num_clos_check].y - pos_clique_y;
 }
 
-void reset_valid_tab(Road* road, PlayerCP* cp){
-	if (road->len_tab_checkPoints >= 4 && cp->nb_valid_checkPoints == road->len_tab_checkPoints){
+void reset_valid_tab(Road* road, PlayerCP* cp, bool first_player) {
+	if (road->len_tab_checkPoints >= 4 && cp->nb_valid_checkPoints == road->len_tab_checkPoints && first_player) {
+        // TODO: faire le classement lorsqu'on passe le start
+        // TODO: faire un chrono par voiture
 		printf("Lap time: %.2f\n", ((float)SDL_GetTicks() - (float)startLapTime) / 1000.);
 		//startLapTime = SDL_GetTicks();
 	}
@@ -315,7 +321,7 @@ void reset_valid_tab(Road* road, PlayerCP* cp){
 }
 
 //manage a checkpoint:
-void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car){
+void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car) {
 	road->select = True;
 	closest_checkpoint(road, event, cam, car);
 }
@@ -327,7 +333,7 @@ void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Player* player){
         if (player[num].cp.tab_valid_checkPoints[road->num_clos_check] != False){
             player[num].cp.nb_valid_checkPoints--;
             if (player[num].cp.tab_valid_checkPoints[road->num_clos_check] == Start){
-                reset_valid_tab(road, &player[num].cp);
+                reset_valid_tab(road, &player[num].cp, num == 0);
             }
         }
         for(int i = road->num_clos_check; i < road->len_tab_checkPoints - 1; i++){
@@ -467,12 +473,14 @@ static void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, 
 
                     if (player[num_player].cp.nb_valid_checkPoints == 1) {//Start
                         player[num_player].cp.tab_valid_checkPoints[i] = Start;
-                        startLapTime = SDL_GetTicks();
+                        if (!num_player) {
+                            startLapTime = SDL_GetTicks();
+                        }
                     }
 
                 } else if (player[num_player].cp.nb_valid_checkPoints >= road->len_tab_checkPoints &&
                            player[num_player].cp.tab_valid_checkPoints[i] == Start) {
-                    reset_valid_tab(road, &player[num_player].cp);
+                    reset_valid_tab(road, &player[num_player].cp, true);
                 }
             }
         }

@@ -181,14 +181,14 @@ void move_screen(Camera* cam, Toolbar* toolbar){
 	// TODO à reprendre
 	SDL_GetMouseState(&cam->cursor_x, &cam->cursor_y);
 	if (cam->cursor_x < 20){
-		cam->x -= (240. / FRAMES_PER_SECONDE);
+		cam->x -= (300. / FRAMES_PER_SECONDE);
 	} else if (cam->cursor_x > cam->winSize_w + toolbar->size.w - 20){
-		cam->x += (240. / FRAMES_PER_SECONDE);
+		cam->x += (300. / FRAMES_PER_SECONDE);
 	}
 	if (cam->cursor_y < 20){
-		cam->y -= (240. / FRAMES_PER_SECONDE);
+		cam->y -= (300. / FRAMES_PER_SECONDE);
 	} else if (cam->cursor_y > cam->winSize_h - 20){
-		cam->y += (240. / FRAMES_PER_SECONDE);
+		cam->y += (300. / FRAMES_PER_SECONDE);
 	}
 }
 

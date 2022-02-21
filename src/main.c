@@ -17,6 +17,7 @@
 #include "../include/jeu.h"
 #include "../include/ia.h"
 #include "../include/background.h"
+#include "../include/collision_car.h"
 
 #define ZOOM_INIT 0.24
 //#define ZOOM_INIT 1
@@ -72,7 +73,7 @@ int main(void) {
             fprintf(stderr, "Error: malloc IA");
             goto Quit;
         }
-        player[i].ia->active = (i == 0)?IA_ACTIVE:True;
+        player[i].ia->active = (i == 0)?IA_ACTIVE:true;
         player[i].ia->drift = IA_DRIFT;
         player[i].ia->show_simu_traj = SHOW_SIMU_TRAJ;
         player[i].ia->next_cp.x = 0;
@@ -236,6 +237,9 @@ int main(void) {
             move_screen(&cam, &toolbar);
         }
         for (int i = 0; i < NB_OF_PLAYERS; ++i) {
+            for (int j = i + 1; j < NB_OF_PLAYERS; ++j) {
+                collision(&player[i].car, &player[j].car, &cam, i == 0);
+            }
             move_car(&player[i].car, &player[i].key, &cam, (i == 0));
         }
 

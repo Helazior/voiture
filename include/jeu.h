@@ -8,7 +8,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
-#define NB_OF_PLAYERS 3
+#define NB_OF_PLAYERS 15
 
 #define FRAMES_PER_SECONDE 60
 
@@ -165,7 +165,7 @@ float distance(float x1, float y1, float x2, float y2);
 
 float dist2(float x1, float y1, float x2, float y2);
 
-void reset_valid_tab(Road* road, PlayerCP* cp);
+void reset_valid_tab(Road* road, PlayerCP* cp, bool first_player);
 //drift
 void manage_skid_marks(Entity* car, Keys_pressed* key);
 //car
