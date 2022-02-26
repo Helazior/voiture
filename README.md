@@ -1,5 +1,7 @@
 # voiture
-Car game with splines and camera.
+Car game with splines, camera, collision, AI etc.
+
+Old version demo: https://youtu.be/qXShaxG2h3Y
 
 
 ** **  
@@ -20,6 +22,11 @@ sudo pacman -S sdl2 sdl2_image sdl2_ttf
 ```
 make
 ```
+
+# Lancer
+```
+make run
+```
 debug mode :
 ```
 make debug
@@ -28,6 +35,3 @@ with gcc -O3 optimisations :
 ```
 make opti
 ```
-
-# Lancer
-`./exec`
