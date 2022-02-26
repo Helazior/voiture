@@ -3,6 +3,7 @@ Car game with splines, camera, collision, AI etc.
 
 Old version demo: https://youtu.be/qXShaxG2h3Y
 
+![alt text](image/demo.png)
 
 ** **  
 
