@@ -18,8 +18,9 @@
 #include "../include/ia.h"
 #include "../include/background.h"
 #include "../include/collision_car.h"
+#include "../include/create_map.h"
 
-#define ZOOM_INIT 0.24
+#define ZOOM_INIT 0.4
 //#define ZOOM_INIT 1
 
 extern unsigned int startLapTime;
@@ -52,7 +53,11 @@ int main(void) {
 		.selectx = 0,
 		.selecty = 0,
 	};
-	init_road(&road);
+	if (CREATE_MAP_AUTO) {
+		create_alea_road(&road);
+	} else {
+		create_fixe_road(&road);
+	}
 
 
 	// TODO : passer car, key et ia en pointeur et les allouer.

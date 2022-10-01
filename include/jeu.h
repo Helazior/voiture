@@ -46,7 +46,7 @@
 #define NB_GRID_ROW 15
 #define NB_GRID_COLUMN 27
 
-#define CAM_FOLLOW_CAR False
+#define CAM_FOLLOW_CAR True
 
 
 typedef enum {
@@ -153,8 +153,6 @@ typedef struct player {
 void pause();
 
 void init_car(Entity* car, SDL_Renderer *renderer, uint8_t num);
-
-void init_road(Road* road);
 
 void init_player_cp(PlayerCP* cp, int len_tab_checkPoints);
 
