@@ -8,7 +8,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
-#define NB_OF_PLAYERS 15
+#define NB_OF_PLAYERS 3
 
 #define FRAMES_PER_SECONDE 60
 
@@ -54,6 +54,7 @@ typedef enum {
 	True = 1,
 	Start = 2
 }Bool;
+
 
 int init(SDL_Window** window, SDL_Renderer** renderer, int w, int h); //initialisation SDL
 

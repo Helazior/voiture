@@ -30,7 +30,7 @@ gprof : $(EXEC)
 
 valgrind : CFLAGS += -g
 valgrind : $(EXEC)
-valgrind : ;valgrind ./exec
+valgrind : ;valgrind --track-origins=yes ./exec
 
 $(EXEC) : $(OBJ_FILES)
 	$(LD) $(OBJ_FILES) $(LDFLAGS) -o $@

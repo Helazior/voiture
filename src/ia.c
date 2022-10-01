@@ -10,7 +10,7 @@
 
 void init_ia(Ia* ia, Road* road, Entity* car, PlayerCP* cp){
 	ia->active = True;
-	ia->num_next_cp = -1;
+	ia->num_next_cp = -1; // TODO: à changer
 	calcul_next_cp(road, ia, cp, car);
 }
 
@@ -132,6 +132,7 @@ void calcul_next_cp(Road* road, Ia* ia, PlayerCP* cp, Entity* car){
 	if (ia->active_traj == False){
 		ia->go_ahead = True;
 	}
+	printf("ia->num_next_cp = %d\n cp->nb_valid_checkPoints = %d\n\n", ia->num_next_cp, cp->nb_valid_checkPoints);
 	if (ia->num_next_cp == -1 && cp->nb_valid_checkPoints > 1){
 		ia->num_next_cp = 0; // TODO à changer, faut prendre le prochain CP, pas le premier car il peut avoir été pris
 		while (cp->tab_valid_checkPoints[ia->num_next_cp++] != Start);
