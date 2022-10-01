@@ -7,6 +7,30 @@
 #include "../include/jeu.h"
 #include "../include/ia.h"
 
+Ia* init_player_ia(Ia** ia, bool is_player_car) {
+	if (!(*ia = malloc(sizeof(Ia)))) {
+		fprintf(stderr, "Error: malloc IA");
+		return NULL;
+	}
+	(*ia)->active = is_player_car?IA_ACTIVE:true; // Only the player (i == 0) can be manual
+	(*ia)->drift = IA_DRIFT;
+	(*ia)->show_simu_traj = SHOW_SIMU_TRAJ;
+	(*ia)->next_cp.x = 0;
+	(*ia)->next_cp.y = 0;
+	(*ia)->num_next_cp = 1;
+	(*ia)->angle_cp = 0;
+	(*ia)->angle_car_angle_cp = 0;
+	(*ia)->angle_car_cp = 0;
+	(*ia)->car_angle_cp = 0;
+	(*ia)->angle_vect_car_cp = 0;
+	(*ia)->prev_cp.x = 0;
+	(*ia)->prev_cp.y = 0;
+	(*ia)->next_next_cp.x = 0;
+	(*ia)->next_next_cp.y = 0;
+	(*ia)->go_ahead = False;
+	(*ia)->active_traj = False;
+	return (*ia);
+}
 
 void init_ia(Ia* ia, Road* road, Entity* car, PlayerCP* cp){
 	ia->active = True;
@@ -132,7 +156,6 @@ void calcul_next_cp(Road* road, Ia* ia, PlayerCP* cp, Entity* car){
 	if (ia->active_traj == False){
 		ia->go_ahead = True;
 	}
-	printf("ia->num_next_cp = %d\n cp->nb_valid_checkPoints = %d\n\n", ia->num_next_cp, cp->nb_valid_checkPoints);
 	if (ia->num_next_cp == -1 && cp->nb_valid_checkPoints > 1){
 		ia->num_next_cp = 0; // TODO à changer, faut prendre le prochain CP, pas le premier car il peut avoir été pris
 		while (cp->tab_valid_checkPoints[ia->num_next_cp++] != Start);

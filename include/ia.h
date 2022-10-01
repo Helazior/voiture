@@ -25,6 +25,7 @@ typedef struct Ia {
 	Bool active_traj;
 }Ia;
 
+Ia* init_player_ia(Ia** ia, bool is_player_car);
 void init_ia(Ia* ia, Road* road, Entity* car, PlayerCP* cp);
 //to initialize the keys after the stop of the ia
 void stop_ia(Player* player);

@@ -71,28 +71,8 @@ int main(void) {
 		player[i].cp.nb_valid_checkPoints = 0;
 		init_player_cp(&player[i].cp, road.len_tab_checkPoints);
 		//init struct Ia;
-		if (!(player[i].ia = malloc(sizeof(Ia)))) {
-			fprintf(stderr, "Error: malloc IA");
+		if (!init_player_ia(&player[i].ia, (i == 0)))
 			goto Quit;
-		}
-		//TODO: mettre dans une fonction
-		player[i].ia->active = (i == 0)?IA_ACTIVE:true; // Only the player (i == 0) can be manual
-		player[i].ia->drift = IA_DRIFT;
-		player[i].ia->show_simu_traj = SHOW_SIMU_TRAJ;
-		player[i].ia->next_cp.x = 0;
-		player[i].ia->next_cp.y = 0;
-		player[i].ia->num_next_cp = 1;
-		player[i].ia->angle_cp = 0;
-		player[i].ia->angle_car_angle_cp = 0;
-		player[i].ia->angle_car_cp = 0;
-		player[i].ia->car_angle_cp = 0;
-		player[i].ia->angle_vect_car_cp = 0;
-		player[i].ia->prev_cp.x = 0;
-		player[i].ia->prev_cp.y = 0;
-		player[i].ia->next_next_cp.x = 0;
-		player[i].ia->next_next_cp.y = 0;
-		player[i].ia->go_ahead = False;
-		player[i].ia->active_traj = False;
 		if (player[i].ia->active){
 			init_ia(player[i].ia, &road, &player[i].car, &player[i].cp);
 		}
