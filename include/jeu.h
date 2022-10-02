@@ -8,7 +8,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
-#define NB_OF_PLAYERS 3
+#define NB_OF_PLAYERS 7
 
 #define FRAMES_PER_SECONDE 60
 

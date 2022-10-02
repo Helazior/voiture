@@ -1,4 +1,4 @@
-// create random map with Travelling salesman algo to link the points or my algo
+// create random map with Travelling salesman algo to link the points or my algo or perlin
 
 #include <SDL2/SDL_stdinc.h>
 #include <stdint.h>
@@ -10,7 +10,7 @@
 
 // pourra être changé dans une variable plus tard
 #define DIST_CP 700
-#define NB_CP 16
+#define NB_CP 27
 // TODO: faire par rapport à la position de départ et la direction de la voiture
 #define START_X 1760
 #define START_Y 534
@@ -52,8 +52,8 @@ void create_alea_road(Road* road) {
 	srand ((unsigned)time(&t));
 	for (uint16_t i = 1; i < NB_CP; i++) {
 		// turn around when to fan away
-		// TODO!!!! 0.5 + dist !
-		direction += (((double)(rand() % 6)) / 5. - (0.5)) * TIGHT_TURNS; //[-0.5; 0.5]
+		float turn_to_loop = PI * (1. - ((float)NB_CP - 2.) / (float)NB_CP);
+		direction += (((double)(rand() % 6)) / 5. - 0.5) * TIGHT_TURNS + turn_to_loop; //[-0.5; 0.5]
 		// angle in radius
 		new_pos_x += cos(direction) * DIST_CP;
 		new_pos_y += sin(direction) * DIST_CP;
