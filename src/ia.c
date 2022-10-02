@@ -373,7 +373,7 @@ static void simu_traj_no_line(int* forecast, int nb_iter, Entity* car, Camera* c
 		*forecast = DRIFT_LEFT;
 	} else if (*forecast == GO_RIGHT && ((is_angle_negative(ia, 0.f, car) && went_to_cp == 0) || too_far(car, ia, (int)car_initx, (int)car_inity, (float)road->size * 2/6) || (too_close(car, ia, (int)car_initx, (int)car_inity, (float)(road->size * 1./6. + (float)car->frame.h / 2.)) && have_time_to_turn == False) || (have_time_to_turn == False && first_turn == RIGHT))){
 		//printf("forecast = 5, %d, %d, %d\n", went_to_cp == 0, too_far(car, ia, car_initx, car_inity, (float)road->size * 2/6), (too_close(car, ia, car_initx, car_inity, (float)road->size * 1./6. + (float)car->frame.h / 2.))); 
-		*forecast = GO_RIGHT;
+		*forecast = DRIFT_RIGHT;
 	// faut plus souvent y aller
 	} else if (*forecast == GO_LEFT && is_angle_negative(ia, 0.f, car) && went_to_cp == 0 && have_time_to_turn == False){
 		//printf("arrête de tourner à gauche et fonce !\n"); 
