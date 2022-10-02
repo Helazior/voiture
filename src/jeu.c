@@ -713,14 +713,14 @@ void display(SDL_Renderer *renderer, Player* player, Road* road, Camera* cam, To
 	render_checkPoints(renderer, road, cam, player);
 
 	//_____drift display_____
-//    for (int i = 0; i < NB_OF_PLAYERS; i++) {
-        render_drift(renderer, &player[0].car, cam);
-//    }
+	//    for (int i = 0; i < NB_OF_PLAYERS; i++) {
+	render_drift(renderer, &player[0].car, cam);
+	//    }
 
 	//_____toolbar display___
 	render_toolbar(renderer, toolbar);
 
-    //_____fps display ______
+    //_____FPS display ______
     render_number(renderer, bg, nb_fps, cam->winSize_w + toolbar->size.w - 5, 5);
 
 	//_____key display_______

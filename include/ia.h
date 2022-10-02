@@ -7,6 +7,10 @@
 #define IA_DRIFT True
 #define SHOW_SIMU_TRAJ True
 
+typedef enum{
+	LEFT,
+	RIGHT
+}Turn;
 
 typedef struct Ia {
 	Bool active; // active IA or not
@@ -23,6 +27,7 @@ typedef struct Ia {
 	Coord next_next_cp;
 	Bool go_ahead;
 	Bool active_traj;
+	Turn next_cp_turn;
 }Ia;
 
 Ia* init_player_ia(Ia** ia, bool is_player_car);

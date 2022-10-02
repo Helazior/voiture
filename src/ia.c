@@ -7,6 +7,18 @@
 #include "../include/jeu.h"
 #include "../include/ia.h"
 
+
+typedef enum{
+	SPEED_UP=0,
+	BREAK=1,
+	GO_LEFT=2,
+	GO_RIGHT=3,
+	DRIFT_LEFT=4,
+	DRIFT_RIGHT=5,
+	GO_AHEAD=6,
+}Forecast;
+
+
 Ia* init_player_ia(Ia** ia, bool is_player_car) {
 	if (!(*ia = malloc(sizeof(Ia)))) {
 		fprintf(stderr, "Error: malloc IA");
@@ -85,9 +97,8 @@ static void calcul_angle_next_cp(Road* road, Ia* ia){
 	/*}*/
 
 
-	// y are inversed
+	// y is inversed
 	ia->angle_cp = atan2f(-(next_cp_y - prev_cp_y), next_cp_x - prev_cp_x);
-
 }
 	
 static void calcul_angle_car_angle_cp(Ia* ia, Entity* car){
@@ -97,6 +108,7 @@ static void calcul_angle_car_angle_cp(Ia* ia, Entity* car){
 static void calcul_angle_car_cp(Ia* ia, Entity* car){
 	ia->angle_vect_car_cp = atan2f(-(ia->next_cp.y - car->posy), ia->next_cp.x - car->posx); // angle for the vect (car.x, car.y) - (cp.x, cp.y) 
 	ia->angle_car_cp = (float)(fmod(car->angle - ia->angle_vect_car_cp + 3*PI, 2 * PI) - PI);
+	//TODO!!!!!!!!!!! Faire un produit scalaire ! x0*y1 - x1*y0
 	/*printf("angle  vect car-cp = %f\n", angle_vect_car_cp);*/
 }
 
@@ -236,21 +248,15 @@ static void show_simu_traj(Entity* car, Camera* cam, SDL_Renderer* renderer, flo
     rect.y = (int)((1 - cam->zoom) * centre_y + cam->zoom) * rect.y;
 	if (rect.x > 0 && rect.x < cam->winSize_w && rect.y > 0 && rect.y < cam->winSize_h){
 		SDL_RenderFillRect(renderer, &rect);
+		SDL_RenderPresent(renderer);
 	}
 }
-
-typedef enum{
-	LEFT,
-	RIGHT
-}Turn;
-
 
 static Bool calcul_went_to_cp(Entity* car, Ia* ia){
 	calcul_car_angle_cp(ia, car);
 	/*printf("______angle = %f | %f - %f____\n\n", ia->car_angle_cp, ia->angle_vect_car_cp, ia->angle_cp);*/
 	return (fabsf(ia->car_angle_cp) > PI / 2.0); // NOT < PI/2 => too far from the CP => no need to slow down !
 }
-
 
 static void simu_traj_no_line(int* forecast, int nb_iter, Entity* car, Camera* cam, Ia* ia, Keys_pressed* key, SDL_Renderer* renderer, float centre_x, float centre_y, int nb_iter_line, Road* road, Turn first_turn){
 	// TODO : pour optimiser on pourrait repprendre au moment de la ligne droite !
@@ -309,7 +315,7 @@ static void simu_traj_no_line(int* forecast, int nb_iter, Entity* car, Camera* c
 
 	// we come back from the turn in the opposite direction (2nd turn)
 	/*if (first_turn == RIGHT){*/
-	if (*forecast == 3){
+	if (*forecast == GO_RIGHT){
 		key->left = True;
 		key->right = False;
 	} else {
@@ -358,23 +364,23 @@ static void simu_traj_no_line(int* forecast, int nb_iter, Entity* car, Camera* c
 		//printf("n'arrive pas au CP \n");
         }
 			
-	if (went_to_cp && zero_turn && ((*forecast == 2 && first_turn == RIGHT) || (*forecast == 3 && first_turn == LEFT))) { // everything like the other trajectory in the right direction
+	if (went_to_cp && zero_turn && ((*forecast == GO_LEFT && first_turn == RIGHT) || (*forecast == GO_RIGHT && first_turn == LEFT))) { // everything like the other trajectory in the right direction
 		// TODO vérifier qu'il tourne dans le bon sens, sinon freiner !
 		//printf("même traj !\n");
-		*forecast = 6;
-	} else if (*forecast == 2 && ((is_angle_positive(ia, 0.f, car) && went_to_cp == 0) || too_far(car, ia, (int)car_initx, (int)car_inity, (float)road->size * 2/6) || (too_close(car, ia, (int)car_initx, (int)car_inity, (float)(road->size + 1./6. + (float)car->frame.h / 2.)) && have_time_to_turn == False) ||(have_time_to_turn == False && first_turn == LEFT))){
+		*forecast = GO_AHEAD;
+	} else if (*forecast == GO_LEFT && ((is_angle_positive(ia, 0.f, car) && went_to_cp == 0) || too_far(car, ia, (int)car_initx, (int)car_inity, (float)road->size * 2/6) || (too_close(car, ia, (int)car_initx, (int)car_inity, (float)(road->size + 1./6. + (float)car->frame.h / 2.)) && have_time_to_turn == False) ||(have_time_to_turn == False && first_turn == LEFT))){
 		//printf("forecast = 4\n"); 
-		*forecast = 4;
-	} else if (*forecast == 3 && ((is_angle_negative(ia, 0.f, car) && went_to_cp == 0) || too_far(car, ia, (int)car_initx, (int)car_inity, (float)road->size * 2/6) || (too_close(car, ia, (int)car_initx, (int)car_inity, (float)(road->size * 1./6. + (float)car->frame.h / 2.)) && have_time_to_turn == False) || (have_time_to_turn == False && first_turn == RIGHT))){
+		*forecast = DRIFT_LEFT;
+	} else if (*forecast == GO_RIGHT && ((is_angle_negative(ia, 0.f, car) && went_to_cp == 0) || too_far(car, ia, (int)car_initx, (int)car_inity, (float)road->size * 2/6) || (too_close(car, ia, (int)car_initx, (int)car_inity, (float)(road->size * 1./6. + (float)car->frame.h / 2.)) && have_time_to_turn == False) || (have_time_to_turn == False && first_turn == RIGHT))){
 		//printf("forecast = 5, %d, %d, %d\n", went_to_cp == 0, too_far(car, ia, car_initx, car_inity, (float)road->size * 2/6), (too_close(car, ia, car_initx, car_inity, (float)road->size * 1./6. + (float)car->frame.h / 2.))); 
-		*forecast = 5;
+		*forecast = GO_RIGHT;
 	// faut plus souvent y aller
-	} else if (*forecast == 2 && is_angle_negative(ia, 0.f, car) && went_to_cp == 0 && have_time_to_turn == False){
+	} else if (*forecast == GO_LEFT && is_angle_negative(ia, 0.f, car) && went_to_cp == 0 && have_time_to_turn == False){
 		//printf("arrête de tourner à gauche et fonce !\n"); 
-		*forecast = 6;
-	} else if (*forecast == 3 && is_angle_positive(ia, 0.f, car) && went_to_cp == 0 && have_time_to_turn == False){
+		*forecast = GO_AHEAD;
+	} else if (*forecast == GO_RIGHT && is_angle_positive(ia, 0.f, car) && went_to_cp == 0 && have_time_to_turn == False){
 		//printf("arrête de tourner à droite et fonce !\n"); 
-		*forecast = 6;
+		*forecast = GO_AHEAD;
 	}
 }
 
@@ -435,10 +441,10 @@ static int simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, SDL_R
 		nb_iter++;
 	}
 	// TODO : faire un type enum
-	int forecast = 0; // continue to speed up
+	int forecast = SPEED_UP; // continue to speed up
 	calcul_angle_car_cp(&ia, &car_init);
 	// 1 - the traj arrive too far from the CP
-	// TODO : [BUG][j'ai commencé un premier jet] attention, des fois quand il est prêt il est trop loin au lieu de trop prêt. checker dist car_init-car < dist car-CP
+	// TODO : [BUG][j'ai commencé un premier jet] attention, des fois quand il est près il est trop loin au lieu de trop près. checker dist car_init-car < dist car-CP
 	// to avoid to go to the bad if statement by error (to fix the bug)
 	/*printf("dist = %f\n", distance(car.posx, car.posy, car_init.posx, car_init.posy) - distance(car.posx, car.posy, ia.next_cp.x, ia.next_cp.y)); */
 	if (too_far(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)road->size * 2/6)){
@@ -447,26 +453,26 @@ static int simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, SDL_R
 
 		// 1/ not enought angle and left
 		if (ia.angle_car_cp <= 0. && is_angle_positive(&ia, 0.f, &car)){
-			forecast = 1;
+			forecast = BREAK;
 			// TODO : essayer en tournant à droite en freinant pour voir
 		}
 		// 1/ not enought angle and right
 		else if (ia.angle_car_cp >= 0. && is_angle_negative(&ia, 0.f, &car)){
-			forecast = 1;
+			forecast = BREAK;
 			// TODO : essayer en tournant à gauche en freinant pour voir
 
 			// 2/ too much angle
 
 		} else if (ia.angle_car_cp >= 0. && is_angle_positive(&ia, 0.f, &car)){
-			forecast = 1;
+			forecast = BREAK;
 			// TODO drif if possible
 
 		} else if (ia.angle_car_cp <= 0. && is_angle_negative(&ia, 0.f, &car)){
-			forecast = 1;
+			forecast = BREAK;
 			// TODO drif if possible
 
 		} else {
-			printf("ERRORRRRRRRRRRR l.329 ia.c\n"); 
+			printf("Error angle IA\n"); 
 		}
 
 
@@ -476,26 +482,25 @@ static int simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, SDL_R
 
 		// 1/ not enought angle and left
 		if (ia.angle_car_cp <= 0. && is_angle_positive(&ia, 0.1f, &car)) {
-			forecast = 1;
+			forecast = BREAK;
 			// TODO : drifter
 		}
 		// 1/ not enought angle and right
 		else if (ia.angle_car_cp >= 0. && is_angle_negative(&ia, 0.1f, &car)) {
-			forecast = 1;
+			forecast = BREAK;
 			// TODO : drifter
 		}
 
 		// 2/ too much angle
 
 		else if (ia.angle_car_cp >= 0. && is_angle_positive(&ia, 0.1f, &car)) {
-			forecast = 0;
+			forecast = SPEED_UP;
 		} else if (ia.angle_car_cp <= 0. && is_angle_negative(&ia, 0.1f, &car)) {
-			forecast = 0;
+			forecast = SPEED_UP;
 
 		} else {
 			//printf("On fonce !\n");
-			forecast = 0;
-			/*printf("ERRORRRRRRRRRRR l.361 ia.c\n"); */
+			forecast = SPEED_UP;
 		}
 
 
@@ -504,19 +509,19 @@ static int simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, SDL_R
 		// 1/ not enought angle, cp on the left and the car have to go to the right (but first left)
 		if (is_angle_positive(&ia, 0.1, &car)){
 			/*printf("1 : angle right -> (go to left) : %f \n",ia.angle_car_angle_cp ); */
-			forecast = 2; // left
+			forecast = GO_LEFT; // left
 			simu_traj_no_line(&forecast, nb_iter, &car_init, cam, &ia, &key, renderer, centre_x, centre_y, nb_iter_line, road, first_turn);
 			// TODO : drift au lieu de freiner peut être bien
 		}
 		// 1/ not enought angle, cp on the right and the car have to go to the left (but first right)
 		else if (is_angle_negative(&ia, 0.1f, &car)){
 			/*printf("2 :  angle left -> (go to right) : %f \n",ia.angle_car_angle_cp ); */
-			forecast = 3; // right
+			forecast = GO_RIGHT; // right
 			simu_traj_no_line(&forecast, nb_iter, &car_init, cam, &ia, &key, renderer, centre_x, centre_y, nb_iter_line, road, first_turn);
 			// TODO : drift au lieu de freiner peut être bien
 		} else {
 			/*printf("3 : ok ! \n");	*/
-			forecast = 0;
+			forecast = SPEED_UP;
 		}
 
 	} else {
@@ -563,7 +568,7 @@ void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* render
 	key->down = False;
 	key->up = True;
 	int forecast = simu_traj(*ia, *car, *car, *key, renderer, cam, road);
-	if ((forecast == 1 && car->speed > 10) || ((forecast == 4 || forecast == 5) && car->speed > 7)){
+	if ((forecast == BREAK && car->speed > 10) || ((forecast == 4 || forecast == 5) && car->speed > 7)){
 		key->down = True;
 		key->up = False;
 	}
@@ -577,11 +582,11 @@ void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* render
 		key->left = False;
 		key->right = False;
 	}
-	if (forecast == 2 || forecast == 4){
+	if (forecast == GO_LEFT || forecast == 4){
 		/*printf("ok -> gauche %f %f %f\n", ia->angle_car_angle_cp, car->angle, ia->angle_cp); */
 		key->left = True;
 		key->right = False;
-	} else if (forecast == 3 || forecast == 5){
+	} else if (forecast == GO_RIGHT || forecast == 5){
 		/*printf("ok -> droite %f %f %f\n", ia->angle_car_angle_cp,car->angle, ia->angle_cp ); */
 		key->left = False;
 		key->right = True;
