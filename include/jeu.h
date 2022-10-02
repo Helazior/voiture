@@ -8,7 +8,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
-#define NB_OF_PLAYERS 7
+#define NB_OF_PLAYERS 1
 
 #define FRAMES_PER_SECONDE 60
 
@@ -34,7 +34,7 @@
 #define NB_SQUARE 400
 
 #define ACCELERATION 10.
-#define FROTTEMENT 8.
+#define FRICTION 8.
 #define TURN 8.
 #define TURN_DRIFT 7.
 
@@ -46,7 +46,7 @@
 #define NB_GRID_ROW 15
 #define NB_GRID_COLUMN 27
 
-#define CAM_FOLLOW_CAR True
+#define CAM_FOLLOW_CAR False
 
 
 typedef enum {
@@ -80,7 +80,7 @@ typedef struct Entity {
 	float pos_inity;
 
 	float acceleration;
-	float frottement;
+	float friction;
 	float turn;
 	float turn_drift;
 
@@ -141,6 +141,10 @@ typedef struct Camera {
 	Bool follow_car;
 	int cursor_x;
 	int cursor_y;
+	int old_cursor_x;
+	int old_cursor_y;
+	bool moving;
+	bool cursor_moving;
 }Camera;
 
 typedef struct player {

@@ -87,7 +87,7 @@ void init_car(Entity* car, SDL_Renderer *renderer, uint8_t num){
 	car->pos_tab = 0;
 	car->count_pos_tab = 0;
 	car->acceleration = ACCELERATION;
-	car->frottement = FROTTEMENT;
+	car->friction = FRICTION;
 	car->turn = TURN;
 	car->turn_drift = TURN_DRIFT;
 }
@@ -152,7 +152,7 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam, Bool first_car) {
 	car->posy -= car->speed * (float)sin(car->angle);
 	car->frame.x = (int)(car->posx);
 	car->frame.y = (int)(car->posy);
-	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (fabsf(car->speed))) * car->frottement / 640.;
+	car->speed += ((float)(((car->speed) < 0.) - ((car->speed) > 0.))) * (1. + (fabsf(car->speed))) * car->friction / 640.;
 	//manage cam
 	//TODO : si on est au bout de la piste, ne pas aller plus loin !
     if (first_car) {
@@ -164,6 +164,7 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam, Bool first_car) {
             cam->x = (int) ((9. * (float) cam->x + (float) new_cam_x) / 10.);
             cam->y = (int) ((9. * (float) cam->y + (float) new_cam_y) / 10.);
         } else {
+			// cam move because of the zoom, to move the car slowly to the screen
             cam->x += (1 - cam->zoom) * (car->posx - old_posx);
             cam->y += (1 - cam->zoom) * (car->posy - old_posy);
         }

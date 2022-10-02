@@ -180,15 +180,27 @@ void change_variable_keys(Toolbar* toolbar, short add){
 void move_screen(Camera* cam, Toolbar* toolbar){
 	// TODO à reprendre
 	SDL_GetMouseState(&cam->cursor_x, &cam->cursor_y);
-	if (cam->cursor_x < 20){
-		cam->x -= (300. / FRAMES_PER_SECONDE);
-	} else if (cam->cursor_x > cam->winSize_w + toolbar->size.w - 20){
-		cam->x += (300. / FRAMES_PER_SECONDE);
+	if (cam->cursor_x != cam->old_cursor_x || cam->cursor_y != cam->old_cursor_y) {
+		cam->cursor_moving = true;
 	}
-	if (cam->cursor_y < 20){
-		cam->y -= (300. / FRAMES_PER_SECONDE);
-	} else if (cam->cursor_y > cam->winSize_h - 20){
-		cam->y += (300. / FRAMES_PER_SECONDE);
+	if (cam->moving || cam->cursor_moving == true) {
+		cam->moving = true;
+		if (0 <= cam->cursor_x && cam->cursor_x < 20){
+			cam->x -= (400. / FRAMES_PER_SECONDE);
+		} else if (cam->cursor_x > cam->winSize_w + toolbar->size.w - 20){
+			cam->x += (400. / FRAMES_PER_SECONDE);
+		} else {
+			cam->moving = false;
+		}
+		if (0 <= cam->cursor_y && cam->cursor_y < 20){
+			cam->y -= (400. / FRAMES_PER_SECONDE);
+		} else if (cam->cursor_y > cam->winSize_h - 20){
+			cam->y += (400. / FRAMES_PER_SECONDE);
+		} else {
+			cam->moving = false;
+		}
+		cam->old_cursor_x = cam->cursor_x;
+		cam->old_cursor_y = cam->cursor_y;
 	}
 }
 

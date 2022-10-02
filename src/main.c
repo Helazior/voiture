@@ -87,8 +87,12 @@ int main(void) {
 	Camera cam = {
 		.zoom = ZOOM_INIT,
 		.follow_car = CAM_FOLLOW_CAR,
-		.cursor_x = 200,
-		.cursor_y = 200,
+		.cursor_x = 0,
+		.cursor_y = 0,
+		.old_cursor_x = 0,
+		.old_cursor_y = 0,
+		.moving = false,
+		.cursor_moving = false,
 	};
 
 	SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
@@ -115,10 +119,10 @@ int main(void) {
 
 	//__________________Start________________
 	int remain_time;
-	Bool gameRunning = True;
+	Bool game_running = True;
 
 	SDL_Event event;
-	while (gameRunning) {
+	while (game_running) {
 		// count the fps
 		count_loops++;
 		count_ms += SDL_GetTicks() - lastTime;
@@ -137,7 +141,7 @@ int main(void) {
 		{
 			switch (event.type) {
 				case SDL_QUIT:
-					gameRunning = False;
+					game_running = False;
 					break;
 				case SDL_KEYDOWN:
 					manage_key(&event, &player[0].key, True, &cam, &road, &toolbar, player, 0);

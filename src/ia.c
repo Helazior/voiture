@@ -194,7 +194,7 @@ static void simu_move_car(Entity* car, Keys_pressed* key){
 	//struct_to_moveCar
 	car->posx += car->speed * (float)cos(car->angle);
 	car->posy -= car->speed * (float)sin(car->angle);
-	car->speed += (float)((((car->speed) < 0.) - ((car->speed) > 0.)) * (1. + (fabsf(car->speed))) * car->frottement / 640.);
+	car->speed += (float)((((car->speed) < 0.) - ((car->speed) > 0.)) * (1. + (fabsf(car->speed))) * car->friction / 640.);
 }
 
 static Bool too_far(Entity* car, Ia* ia, int pos_initx, int pos_inity, float tolerance){

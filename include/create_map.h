@@ -3,7 +3,7 @@
 
 #include "jeu.h"
 
-#define CREATE_MAP_AUTO 1
+#define CREATE_MAP_AUTO 0
 
 void create_fixe_road(Road* road);
 
