@@ -721,18 +721,18 @@ void display(SDL_Renderer *renderer, Player* player, Road* road, Camera* cam, To
 	render_toolbar(renderer, toolbar);
 
     //_____FPS display ______
-    render_number(renderer, bg, nb_fps, cam->winSize_w + toolbar->size.w - 5, 5);
+	render_number(renderer, bg, nb_fps, cam->winSize_w + toolbar->size.w - 5, 5);
 
 	//_____key display_______
 	render_keys(renderer, &player[0].key, cam);
 
 	//default color background
     if (bg->show) {
-        SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);
+		SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);
     } else {
-        SDL_SetRenderDrawColor(renderer, WHITE);
+		SDL_SetRenderDrawColor(renderer, WHITE);
     }
 	//_____car display____
-    render_car(renderer, player, cam);
+	render_car(renderer, player, cam);
 	SDL_RenderPresent(renderer);
 }

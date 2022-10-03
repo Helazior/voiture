@@ -41,6 +41,8 @@ Ia* init_player_ia(Ia** ia, bool is_player_car) {
 	(*ia)->next_next_cp.y = 0;
 	(*ia)->go_ahead = False;
 	(*ia)->active_traj = False;
+	// TEST
+	(*ia)->next_cp_turn = NONE;
 	return (*ia);
 }
 
@@ -244,11 +246,10 @@ static void show_simu_traj(Entity* car, Camera* cam, SDL_Renderer* renderer, flo
             4
     };
 
-    rect.x = (int)((1 - cam->zoom) * centre_x + cam->zoom) * rect.x;
-    rect.y = (int)((1 - cam->zoom) * centre_y + cam->zoom) * rect.y;
+    rect.x = (int)((1 - cam->zoom) * centre_x + cam->zoom * rect.x);
+    rect.y = (int)((1 - cam->zoom) * centre_y + cam->zoom * rect.y);
 	if (rect.x > 0 && rect.x < cam->winSize_w && rect.y > 0 && rect.y < cam->winSize_h){
 		SDL_RenderFillRect(renderer, &rect);
-		SDL_RenderPresent(renderer);
 	}
 }
 

@@ -9,7 +9,8 @@
 
 typedef enum{
 	LEFT,
-	RIGHT
+	RIGHT,
+	NONE,
 }Turn;
 
 typedef struct Ia {
@@ -27,6 +28,8 @@ typedef struct Ia {
 	Coord next_next_cp;
 	Bool go_ahead;
 	Bool active_traj;
+	Coord vect_next_cp;
+	Coord vect_car;
 	Turn next_cp_turn;
 }Ia;
 

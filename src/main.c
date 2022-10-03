@@ -215,6 +215,7 @@ int main(void) {
 		if (toolbar.is_selecting) {
 			change_variable(&toolbar);
 		}
+		clear(renderer);
 		// if rezised
 		// TODO : à mettre dans une fonction
 		SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
@@ -233,7 +234,6 @@ int main(void) {
 			move_car(&player[i].car, &player[i].key, &cam, (i == 0));
 		}
 
-		clear(renderer);
 		for (int i = 0; i < NB_OF_PLAYERS; ++i) {
 			// IA take control of the keys
 			// TODO : mettre avant les contrôles humains
