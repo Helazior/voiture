@@ -332,6 +332,13 @@ void render_keys(SDL_Renderer *renderer, Keys_pressed* key, Camera* cam){
 
 }
 
+/**
+ * Initialize the font and texture for the 10 digits.
+ * Can be used for the FPS
+ * @param renderer
+ * @param bg
+ * @return EXIT_SUCCESS or EXIT_FAILURE
+ */
 static int init_number_tex(SDL_Renderer* renderer, Background* bg) {
 
     //init font
@@ -364,7 +371,7 @@ static int init_number_tex(SDL_Renderer* renderer, Background* bg) {
 }
 
 void destroy_texture(Background* bg){
-#if 1
+#if 1 // TODO : utile ?
 	for (int i = 0; i < NB_COLORS_BG; i++){
 		if(NULL != bg->texture[i])
 			SDL_DestroyTexture(bg->texture[i]);

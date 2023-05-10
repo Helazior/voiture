@@ -71,8 +71,8 @@ void init_car(Entity* car, SDL_Renderer *renderer, uint8_t num){
 	car->speed = 0.f;//pixels per frame
 	car->angle = 0.f;
 	car->angle_drift = 0.f;
-	car->pos_initx = 700.f;
-	car->pos_inity = 700.f + 100.f * num;
+	car->pos_initx = 0.f;
+	car->pos_inity = 0.f + 100.f * (float)num;
 	car->posx = car->pos_initx;
 	car->posy = car->pos_inity;
 	car->frame.x = (int)(car->posx);

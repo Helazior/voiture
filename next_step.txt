@@ -1,23 +1,30 @@
-À faire pour commencer:
+Dans la branche creat-map on va créer une map automatiquement avec l'algo du voyageur de commerce, une animation montrera l'algo si on le souhaite (enum en option)
 
--rendre le code beaucoup plus propre et modulable
+À faire pour commencer :
+
+-rendre le code beaucoup plus propre et modulable : refactoriser et faire plus de fichiers et les mettre dans des dossiers
 -mettre des commentaires pour chaque fonction et structure
+-les enums c'est en majuscule non ?
+- Faire un système de log en mode débug
 
 
 [BUG à résoudre] :
 (Done (c'était event->button le pb)) - quand j'appuie sur espace et que je veux déplacer un CP, gros bug qui fait disparaitre la route
 - Les traces de prédiction de l'IA sont sous le bg
 - appuyer sur "+" lorsqu'on démarre fait segfault des fois
-- Glisser la barre avec une var int marche mal à basse vitesse
+(Done?) - Glisser la barre avec une var int marche mal à basse vitesse
 - En pause (espace), gérer les touches qui peuvent rester appuyées
 - En mode IA, il arrive qu'il ne cherche pas l'arriver, mais reste coincé sur celui d'avant (ce passe quand je supprime ou rajoute un CP pendant qu'il est en mode IA)
 - dans simu_traj_no_line, si la simu remonte trop, elle va passer derrière et va tourner en rond. Il faut détecter ce cas et laisser passer sans freiner.
 - Si IA se retrouve perpendiculaire au CP, il continue tout droit
 - Zoom ? puis Alt tab plusieurs fois = seg fault, se voit directement avec valgrind
+- la hitbox de la voiture ne tourne pas ?
+- mettre la caméra sur le centre de la voiture et non le coin haut gauche
 
 OPTIMISATION :
 
 -> Utiliser SDL_RenderDrawPoints à la place de SDL_RenderDrawPoint pour les dérapages !
+-> Utiliser openGL lorsqu'on peut
 
  %   cumulative   self              self     total           
  time   seconds   seconds    calls  us/call  us/call  name    
@@ -51,17 +58,23 @@ avec IA et sans drift :
 // mettre un fps MIN et fps MAX, le jeu va au maximum en restant à la même vitesse de jeu. 
 // commenter chaque fonction/struct
 // affiche vitesse
-// afficher frame pour voir frame max
+(fait)// afficher frame pour voir frame max
 // caméra limité au bout du circuit
 //roule mieux sur spline que sur herbe
 //terre/dur (plusieurs surfaces dans les splines)
-//procedural generation pour le décore
+//procedural generation pour le décor
+
+(en cours)// collisions
+// les IA s'éloignent les unes des autres pour ne pas avoir de collision (comme les poissons)
+
+// fichier .json au lieu des defines
 
 /*À faire*/
 (fait)// barre et touche pour agrandir la largeur de route
-(fait)// barre pour gerer la vitesse/acceleration/frottement/virage/derapage
+(fait)// barre pour gerer la vitesse/acceleration/frottement/virage/dérapage
 (un peu fait)// case à cocher pour que la caméra ne suive plus la voiture, dans ce cas, on peut se déplacer avec les flêches ou avec la souris au bord de l'écran
 (fait)// case à cocher pour mettre/enlever l'IA
+// barre pour choisir le nombre d'IA
 
 (un peu)//trajectoire optimal sans dérapage
 //trajectoire optimal sans sortir de la route
@@ -83,19 +96,19 @@ avec IA et sans drift :
 
 /*
  *
-Voilà comment sera la version final:
-Un fichier config avec tous les réglages enregistrés (modifiables en jeu)
+Voilà comment sera la version finale :
+Un fichier config .json ou .toml ou autre avec tous les réglages enregistrés (modifiables en jeu)
 On démarre avec une fenêtre qui s'adapte à notre écran
-on a à gauche (modifiable, resizable et enlevable) un panneau de controle qui permet de tout modifier (un racourci clavier pourra remplacer chaque bouton)
+on a à gauche (modifiable, resizable et enlevable) un panneau de controle qui permet de tout modifier (un raccourci clavier pourra remplacer chaque bouton)
 
 Options raccourcis clavier:
 	Le panneau peut s'agrandir (ou alors plusieurs onglets) pour donner encore plus de possibilités:
-	On pourra ainsi modifier les racourcis clavier, mais plus important, avoir des raccourcis pour remplacer une souris sur un ordi portable.
+	On pourra ainsi modifier les raccourcis clavier, mais plus important, avoir des raccourcis pour remplacer une souris sur un ordi portable.
 	Le clique peut donc placer des CP, les enlever/modifier, mais aussi dans un mode plus édition BOUGER LA VOITURE de place.
 	Lorsque l'on est sur un curseur, on peut le bouger avec '-' et '+'.
 
 Options jeu:
-	je veux pouvour régler:
+	je veux pouvoir régler:
 	GRAPHIQUES: 
 		-affichage simu (voir plus bas)
 		-affichage info (vitesse, touche appuyé actuellement etc.)
@@ -133,8 +146,8 @@ Options simu:
 		-efface la traj quand passé dessus (oui, non)
 		-efface l'ancienne trace si la traj à changer (oui, non)
 	-laisse une trace derrière elle
-		- ligne de couleur (rouge quand freine et vert quand acclère; bleu à doite, jaune à gauche (dessus ou à côté (doite/gauche)?))
-		-voiture en transparant
+		- ligne de couleur (rouge quand freine et vert quand accélère; bleu à doite, jaune à gauche (dessus ou à côté (doite/gauche)?))
+		-voiture en transparent
 _____________________________________________________
 
 

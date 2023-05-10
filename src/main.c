@@ -53,11 +53,8 @@ int main(void) {
 		.selectx = 0,
 		.selecty = 0,
 	};
-	if (CREATE_MAP_AUTO) {
-		create_alea_road(&road);
-	} else {
-		create_fixe_road(&road);
-	}
+
+    create_road(&road);
 
 
 	// TODO : passer car, key et ia en pointeur et les allouer.
