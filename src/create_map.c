@@ -1,5 +1,7 @@
-// create random map with Travelling salesman algo to link the points or my algo or perlin
-
+/**
+ * create random map with Travelling salesman algo to link the points (or my algo or perlin noise)
+*/
+// TODO: refactoriser dans plusieurs fichiers
 #include <SDL2/SDL_stdinc.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -10,7 +12,7 @@
 
 // pourra être changé dans une variable plus tard
 #define DIST_CP 700
-#define NB_CP 27
+#define NB_CP 35
 // TODO: faire par rapport à la position de départ et la direction de la voiture
 #define START_X 1060
 #define START_Y (-234)
@@ -41,6 +43,7 @@ void create_road(Road* road) {
 }
 
 void create_fixe_road(Road* road){
+    // TODO : à mettre dans un fichier
 	road->len_tab_checkPoints = 6;
 	road->tab_checkPoints[0].x = START_X;
 	road->tab_checkPoints[0].y = START_Y;
@@ -108,8 +111,8 @@ static void random_set_up_algo(Road* road) {
     srand ((unsigned)time(&t));
 
     int radius_max = (int)(700. * sqrtf(NB_CP));
-
-    for (uint16_t i = 1; i < NB_CP; i++) {
+    // TODO : mettre le premier à côté de la voiture
+    for (uint16_t i = 0; i < NB_CP; i++) {
         // TODO : pour l'instant c'est en carré mais faut voir avec un cercle
         road->tab_checkPoints[i].x = rand() % (2 * radius_max) - radius_max;
         road->tab_checkPoints[i].y = rand() % (2 * radius_max) - radius_max;
@@ -124,18 +127,102 @@ static void random_set_up_algo(Road* road) {
  * Set up each CP into a case with random location
  * @param road
  */
-static void grid_set_up_algo(Road* road) {
-    // TODO
-}
+//static void grid_set_up_algo(Road* road) {
+//    // TODO
+//}
 
+/**
+ * Manage witch algo to use to set up the CPs
+ * @param road
+ */
 static void travelling_set_up_cp(Road* road) {
     random_set_up_algo(road);
+}
 
+static int sqrt_dist_CP(SDL_Rect* CP0, SDL_Rect* CP1) {
+    return (CP1->x - CP0->x) * (CP1->x - CP0->x) + (CP1->y - CP0->y) * (CP1->y - CP0->y);
+}
+
+/**
+ * NB_CP must be <= 2
+ * @param road
+ * @param cp_index Must be 0 < cp_index < NB_CP
+ * @return The index of the nearest CP
+ */
+static int index_of_nearest_CP(SDL_Rect* tab_checkpoints, int cp_index) {
+    // TODO : j'ai pas déjà fait le même algo pour autre chose ? Voir si on peut factoriser
+    if (NB_CP <= 2) {
+        perror("Not enough CP");
+        return 0;
+    }
+    if (cp_index < 0 || cp_index > NB_CP) {
+        perror("Index_CP out of bound");
+    }
+
+    int nearest_cp_index = cp_index ? 0 : 1;
+    int nearest_sqrt_dist = sqrt_dist_CP(
+            &tab_checkpoints[cp_index],
+            &tab_checkpoints[nearest_cp_index]
+            );
+
+    int tmp_dist;
+    for (int current_index = cp_index + 1; current_index < NB_CP; ++current_index) {
+        tmp_dist = sqrt_dist_CP(
+                &tab_checkpoints[cp_index],
+                &tab_checkpoints[current_index]
+        );
+        if (tmp_dist < nearest_sqrt_dist) {
+            nearest_sqrt_dist = tmp_dist;
+            nearest_cp_index = current_index;
+        }
+    }
+    return nearest_cp_index;
+}
+
+static void swap(SDL_Rect* a, SDL_Rect* b) {
+    SDL_Rect tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+/**
+ * Take the nearest CP and then iterate over all CPs one by one.
+ * This the first step of other algos that manage the crossed road
+ * @param road
+ */
+static void greedy(SDL_Rect tab_checkpoints[]) {
+    for (int i = 0; i < NB_CP-1; ++i) {
+        int nearest_cp_index = index_of_nearest_CP(tab_checkpoints, i);
+        swap(&tab_checkpoints[nearest_cp_index], &tab_checkpoints[(i + 1) % NB_CP]);
+    }
+}
+
+/**
+ * Manage witch algo to use to implement the travelling salesman problem
+ * @param road
+ */
+static void travelling_salesman_on_cp(SDL_Rect tab_checkpoints[]) {
+    greedy(tab_checkpoints);
 }
 
 void create_travelling_road(Road* road) {
     // TODO : créer un fichier spécial pour chaque type d'algo dans des dossiers séparés
-    // TODO : Et enlever "travelling devant les fonctions statiques
+    // TODO : Et enlever "travelling" devant les fonctions statiques
+    // TODO : comprendre pourquoi il y a toujours un CP sous la voiture
     travelling_init_road(road);
     travelling_set_up_cp(road);
+    printf("\n");
+    long int sum = 0;
+    for (int i = 0; i < NB_CP; ++i) {
+        printf("%d ", sqrt_dist_CP(&road->tab_checkPoints[i], &road->tab_checkPoints[(i + 1) % NB_CP]));
+        sum += sqrt_dist_CP(&road->tab_checkPoints[i], &road->tab_checkPoints[(i + 1) % NB_CP]);
+    }
+    printf("\n sum = %ld", sum);
+    travelling_salesman_on_cp(road->tab_checkPoints);
+    printf("\n");
+    sum = 0;
+    for (int i = 0; i < NB_CP; ++i) {
+        printf("%d ", sqrt_dist_CP(&road->tab_checkPoints[i], &road->tab_checkPoints[(i + 1) % NB_CP]));
+        sum += sqrt_dist_CP(&road->tab_checkPoints[i], &road->tab_checkPoints[(i + 1) % NB_CP]);
+    }
+    printf("\n sum = %ld\n", sum);
 }

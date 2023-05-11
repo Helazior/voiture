@@ -110,6 +110,7 @@ int main(void) {
 	if (init_toolbar(&toolbar, renderer, &player[0].car, &road, player[0].ia, &cam, &bg) == EXIT_FAILURE)
 		goto Quit;
 
+
 	//__________________Start________________
 	int remain_time;
 	Bool gameRunning = True;
