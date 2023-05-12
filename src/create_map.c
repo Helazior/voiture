@@ -197,6 +197,43 @@ static void greedy(SDL_Rect tab_checkpoints[]) {
 }
 
 /**
+ * @return if three points are listed in a counterclockwise order
+ */
+static int ccw(SDL_Rect* a, SDL_Rect* b, SDL_Rect* c) {
+    return (c->y - a->y) * (b->x - a->x) > (b->y - a->y) * (c->x - a->x);
+}
+
+/**
+ * @return if "ab" and "bc" have an intersection, does not deal with co-linearity
+ */
+static bool is_intersect(SDL_Rect* a, SDL_Rect* b, SDL_Rect* c, SDL_Rect* d) {
+    return ccw(a, c, d) != ccw(b, c, d)
+           && ccw(a, b, c) != ccw(a, b, d);
+}
+
+
+void uncross_segments(SDL_Rect tab_checkpoints[]) {
+    // index_segm1 && index_segm2 are always distincts to have an intersection :
+    // so index_segm2 is at least 2 above index_segm1
+    for (int index_segm1 = 0; index_segm1 < NB_CP - 3; ++index_segm1) {
+        for (int index_segm2 = index_segm1 + 2; index_segm2 < NB_CP - 1; ++index_segm2) {
+            if (is_intersect(&tab_checkpoints[index_segm1],
+                             &tab_checkpoints[index_segm1 + 1],
+                             &tab_checkpoints[index_segm2],
+                             &tab_checkpoints[index_segm2 + 1]
+                             )) {
+                // swap the two nearest indexes to invert the smallest loop
+                if (index_segm2 - (index_segm1 + 1) < ((index_segm2 + 1) - index_segm1 + NB_CP) % NB_CP) {
+                    swap(&tab_checkpoints[index_segm1 + 1], &tab_checkpoints[index_segm2]);
+                } else {
+                    swap(&tab_checkpoints[index_segm1], &tab_checkpoints[index_segm2 + 1]);
+                }
+            }
+        }
+    }
+}
+
+/**
  * Manage witch algo to use to implement the travelling salesman problem
  * @param road
  */

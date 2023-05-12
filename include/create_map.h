@@ -27,6 +27,13 @@ void create_fixe_road(Road* road);
  */
 void create_naif_road(Road* road);
 
+
+/**
+ * The optimal solution does not have intersection in the road, so the function uncross all the segments
+ * @param tab_checkpoints
+ */
+void uncross_segments(SDL_Rect tab_checkpoints[]);
+
 /**
  * Implement a travelling salesman algo
  * @param road

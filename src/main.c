@@ -20,7 +20,8 @@
 #include "../include/collision_car.h"
 #include "../include/create_map.h"
 
-#define ZOOM_INIT 0.4
+#define ZOOM_INIT 0.1
+//#define ZOOM_INIT 0.4
 //#define ZOOM_INIT 1
 
 extern unsigned int startLapTime;
@@ -130,7 +131,12 @@ int main(void) {
 		remain_time = (int)lroundf(1000.f / FRAMES_PER_SECONDE + (float)lastTime - (float)SDL_GetTicks());
 		remain_time *= (int)(remain_time > 0);
 		SDL_Delay(remain_time); // wait*/
-		lastTime = SDL_GetTicks();
+//        if (count_loops < 4) {
+//            pause();
+//            if (count_loops > 2)
+                uncross_segments(road.tab_checkPoints);
+//        }
+        lastTime = SDL_GetTicks();
 		while (SDL_PollEvent(&event))//events
 		{
 			switch (event.type) {

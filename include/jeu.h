@@ -150,7 +150,7 @@ typedef struct player {
     PlayerCP cp;
 }Player;
 
-//void pause();
+void pause();
 
 void init_car(Entity* car, SDL_Renderer *renderer, uint8_t num);
 

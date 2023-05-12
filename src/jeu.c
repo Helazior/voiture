@@ -59,7 +59,7 @@ SDL_Texture* loadTexture(SDL_Renderer *renderer, const char* p_filePath){
 	return texture;
 }
 
-static void pause(){
+void pause(){
 	// TODO : ne pas compter le temps du chrono
     // TODO : corriger les bugs dans "next_steps.txt"
 	SDL_Event event;
