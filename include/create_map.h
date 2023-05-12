@@ -43,4 +43,6 @@ void create_travelling_road(Road* road);
 // TODO: load_map_from_file()
 // create_saved_map(Road* road);
 
+void travelling_set_up_cp(Road* road);//à suppr TODO mettre en privé
+void greedy(SDL_Rect tab_checkpoints[]);
 #endif //VOITURE_CREATE_MAP_H

@@ -12,7 +12,7 @@
 
 // pourra être changé dans une variable plus tard
 #define DIST_CP 700
-#define NB_CP 35
+#define NB_CP 17
 // TODO: faire par rapport à la position de départ et la direction de la voiture
 #define START_X 1060
 #define START_Y (-234)
@@ -74,8 +74,7 @@ void create_naif_road(Road* road) {
 	road->tab_checkPoints[0].w = road->square_width;
 	road->tab_checkPoints[0].h = road->square_width;
 
-	time_t t;
-	srand ((unsigned)time(&t));
+    srand(time(NULL));
 	for (uint16_t i = 1; i < NB_CP; i++) {
 		// turn around when to fan away
 		float turn_to_loop = PI * (1. - ((float)NB_CP - 2.) / (float)NB_CP);
@@ -107,9 +106,7 @@ static void travelling_init_road(Road* road) {
  */
 static void random_set_up_algo(Road* road) {
 
-    time_t t;
-    srand ((unsigned)time(&t));
-
+    srand(time(NULL));
     int radius_max = (int)(700. * sqrtf(NB_CP));
     // TODO : mettre le premier à côté de la voiture
     for (uint16_t i = 0; i < NB_CP; i++) {
@@ -127,16 +124,36 @@ static void random_set_up_algo(Road* road) {
  * Set up each CP into a case with random location
  * @param road
  */
-//static void grid_set_up_algo(Road* road) {
-//    // TODO
-//}
+static void grid_set_up_algo(Road* road) {
+    srand(time(NULL));
+    int width = (int)round(sqrt(NB_CP) + 0.5);
+    int i;
+    for (int row = 0; row < width; ++row) {
+        for (int column = 0; column < width; ++column) {
+            if (row * width + column >= NB_CP) {
+                return;
+            }
+            i = row * width + column;
+            road->tab_checkPoints[i].x =
+                    (column - (width >> 1)) * DIST_CP + (rand() % 100) - 50;
+            road->tab_checkPoints[i].y =
+                    (row - (width >> 1)) * DIST_CP + (rand() % 100) - 50;
+            road->tab_checkPoints[i].w = road->square_width;
+            road->tab_checkPoints[i].h = road->square_width;
+        }
+    }
+}
 
 /**
  * Manage witch algo to use to set up the CPs
  * @param road
  */
-static void travelling_set_up_cp(Road* road) {
+void travelling_set_up_cp(Road* road) {
+#if 0
     random_set_up_algo(road);
+#else
+    grid_set_up_algo(road);
+#endif
 }
 
 static int sqrt_dist_CP(SDL_Rect* CP0, SDL_Rect* CP1) {
@@ -189,7 +206,7 @@ static void swap(SDL_Rect* a, SDL_Rect* b) {
  * This the first step of other algos that manage the crossed road
  * @param road
  */
-static void greedy(SDL_Rect tab_checkpoints[]) {
+void greedy(SDL_Rect tab_checkpoints[]) {
     for (int i = 0; i < NB_CP-1; ++i) {
         int nearest_cp_index = index_of_nearest_CP(tab_checkpoints, i);
         swap(&tab_checkpoints[nearest_cp_index], &tab_checkpoints[(i + 1) % NB_CP]);
@@ -254,7 +271,7 @@ void create_travelling_road(Road* road) {
         sum += sqrt_dist_CP(&road->tab_checkPoints[i], &road->tab_checkPoints[(i + 1) % NB_CP]);
     }
     printf("\n sum = %ld", sum);
-    travelling_salesman_on_cp(road->tab_checkPoints);
+    //travelling_salesman_on_cp(road->tab_checkPoints);
     printf("\n");
     sum = 0;
     for (int i = 0; i < NB_CP; ++i) {
