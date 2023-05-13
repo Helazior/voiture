@@ -12,7 +12,7 @@
 
 // pourra être changé dans une variable plus tard
 #define DIST_CP 700
-#define NB_CP 17
+#define NB_CP 6
 // TODO: faire par rapport à la position de départ et la direction de la voiture
 #define START_X 1060
 #define START_Y (-234)
@@ -232,18 +232,19 @@ static bool is_intersect(SDL_Rect* a, SDL_Rect* b, SDL_Rect* c, SDL_Rect* d) {
 void uncross_segments(SDL_Rect tab_checkpoints[]) {
     // index_segm1 && index_segm2 are always distincts to have an intersection :
     // so index_segm2 is at least 2 above index_segm1
-    for (int index_segm1 = 0; index_segm1 < NB_CP - 3; ++index_segm1) {
-        for (int index_segm2 = index_segm1 + 2; index_segm2 < NB_CP - 1; ++index_segm2) {
+    for (int index_segm1 = 0; index_segm1 < NB_CP - 2; ++index_segm1) {
+        for (int index_segm2 = index_segm1 + 2; index_segm2 < NB_CP; ++index_segm2) {
             if (is_intersect(&tab_checkpoints[index_segm1],
-                             &tab_checkpoints[index_segm1 + 1],
-                             &tab_checkpoints[index_segm2],
-                             &tab_checkpoints[index_segm2 + 1]
+                             &tab_checkpoints[(index_segm1 + 1) % NB_CP],
+                             &tab_checkpoints[index_segm2 % NB_CP],
+                             &tab_checkpoints[(index_segm2 + 1) % NB_CP]
                              )) {
+                printf("%d %d\n", index_segm1, index_segm2);
                 // swap the two nearest indexes to invert the smallest loop
                 if (index_segm2 - (index_segm1 + 1) < ((index_segm2 + 1) - index_segm1 + NB_CP) % NB_CP) {
-                    swap(&tab_checkpoints[index_segm1 + 1], &tab_checkpoints[index_segm2]);
+                    swap(&tab_checkpoints[index_segm1 + 1], &tab_checkpoints[index_segm2 % NB_CP]);
                 } else {
-                    swap(&tab_checkpoints[index_segm1], &tab_checkpoints[index_segm2 + 1]);
+                    swap(&tab_checkpoints[index_segm1], &tab_checkpoints[(index_segm2 + 1) % NB_CP]);
                 }
             }
         }

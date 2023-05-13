@@ -136,8 +136,10 @@ int main(void) {
                 create_road(&road);
             if (count_loops == 3)
                 greedy(road.tab_checkPoints);
-            if (count_loops >= 4)
+            if (count_loops >= 4) {
                 uncross_segments(road.tab_checkPoints);
+                printf("\n_____\n");
+            }
         }
         lastTime = SDL_GetTicks();
 		while (SDL_PollEvent(&event))//events
