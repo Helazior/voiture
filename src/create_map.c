@@ -11,8 +11,8 @@
 #include "../include/create_map.h"
 
 // pourra être changé dans une variable plus tard
-#define DIST_CP 700
-#define NB_CP 6
+#define DIST_CP 800
+#define NB_CP 21
 // TODO: faire par rapport à la position de départ et la direction de la voiture
 #define START_X 1060
 #define START_Y (-234)
@@ -228,17 +228,51 @@ static bool is_intersect(SDL_Rect* a, SDL_Rect* b, SDL_Rect* c, SDL_Rect* d) {
            && ccw(a, b, c) != ccw(a, b, d);
 }
 
+/**
+ * Extend each segment to avoid collision with a large road
+ * @return is_intersect
+ */
+static bool is_intersect_extend(SDL_Rect a, SDL_Rect b, SDL_Rect c, SDL_Rect d) {
+    int road_size = DIST_CP / 5; // TODO: put in arg
+
+    printf("\n%d, %d, %d, %d\n", a.x, a.y, b.x, b.y);
+    // make segments of size road_size
+    SDL_Rect ab;
+    ab.x = b.x - a.x;
+    ab.y = b.y - a.y;
+    int size_ab = (int)sqrt(ab.x * ab.x + ab.y * ab.y);
+    ab.x = ab.x * road_size / size_ab;
+    ab.y = ab.y * road_size / size_ab;
+    a.x -= ab.x;
+    b.x += ab.x;
+    a.y -= ab.y;
+    b.y += ab.y;
+
+    SDL_Rect cd;
+    cd.x = d.x - c.x;
+    cd.y = d.y - c.y;
+    int size_cd = (int)sqrt(cd.x * cd.x + cd.y * cd.y);
+    cd.x = cd.x / size_cd * road_size;
+    cd.y = cd.y / size_cd * road_size;
+    c.x -= cd.x;
+    d.x += cd.x;
+    c.y -= cd.y;
+    d.y += cd.y;
+    printf("%d, %d, %d, %d | %d, %d, %d\n__________\n", a.x, a.y, b.x, b.y, size_ab, ab.x, ab.y);
+
+    return is_intersect(&a, &b, &c, &d);
+}
 
 void uncross_segments(SDL_Rect tab_checkpoints[]) {
     // index_segm1 && index_segm2 are always distincts to have an intersection :
     // so index_segm2 is at least 2 above index_segm1
     for (int index_segm1 = 0; index_segm1 < NB_CP - 2; ++index_segm1) {
         for (int index_segm2 = index_segm1 + 2; index_segm2 < NB_CP; ++index_segm2) {
-            if (is_intersect(&tab_checkpoints[index_segm1],
-                             &tab_checkpoints[(index_segm1 + 1) % NB_CP],
-                             &tab_checkpoints[index_segm2 % NB_CP],
-                             &tab_checkpoints[(index_segm2 + 1) % NB_CP]
-                             )) {
+            if (is_intersect_extend(tab_checkpoints[index_segm1],
+                                    tab_checkpoints[(index_segm1 + 1) % NB_CP],
+                                    tab_checkpoints[index_segm2 % NB_CP],
+                                    tab_checkpoints[(index_segm2 + 1) % NB_CP]
+            )) {
                 printf("%d %d\n", index_segm1, index_segm2);
                 // swap the two nearest indexes to invert the smallest loop
                 if (index_segm2 - (index_segm1 + 1) < ((index_segm2 + 1) - index_segm1 + NB_CP) % NB_CP) {

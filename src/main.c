@@ -130,7 +130,7 @@ int main(void) {
 		remain_time = (int)lroundf(1000.f / FRAMES_PER_SECONDE + (float)lastTime - (float)SDL_GetTicks());
 		remain_time *= (int)(remain_time > 0);
 		SDL_Delay(remain_time); // wait*/
-        if (count_loops < 12) {
+        if (count_loops < 28) {
             pause();
             if (count_loops == 2)
                 create_road(&road);
