@@ -13,7 +13,7 @@
 
 // pourra être changé dans une variable plus tard
 #define DIST_CP 900
-#define NB_CP 21
+#define NB_CP 100
 // TODO: faire par rapport à la position de départ et la direction de la voiture
 #define START_X 1060
 #define START_Y (-234)
@@ -117,18 +117,18 @@ static void random_set_up_algo(Road* road) {
  */
 static void grid_set_up_algo(Road* road) {
     srand(time(NULL));
-    int width = (int)round(sqrt(NB_CP) + 0.5);
+    int width = (int)round(sqrt(road->len_tab_cp) + 0.5);
     int i;
     for (int row = 0; row < width; ++row) {
         for (int column = 0; column < width; ++column) {
-            if (row * width + column >= NB_CP) {
+            if (row * width + column >= road->len_tab_cp) {
                 return;
             }
             i = row * width + column;
             road->tab_cp[i].x =
-                    (column - (width >> 1)) * DIST_CP + (rand() % 100) - 50;
+                    (column - (width >> 1)) * DIST_CP + (rand() % 200) - 100;
             road->tab_cp[i].y =
-                    (row - (width >> 1)) * DIST_CP + (rand() % 100) - 50;
+                    (row - (width >> 1)) * DIST_CP + (rand() % 200) - 100;
             road->tab_cp[i].w = road->square_width;
             road->tab_cp[i].h = road->square_width;
         }
@@ -198,10 +198,10 @@ static void swap(SDL_Rect* a, SDL_Rect* b) {
  * This the first step of other algos that manage the crossed road
  * @param road
  */
-void greedy(SDL_Rect tab_checkpoints[]) {
-    for (int i = 0; i < NB_CP-1; ++i) {
+void greedy(SDL_Rect tab_checkpoints[], int nb_cp) {
+    for (int i = 0; i < nb_cp-1; ++i) {
         int nearest_cp_index = index_of_nearest_CP(tab_checkpoints, i);
-        swap(&tab_checkpoints[nearest_cp_index], &tab_checkpoints[(i + 1) % NB_CP]);
+        swap(&tab_checkpoints[nearest_cp_index], &tab_checkpoints[(i + 1) % nb_cp]);
     }
 }
 
@@ -255,24 +255,24 @@ static bool is_intersect_extend(SDL_Rect a, SDL_Rect b, SDL_Rect c, SDL_Rect d) 
     return is_intersect(&a, &b, &c, &d);
 }
 
-static bool uncross_segments(SDL_Rect tab_checkpoints[]) {
+static bool uncross_segments(SDL_Rect tab_checkpoints[], int nb_cp) {
     // index_segm1 && index_segm2 are always distincts to have an intersection :
     // so index_segm2 is at least 2 above index_segm1
     bool has_been_changed = false;
-    for (int index_segm1 = 0; index_segm1 < NB_CP - 2; ++index_segm1) {
-        for (int index_segm2 = index_segm1 + 2; index_segm2 < NB_CP; ++index_segm2) {
+    for (int index_segm1 = 0; index_segm1 < nb_cp - 2; ++index_segm1) {
+        for (int index_segm2 = index_segm1 + 2; index_segm2 < nb_cp; ++index_segm2) {
             if (is_intersect_extend(tab_checkpoints[index_segm1],
-                                    tab_checkpoints[(index_segm1 + 1) % NB_CP],
-                                    tab_checkpoints[index_segm2 % NB_CP],
-                                    tab_checkpoints[(index_segm2 + 1) % NB_CP]
+                                    tab_checkpoints[(index_segm1 + 1) % nb_cp],
+                                    tab_checkpoints[index_segm2 % nb_cp],
+                                    tab_checkpoints[(index_segm2 + 1) % nb_cp]
             )) {
 //                printf("%d %d\n", index_segm1, index_segm2);
                 has_been_changed = true;
                 // swap the two nearest indexes to invert the smallest loop
-                if (index_segm2 - (index_segm1 + 1) < ((index_segm2 + 1) - index_segm1 + NB_CP) % NB_CP) {
-                    swap(&tab_checkpoints[index_segm1 + 1], &tab_checkpoints[index_segm2 % NB_CP]);
+                if (index_segm2 - (index_segm1 + 1) < ((index_segm2 + 1) - index_segm1 + nb_cp) % nb_cp) {
+                    swap(&tab_checkpoints[index_segm1 + 1], &tab_checkpoints[index_segm2 % nb_cp]);
                 } else {
-                    swap(&tab_checkpoints[index_segm1], &tab_checkpoints[(index_segm2 + 1) % NB_CP]);
+                    swap(&tab_checkpoints[index_segm1], &tab_checkpoints[(index_segm2 + 1) % nb_cp]);
                 }
             }
         }
@@ -280,40 +280,44 @@ static bool uncross_segments(SDL_Rect tab_checkpoints[]) {
     return has_been_changed;
 }
 
-void uncross_all_segments(SDL_Rect tab_checkpoints[]) {
+bool uncross_all_segments(SDL_Rect tab_checkpoints[], int nb_cp) {
     int nb_change = 0;
-    while (uncross_segments(tab_checkpoints) && nb_change++ < 10);
+    while (uncross_segments(tab_checkpoints, nb_cp) && nb_change++ < 30); // TODO : nombre arbitraire, changer
+    return nb_change != 0;
 }
 
 void remove_hairpin_turns(Road* road , Player* player) {
+    int nb_loop = 0;
     bool has_removed;
     do {
-        has_removed = false;
-        for (int i = 0; i < road->len_tab_cp; ++i) {
-            double angle =
-                    atan2(road->tab_cp[(i - 1 + road->len_tab_cp) % road->len_tab_cp].y - road->tab_cp[i].y,
-                          road->tab_cp[(i - 1 + road->len_tab_cp) % road->len_tab_cp].x - road->tab_cp[i].x)
-                    -
-                    atan2(road->tab_cp[(i + 1) % road->len_tab_cp].y - road->tab_cp[i].y,
-                          road->tab_cp[(i + 1) % road->len_tab_cp].x - road->tab_cp[i].x);
+        do {
+            has_removed = false;
+            for (int i = 0; i < road->len_tab_cp; ++i) {
+                double angle =
+                        atan2(road->tab_cp[(i - 1 + road->len_tab_cp) % road->len_tab_cp].y - road->tab_cp[i].y,
+                              road->tab_cp[(i - 1 + road->len_tab_cp) % road->len_tab_cp].x - road->tab_cp[i].x)
+                        -
+                        atan2(road->tab_cp[(i + 1) % road->len_tab_cp].y - road->tab_cp[i].y,
+                              road->tab_cp[(i + 1) % road->len_tab_cp].x - road->tab_cp[i].x);
 
 
-            if (fabs(angle) < 0.4) { // TODO: la valeur est arbitraire, faire un truc modulaire
-                road->num_closest_cp = i;
-                del_checkPoint(road, player);
-                has_removed = true;
+                if (fabs(angle) < 1) { // TODO: la valeur est arbitraire, faire un truc modulaire
+                    road->num_closest_cp = i;
+                    del_checkPoint(road, player);
+                    has_removed = true;
+                }
             }
-        }
-    } while (has_removed);
+        } while (has_removed);
+    } while(uncross_all_segments(road->tab_cp, road->len_tab_cp) && nb_loop++ < 10);
 }
 
 /**
  * Manage witch algo to use to implement the travelling salesman problem
  * @param road
  */
-static void travelling_salesman_on_cp(SDL_Rect tab_checkpoints[]) {
-    greedy(tab_checkpoints);
-    uncross_all_segments(tab_checkpoints);
+static void travelling_salesman_on_cp(Road* road) {
+    greedy(road->tab_cp, road->len_tab_cp);
+    uncross_all_segments(road->tab_cp, road->len_tab_cp);
 }
 
 void create_travelling_road(Road* road) {
@@ -321,5 +325,5 @@ void create_travelling_road(Road* road) {
     // TODO : Et enlever "travelling" devant les fonctions statiques
     // TODO : comprendre pourquoi il y a toujours un CP sous la voiture
     travelling_set_up_cp(road);
-    travelling_salesman_on_cp(road->tab_cp);
+    travelling_salesman_on_cp(road);
 }

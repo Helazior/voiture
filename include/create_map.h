@@ -34,7 +34,7 @@ void create_naif_road(Road* road);
  * @return If a switch has been done
  *
  */
-void uncross_all_segments(SDL_Rect tab_checkpoints[]);
+bool uncross_all_segments(SDL_Rect tab_checkpoints[], int nb_cp);
 
 /**
  * Implement a travelling salesman algo
@@ -56,5 +56,5 @@ void create_travelling_road(Road* road);
 void remove_hairpin_turns(Road* road , Player* player);
 
 void travelling_set_up_cp(Road* road);//à suppr TODO mettre en privé
-void greedy(SDL_Rect tab_checkpoints[]);
+void greedy(SDL_Rect tab_checkpoints[], int nb_cp);
 #endif //VOITURE_CREATE_MAP_H
