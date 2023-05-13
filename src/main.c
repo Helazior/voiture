@@ -45,9 +45,9 @@ int main(void) {
 
 	//init struct Road;
 	Road road = {
-		.len_tab_checkPoints = 0,
+		.len_tab_cp = 0,
 		.square_width = 40,
-		.num_clos_check = 0,
+		.num_closest_cp = 0,
 		.select = False,
 		.size = 500,
 		.selectx = 0,
@@ -55,7 +55,6 @@ int main(void) {
 	};
 
     create_road(&road);
-
 
 	// TODO : passer car, key et ia en pointeur et les allouer.
 	// TODO : les passer dans player
@@ -71,7 +70,7 @@ int main(void) {
 		player[i].key.drift = none;
 		//init cp
 		player[i].cp.nb_valid_checkPoints = 0;
-		init_player_cp(&player[i].cp, road.len_tab_checkPoints);
+		init_player_cp(&player[i].cp, road.len_tab_cp);
 		//init struct Ia;
 		if (!init_player_ia(&player[i].ia, (i == 0)))
 			goto Quit;
@@ -79,6 +78,8 @@ int main(void) {
 			init_ia(player[i].ia, &road, &player[i].car, &player[i].cp);
 		}
 	}
+
+    remove_hairpin_turns(&road, player);
 
 	//init struct Camera;
 	Camera cam = {
@@ -130,17 +131,21 @@ int main(void) {
 		remain_time = (int)lroundf(1000.f / FRAMES_PER_SECONDE + (float)lastTime - (float)SDL_GetTicks());
 		remain_time *= (int)(remain_time > 0);
 		SDL_Delay(remain_time); // wait*/
-        if (count_loops < 28) {
-            pause();
-            if (count_loops == 2)
-                create_road(&road);
-            if (count_loops == 3)
-                greedy(road.tab_checkPoints);
-            if (count_loops >= 4) {
-                uncross_segments(road.tab_checkPoints);
-                printf("\n_____\n");
-            }
-        }
+//        if (count_loops < 6) {
+//            pause();
+//            if (count_loops == 2)
+//                create_road(&road);
+//            if (count_loops == 3)
+//                greedy(road.tab_cp);
+//            if (count_loops == 4) {
+//                int nb_change = 0;
+//                while (uncross_segments(road.tab_cp) && nb_change++ < 10);
+//                printf("\n_____\n");
+//            }
+//            if (count_loops == 5) {
+//                remove_hairpin_turns(&road , player);
+//            }
+//        }
         lastTime = SDL_GetTicks();
 		while (SDL_PollEvent(&event))//events
 		{
@@ -164,17 +169,17 @@ int main(void) {
 							}
 							break;
 						case SDL_BUTTON_MIDDLE:
-							if (road.len_tab_checkPoints > 0) {
+							if (road.len_tab_cp > 0) {
 								// TODO : mettre pour tous
-								del_checkPoint(&road, &event, &cam, player);
-								if (road.len_tab_checkPoints == 3) {
+                                del_closest_checkPoint(&road, &event, &cam, player);
+								if (road.len_tab_cp == 3) {
 									stop_ia(player);
 								}
 							}
 
 							break;
 						case SDL_BUTTON_RIGHT:
-							if (road.len_tab_checkPoints) {// if it exist at least 1 checkpoint
+							if (road.len_tab_cp) {// if it exist at least 1 checkpoint
 														   // TODO : mettre pour tous
 								manage_checkpoint(&road, &event, &cam, &player[0].car);
 							}
@@ -220,7 +225,7 @@ int main(void) {
 		if (toolbar.is_selecting) {
 			change_variable(&toolbar);
 		}
-		// if rezised
+		// if resized
 		// TODO : à mettre dans une fonction
 		SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
 		cam.winSize_w -= toolbar.size.w;

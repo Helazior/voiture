@@ -97,9 +97,9 @@ typedef struct Entity {
 }Entity;
 
 typedef struct Road {
-	SDL_Rect tab_checkPoints[NB_SQUARE];
-	int len_tab_checkPoints;
-    int num_clos_check;
+	SDL_Rect tab_cp[NB_SQUARE];
+	int len_tab_cp;
+    int num_closest_cp;
 	int square_width;
 	Bool select;
 	int selectx;
@@ -175,8 +175,10 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool state, Camera* cam, Ro
 __attribute__((unused)) void close_circuit(Road road);
 //add a checkpoint:
 void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Player* player);
-//del a checkpoint:
-void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Player* player);
+// del the checkpoint in road->num_closest_cp
+void del_checkPoint(Road* road, Player* player);
+//del the closest checkpoint of the click:
+void del_closest_checkPoint(Road* road, SDL_Event* event, Camera* cam, Player* player);
 //found the closest checkpoint to the clic:
 void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 //manage a checkpoint:

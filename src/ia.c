@@ -62,14 +62,14 @@ static void calcul_angle_next_cp(Road* road, Ia* ia){
 	// TODO :  faire la moyenne avec l'angle de la voiture au moment de passer cp0 et l'angle cp1, cp2, car s'il n'est pas au cp au début de l'ia, il va prendre une très mauvaise traj
 	
 	// cp actuel
-	int prev_index = (ia->num_next_cp + road->len_tab_checkPoints - 1) % road->len_tab_checkPoints;
-	float prev_cp_x = (float)road->tab_checkPoints[prev_index].x;
-	float prev_cp_y = (float)road->tab_checkPoints[prev_index].y;
+	int prev_index = (ia->num_next_cp + road->len_tab_cp - 1) % road->len_tab_cp;
+	float prev_cp_x = (float)road->tab_cp[prev_index].x;
+	float prev_cp_y = (float)road->tab_cp[prev_index].y;
 
 	// 2 cp after
-	int next_index = (ia->num_next_cp + 1) % road->len_tab_checkPoints;
-	float next_cp_x = (float)road->tab_checkPoints[next_index].x;
-	float next_cp_y = (float)road->tab_checkPoints[(next_index) % road->len_tab_checkPoints].y;
+	int next_index = (ia->num_next_cp + 1) % road->len_tab_cp;
+	float next_cp_x = (float)road->tab_cp[next_index].x;
+	float next_cp_y = (float)road->tab_cp[(next_index) % road->len_tab_cp].y;
 	ia->prev_cp.x = prev_cp_x;
 	ia->prev_cp.y = prev_cp_y;
 	ia->next_next_cp.x = next_cp_x;
@@ -106,8 +106,8 @@ static void calcul_car_angle_cp(Ia* ia, Entity* car){
 }
 
 static void calcul_coord_cp(Road* road, Ia* ia, Entity* car){
-	ia->next_cp.x = (float)road->tab_checkPoints[ia->num_next_cp].x;
-	ia->next_cp.y = (float)road->tab_checkPoints[ia->num_next_cp].y;
+	ia->next_cp.x = (float)road->tab_cp[ia->num_next_cp].x;
+	ia->next_cp.y = (float)road->tab_cp[ia->num_next_cp].y;
 
 	/*____2: angle______*/
 	calcul_angle_next_cp(road, ia);
@@ -159,14 +159,14 @@ void calcul_next_cp(Road* road, Ia* ia, PlayerCP* cp, Entity* car){
 	if (ia->num_next_cp == -1 && cp->nb_valid_checkPoints > 1){
 		ia->num_next_cp = 0; // TODO à changer, faut prendre le prochain CP, pas le premier car il peut avoir été pris
 		while (cp->tab_valid_checkPoints[ia->num_next_cp++] != Start);
-		if (ia->num_next_cp > road->len_tab_checkPoints)
+		if (ia->num_next_cp > road->len_tab_cp)
 			printf("error\n");
 	}
 	if (!cp->tab_valid_checkPoints[ia->num_next_cp] && ia->num_next_cp >= 0){
 		return;
 	}
-	while (cp->tab_valid_checkPoints[ia->num_next_cp = (ia->num_next_cp + 1) % road->len_tab_checkPoints]){
-		if (cp->nb_valid_checkPoints == road->len_tab_checkPoints){
+	while (cp->tab_valid_checkPoints[ia->num_next_cp = (ia->num_next_cp + 1) % road->len_tab_cp]){
+		if (cp->nb_valid_checkPoints == road->len_tab_cp){
 			ia->num_next_cp = 0;
 			break;
 		}
