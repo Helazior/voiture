@@ -1,10 +1,10 @@
 /*main.c*/
 
-/*Jeu de course ayant 3 buts:
+/*Jeu de course ayant 3 buts :
  * Jouer à un jeu de course
- * Voir comment fonctionne l'IA de la voiture avec des annimations
+ * Voir comment fonctionne l'IA de la voiture avec des animations
  * Créer un univers (3D ?) de façon procédurale, et pouvoir le visiter avec plusieurs caméras
- * Le tout parametrable à volonté, à tout moment
+ * Le tout paramétrable à volonté, à tout moment
  *
  * Voir détails dans le fichier texte*/
 
@@ -103,12 +103,8 @@ int main(void) {
 		goto Quit_texture;
 
 	//init struct Toolbar;
-	Toolbar toolbar = {
-		.select_var_int = NULL,
-		.select_var_float = NULL
-	};
-
-	if (init_toolbar(&toolbar, renderer, &player[0].car, &road, player[0].ia, &cam, &bg) == EXIT_FAILURE)
+	Toolbar toolbar;
+	if (init_toolbar(&toolbar, renderer, &player[0].car, &road, player[0].ia, &cam, &bg/*, create_road*/) == EXIT_FAILURE)
 		goto Quit;
 
 
@@ -176,7 +172,6 @@ int main(void) {
 									stop_ia(player);
 								}
 							}
-
 							break;
 						case SDL_BUTTON_RIGHT:
 							if (road.len_tab_cp) {// if it exist at least 1 checkpoint
@@ -194,22 +189,22 @@ int main(void) {
 						road.select = False;
 					} else if (event.button.button == SDL_BUTTON_LEFT) {
 						toolbar.is_selecting = False;
-						if (toolbar.settings[toolbar.num_setting].type == Checkbox &&
-								toolbar.select_var_int == toolbar.settings[toolbar.num_setting].int_variable) {
-							*toolbar.settings[toolbar.num_setting].int_variable =
-								(*toolbar.settings[toolbar.num_setting].int_variable + 1) % 2;
+						if (toolbar.settings[toolbar.num_page][toolbar.num_setting].type == Checkbox &&
+								toolbar.select_var_int == toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable) {
+							*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable =
+								(*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable + 1) % 2;
 
 							// the box has just been checked
-							if (*toolbar.settings[toolbar.num_setting].int_variable == True) {
+							if (*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable == True) {
 								// the box is ia->active
-								if (toolbar.settings[toolbar.num_setting].int_variable == (int *) player[0].ia->active) {
+								if (toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable == (int *) player[0].ia->active) {
 									init_ia(player[0].ia, &road, &player[0].car, &player[0].cp);
 
 								}
 								// the box has just been unchecked
 							} else {
 								// the box is ia->active
-								if (toolbar.settings[toolbar.num_setting].int_variable == (int *) &player[0].ia->active) {
+								if (toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable == (int *) &player[0].ia->active) {
 									// the ia change keys, so we need to fixe them to False
 									stop_first_ia(&player[0].key);
 								}

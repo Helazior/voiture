@@ -228,7 +228,7 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool status, Camera* cam, R
 		case SDLK_KP_PLUS:
 		case SDLK_PLUS:
 		case SDLK_EQUALS:
-			if (toolbar->settings[toolbar->num_setting].type == Line && (toolbar->select_var_int || toolbar->select_var_float)){
+			if (toolbar->settings[toolbar->num_page][toolbar->num_setting].type == Line && (toolbar->select_var_int || toolbar->select_var_float)){
 				change_variable_keys(toolbar, add_to_var);
 			}
 			break;
@@ -237,7 +237,7 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool status, Camera* cam, R
 		case SDLK_KP_LESS:
 		case SDLK_LESS:
 		case SDLK_6:
-			if (toolbar->settings[toolbar->num_setting].type == Line && (toolbar->select_var_int || toolbar->select_var_float)){
+			if (toolbar->settings[toolbar->num_page][toolbar->num_setting].type == Line && (toolbar->select_var_int || toolbar->select_var_float)){
 				change_variable_keys(toolbar, -add_to_var);
 			}
 			break;
@@ -733,7 +733,7 @@ void display(SDL_Renderer *renderer, Player* player, Road* road, Camera* cam, To
 	render_toolbar(renderer, toolbar);
 
     //_____fps display ______
-    render_number(renderer, bg, nb_fps, cam->winSize_w + toolbar->size.w - 5, 5);
+    render_number(renderer, bg, nb_fps, cam->winSize_w + toolbar->size.w - 5, toolbar->top_h + 5);
 
 	//_____key display_______
 	render_keys(renderer, &player[0].key, cam);
