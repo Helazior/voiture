@@ -9,11 +9,9 @@
 #include <math.h>
 
 #include "../include/create_map.h"
-#include "../include/jeu.h"
 
 // pourra être changé dans une variable plus tard
 #define DIST_CP 900
-#define NB_CP 100
 // TODO: faire par rapport à la position de départ et la direction de la voiture
 #define START_X 1060
 #define START_Y (-234)
@@ -22,7 +20,6 @@
 
 
 void create_road(Road* road) {
-
     switch (CREATE_MAP_AUTO) {
         case FIXE_ROAD:
             create_fixe_road(road);
@@ -66,7 +63,7 @@ void create_fixe_road(Road* road){
 
 void create_naif_road(Road* road) {
     // TODO rendre plus modulable
-	road->len_tab_cp = NB_CP;
+	road->len_tab_cp = road->nb_cp_max;
 	road->tab_cp[0].x = START_X;
 	road->tab_cp[0].y = START_Y;
 	double direction = 0.;
@@ -76,9 +73,9 @@ void create_naif_road(Road* road) {
 	road->tab_cp[0].h = road->square_width;
 
     srand(time(NULL));
-	for (uint16_t i = 1; i < NB_CP; i++) {
+	for (int i = 1; i < road->len_tab_cp; i++) {
 		// turn around when to fan away
-		float turn_to_loop = PI * (1. - ((float)NB_CP - 2.) / (float)NB_CP);
+		float turn_to_loop = PI * (1. - ((float)road->len_tab_cp - 2.) / (float)road->len_tab_cp);
 		direction += (((double)(rand() % 6)) / 5. - 0.5) * TIGHT_TURNS + turn_to_loop; //[-0.5; 0.5]
 		// angle in radius
 		new_pos_x += (int)(cos(direction) * DIST_CP);
@@ -92,15 +89,15 @@ void create_naif_road(Road* road) {
 }
 
 /**
- * Only restrict parameter
+ * Set up each CP completely randomly in a radius
  * @param road
  */
 static void random_set_up_algo(Road* road) {
 
     srand(time(NULL));
-    int radius_max = (int)(700. * sqrtf(NB_CP));
+    int radius_max = (int)(700. * sqrtf(road->len_tab_cp));
     // TODO : mettre le premier à côté de la voiture
-    for (uint16_t i = 0; i < NB_CP; i++) {
+    for (uint16_t i = 0; i < road->len_tab_cp; i++) {
         // TODO : pour l'instant c'est en carré mais faut voir avec un cercle
         road->tab_cp[i].x = rand() % (2 * radius_max) - radius_max;
         road->tab_cp[i].y = rand() % (2 * radius_max) - radius_max;
@@ -140,7 +137,7 @@ static void grid_set_up_algo(Road* road) {
  * @param road
  */
 void travelling_set_up_cp(Road* road) {
-    road->len_tab_cp = NB_CP;
+    road->len_tab_cp = road->nb_cp_max;
 #if 0
     random_set_up_algo(road);
 #else
@@ -153,18 +150,18 @@ static int sqrt_dist_CP(SDL_Rect* CP0, SDL_Rect* CP1) {
 }
 
 /**
- * NB_CP must be <= 2
  * @param road
- * @param cp_index Must be 0 < cp_index < NB_CP
+ * @param cp_index Must be 0 < cp_index < nb_cp
+ * @param nb_cp Must be > 2
  * @return The index of the nearest CP
  */
-static int index_of_nearest_CP(SDL_Rect* tab_checkpoints, int cp_index) {
+static int index_of_nearest_CP(SDL_Rect* tab_checkpoints, int cp_index, int nb_cp) {
     // TODO : j'ai pas déjà fait le même algo pour autre chose ? Voir si on peut factoriser
-    if (NB_CP <= 2) {
+    if (nb_cp <= 2) {
         perror("Not enough CP");
         return 0;
     }
-    if (cp_index < 0 || cp_index > NB_CP) {
+    if (cp_index < 0 || cp_index > nb_cp) {
         perror("Index_CP out of bound");
     }
 
@@ -175,7 +172,7 @@ static int index_of_nearest_CP(SDL_Rect* tab_checkpoints, int cp_index) {
             );
 
     int tmp_dist;
-    for (int current_index = cp_index + 1; current_index < NB_CP; ++current_index) {
+    for (int current_index = cp_index + 1; current_index < nb_cp; ++current_index) {
         tmp_dist = sqrt_dist_CP(
                 &tab_checkpoints[cp_index],
                 &tab_checkpoints[current_index]
@@ -200,7 +197,7 @@ static void swap(SDL_Rect* a, SDL_Rect* b) {
  */
 void greedy(SDL_Rect tab_checkpoints[], int nb_cp) {
     for (int i = 0; i < nb_cp-1; ++i) {
-        int nearest_cp_index = index_of_nearest_CP(tab_checkpoints, i);
+        int nearest_cp_index = index_of_nearest_CP(tab_checkpoints, i, nb_cp);
         swap(&tab_checkpoints[nearest_cp_index], &tab_checkpoints[(i + 1) % nb_cp]);
     }
 }

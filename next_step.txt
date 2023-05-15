@@ -9,6 +9,7 @@ Dans la branche creat-map on va créer une map automatiquement avec l'algo du vo
 
 
 [BUG à résoudre] :
+- Une map s'est créée avec que des CP jaunes
 (Done (c'était event->button le pb)) - quand j'appuie sur espace et que je veux déplacer un CP, gros bug qui fait disparaitre la route
 - Les traces de prédiction de l'IA sont sous le bg
 - appuyer sur "+" lorsqu'on démarre fait segfault des fois

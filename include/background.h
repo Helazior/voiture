@@ -23,12 +23,17 @@ typedef enum{
     Button = 2
 }Type_of_settings;
 
+
+/**To call functions when clicking in the toolbar's settings*/
+typedef struct callback {
+    bool create_road;
+} Callback;
+
 /** 1 setting of 1 variable, int or float.
  * As a line, checkbox or button */
 typedef struct Setting{
 	int* int_variable;
 	float* float_variable;
-    void* void_variable;
 	SDL_Texture* texture; // The name
 	SDL_Rect tex_size; //automatic
 	Type_of_settings type;
@@ -44,7 +49,6 @@ typedef struct Toolbar{
 	int pos_click_x;
     int* select_var_int;
     float* select_var_float;
-    void* select_var_void;
     Bool is_selecting;
     int num_page; // of the toolbar
     int num_setting;
@@ -62,7 +66,7 @@ typedef struct Background{
 }Background;
 
 //init all the settings at the right of the screen
-int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia, Camera* cam, Background* bg/*, void (*create_road)(Road*)*/);
+int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia, Camera* cam, Background* bg, Callback* callback);
 
 void click_toolbar(Toolbar* toolbar);
 

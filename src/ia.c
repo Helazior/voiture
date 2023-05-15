@@ -48,7 +48,7 @@ void stop_ia(Player* player){
     }
 }
 
-void stop_first_ia(Keys_pressed* key){
+void release_the_keys(Keys_pressed* key){
     key->up = False;
     key->down = False;
     key->left = False;

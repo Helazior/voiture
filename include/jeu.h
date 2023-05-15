@@ -99,6 +99,7 @@ typedef struct Entity {
 typedef struct Road {
 	SDL_Rect tab_cp[NB_SQUARE];
 	int len_tab_cp;
+    int nb_cp_max; // To create random road
     int num_closest_cp;
 	int square_width;
 	Bool select;

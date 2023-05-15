@@ -46,6 +46,7 @@ int main(void) {
 	//init struct Road;
 	Road road = {
 		.len_tab_cp = 0,
+        .nb_cp_max = NB_CP,
 		.square_width = 40,
 		.num_closest_cp = 0,
 		.select = False,
@@ -55,6 +56,7 @@ int main(void) {
 	};
 
     create_road(&road);
+
 
 	// TODO : passer car, key et ia en pointeur et les allouer.
 	// TODO : les passer dans player
@@ -81,6 +83,11 @@ int main(void) {
 
     remove_hairpin_turns(&road, player);
 
+//    printf("\nlen_tab_cp = %d | nb_cp_max = %d \n ", road.len_tab_cp, road.nb_cp_max);
+//    for (int i = 0; i < road.len_tab_cp; ++i) {
+//        printf("%d\n", road.tab_cp[i].y);
+//    }
+
 	//init struct Camera;
 	Camera cam = {
 		.zoom = ZOOM_INIT,
@@ -102,9 +109,11 @@ int main(void) {
 	if (init_background(renderer, &bg) == EXIT_FAILURE)
 		goto Quit_texture;
 
+    //init CallBack
+    Callback callback = {false};
 	//init struct Toolbar;
 	Toolbar toolbar;
-	if (init_toolbar(&toolbar, renderer, &player[0].car, &road, player[0].ia, &cam, &bg/*, create_road*/) == EXIT_FAILURE)
+	if (init_toolbar(&toolbar, renderer, &player[0].car, &road, player[0].ia, &cam, &bg, &callback) == EXIT_FAILURE)
 		goto Quit;
 
 
@@ -185,28 +194,40 @@ int main(void) {
 					}
 					break;
 				case SDL_MOUSEBUTTONUP:
+                    // TODO: à revoir !!!
 					if (event.button.button == SDL_BUTTON_RIGHT) {
 						road.select = False;
 					} else if (event.button.button == SDL_BUTTON_LEFT) {
-						toolbar.is_selecting = False;
-						if (toolbar.settings[toolbar.num_page][toolbar.num_setting].type == Checkbox &&
-								toolbar.select_var_int == toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable) {
-							*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable =
-								(*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable + 1) % 2;
+                        //TODO: mettre dans une fonction !!!
+                        toolbar.is_selecting = False;
+                        if ((toolbar.settings[toolbar.num_page][toolbar.num_setting].type == Checkbox
+                             || toolbar.settings[toolbar.num_page][toolbar.num_setting].type == Button) &&
+                            toolbar.select_var_int == toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable) {
 
-							// the box has just been checked
-							if (*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable == True) {
-								// the box is ia->active
-								if (toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable == (int *) player[0].ia->active) {
-									init_ia(player[0].ia, &road, &player[0].car, &player[0].cp);
+                            *toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable =
+                                    (*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable + 1) % 2;
 
-								}
-								// the box has just been unchecked
-							} else {
-								// the box is ia->active
-								if (toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable == (int *) &player[0].ia->active) {
-									// the ia change keys, so we need to fixe them to False
-									stop_first_ia(&player[0].key);
+                            // the box has just been checked
+                            if (*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable == True) {
+                                // the box is ia->active
+                                if (toolbar.select_var_int == (int *) &player[0].ia->active) {
+                                    // TODO : Utile ?
+                                    init_ia(player[0].ia, &road, &player[0].car, &player[0].cp);
+                                }
+                                // TODO : à mettre dans une fonction
+                                // function to create road
+                                if (toolbar.select_var_int == (int *) &callback.create_road) {
+                                    // TODO : faire un thread pour pas avoir de freeze
+                                    create_road(&road);
+                                    remove_hairpin_turns(&road, player);
+                                    *toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable = false; // TODO: generaliser
+                                }
+                                // the box has just been unchecked
+                            } else {
+                                // the box is ia->active
+                                if (toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable == (int *) &player[0].ia->active) {
+                                    // the ia change keys, so we need to fixe them to False
+                                    release_the_keys(&player[0].key);
 								}
 							}
 							toolbar.select_var_int = NULL;

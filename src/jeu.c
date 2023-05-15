@@ -61,7 +61,8 @@ SDL_Texture* loadTexture(SDL_Renderer *renderer, const char* p_filePath){
 
 void pause(){
 	// TODO : ne pas compter le temps du chrono
-    // TODO : corriger les bugs dans "next_steps.txt"
+    // TODO : corriger les bugs dans "next_steps.txt" comme les touches qui restent enfoncées
+    // Avec release_the_keys(&player[0].key);
 	SDL_Event event;
 	do{
 		SDL_WaitEvent(&event);

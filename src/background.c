@@ -16,7 +16,6 @@ typedef struct visible_sitting{
 	char* name;
 	int* int_variable;
 	float* float_variable;
-    void* void_variable; // function pointer
 	float min;
 	float max;
 	Type_of_settings type;
@@ -38,8 +37,6 @@ static int init_setting(
                 settings[num_page][num_var].int_variable = sub_sittings[num_page][num_var].int_variable;
             } else if (sub_sittings[num_page][num_var].float_variable != NULL) {
                 settings[num_page][num_var].float_variable = sub_sittings[num_page][num_var].float_variable;
-            } else if (sub_sittings[num_page][num_var].void_variable != NULL) {
-                settings[num_page][num_var].void_variable = sub_sittings[num_page][num_var].void_variable;
             } else {
                 printf("Error: no variable in the setting %d\n", num_var);
             }
@@ -67,7 +64,7 @@ static int init_setting(
 	return EXIT_SUCCESS;
 }
 
-int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia, Camera* cam, Background* bg/*, void (*create_road)(Road*)*/){
+int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia, Camera* cam, Background* bg, Callback* callback){
 	toolbar->size.w = WIDTH_TOOLBAR;
 	toolbar->size.y = 0;
     toolbar->top_h = 30;
@@ -86,30 +83,29 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
     }
     SDL_Color fg_color = { WHITE };
     SDL_Color bg_color = { COLOR_TOOLBAR };
-    // TODO: ______________________________________________________
-    // TODO: Enlever void_variable, faire une box/button qui change une varible, lorsque la variable est à true, la fonction associée se lance (dans le main par ex), et les variables se remettent à False
     Visible_sitting sub_sittings[2][NB_SETTINGS] = {
             {
-                    {"IA:", (int*)&ia->active, NULL, NULL, 0, 1, Checkbox},
-                    {"IA drift:", (int*)&ia->drift, NULL, NULL, 0, 1, Checkbox},
-                    {"IA show simu traj:", (int*)&ia->show_simu_traj, NULL, NULL, 0, 1, Checkbox},
-                    {"Cam follow car:", (int*)&cam->follow_car, NULL, NULL, 0, 1, Checkbox},
-                    {"Show the background:", (int*)&bg->show, NULL, NULL, 0, 1, Checkbox},
-                    {"road->size", &road->size, NULL, NULL, 0, 2000, Line},
-                    {"car->turn", NULL, &car->turn, NULL, 0.1f, 30, Line},
-                    {"car->acceleration", NULL, &car->acceleration, NULL, 0.1f, 30, Line},
-                    {"car->acceleration", NULL, &car->acceleration, NULL, 0.1f, 30, Line}
+                    {"IA:", (int*)&ia->active, NULL, 0, 1, Checkbox},
+                    {"IA drift:", (int*)&ia->drift, NULL, 0, 1, Checkbox},
+                    {"IA show simu traj:", (int*)&ia->show_simu_traj, NULL, 0, 1, Checkbox},
+                    {"Cam follow car:", (int*)&cam->follow_car, NULL, 0, 1, Checkbox},
+                    {"Show the background:", (int*)&bg->show, NULL, 0, 1, Checkbox},
+                    {"road->size", &road->size, NULL, 0, 2000, Line},
+                    {"car->turn", NULL, &car->turn, 0.1f, 30, Line},
+                    {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line},
+                    {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line}
             },
-            {
-                    {"Generate Map:", NULL, NULL, NULL/*create_road*/, 0, 1, Button},
-                    {"IA drift:", (int *) &ia->drift, NULL, NULL, 0, 1, Checkbox},
-                    {"IA show simu traj:", (int *) &ia->show_simu_traj, NULL, NULL, 0, 1, Checkbox},
-                    {"Cam follow car:", (int *) &cam->follow_car, NULL, NULL, 0, 1, Checkbox},
-                    {"Show the background:", (int *) &bg->show, NULL, NULL, 0, 1, Checkbox},
-                    {"road->size", &road->size, NULL, NULL, 0, 2000, Line},
-                    {"car->turn", NULL, &car->turn, NULL, 0.1f, 30, Line},
-                    {"car->acceleration", NULL, &car->acceleration, NULL, 0.1f, 30, Line},
-                    {"car->acceleration", NULL, &car->acceleration, NULL, 0.1f, 30, Line}
+            {// TODO dist cp
+                //TODO: voir pourquoi au dessus de 300? a ne fait plus de map ?
+                    {"Generate Map:", (int *) &callback->create_road, NULL, 0, 1, Button},
+                    {"Nb max of CP:", (int *) &road->nb_cp_max, NULL, 4, 300, Line},
+                    {"IA show simu traj:", (int *) &ia->show_simu_traj, NULL, 0, 1, Checkbox},
+                    {"Cam follow car:", (int *) &cam->follow_car, NULL, 0, 1, Checkbox},
+                    {"Show the background:", (int *) &bg->show, NULL, 0, 1, Checkbox},
+                    {"road->size", &road->size, NULL, 0, 2000, Line},
+                    {"car->turn", NULL, &car->turn, 0.1f, 30, Line},
+                    {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line},
+                    {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line}
             }
     };
 
@@ -125,6 +121,7 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
 
 //check if the user click in a box of setting
 static Bool is_in(int x, int y, SDL_Rect* size) {
+    //TODO C'est pas la bonne hitbox pour les barres car j'ai changé la position qui ne dépend plus de la taille du texte.
 	int x_mean;
 	x_mean = size->x + size->w / 2;
 	return x >= x_mean - SIZE_LINE_TOOLBAR / 2 - 10 && x <= x_mean + SIZE_LINE_TOOLBAR / 2 + 10 && y > size->y && y < size->y + 3 * size->h;
@@ -139,10 +136,12 @@ void click_toolbar(Toolbar* toolbar){
         // TODO: faire un truc générique
         // TODO: initialiser tout, par exemple les var sélectionnées doivent être désélectionnées.
         toolbar->num_page = (mouse_x > toolbar->size.x + toolbar->size.w / 2);
+        return;
     }
 	// click on something ?
 	int i;
 	for (i = 0; i < NB_SETTINGS; i++){
+        //TODO C'est pas la bonne hitbox
 		if (is_in(toolbar->pos_click_x, mouse_y , &(toolbar->settings[toolbar->num_page][i].tex_size))){
 			//put the corresponding variable in select_var
 			toolbar->select_var_int = toolbar->settings[toolbar->num_page][i].int_variable;
@@ -273,10 +272,11 @@ void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar){
 		//line
         switch (toolbar->settings[toolbar->num_page][i].type) {
             case Line:
-                x_mean_line = toolbar->settings[toolbar->num_page][i].tex_size.x + toolbar->settings[toolbar->num_page][i].tex_size.w / 2;
+//                x_mean_line = toolbar->settings[toolbar->num_page][i].tex_size.x + toolbar->settings[toolbar->num_page][i].tex_size.w / 2;
+                x_mean_line = toolbar->size.x + toolbar->size.w / 2;
                 y_line = toolbar->settings[toolbar->num_page][i].tex_size.y + 2 * toolbar->settings[toolbar->num_page][i].tex_size.h;
                 // draw the line
-                SDL_RenderDrawLine(renderer, toolbar->size.x + toolbar->size.w /2 - SIZE_LINE_TOOLBAR / 2, y_line, toolbar->size.x + toolbar->size.w /2 + SIZE_LINE_TOOLBAR / 2, y_line);
+                SDL_RenderDrawLine(renderer,  x_mean_line- SIZE_LINE_TOOLBAR / 2, y_line, toolbar->size.x + toolbar->size.w /2 + SIZE_LINE_TOOLBAR / 2, y_line);
                 // cursor
                 min = (int)toolbar->settings[toolbar->num_page][i].min;
                 max = (int)toolbar->settings[toolbar->num_page][i].max;
@@ -314,11 +314,14 @@ void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar){
                 rect.w = toolbar->settings[toolbar->num_page][i].tex_size.h;
                 rect.x = toolbar->settings[toolbar->num_page][i].tex_size.x + toolbar->settings[toolbar->num_page][i].tex_size.w + 10;
                 rect.y = toolbar->settings[toolbar->num_page][i].tex_size.y;
-                if (toolbar->select_var_int == toolbar->settings[toolbar->num_page][i].void_variable){
-                    SDL_SetRenderDrawColor(renderer, 10, 10, 30, 255); // checkbox selected
+                if (toolbar->select_var_int == toolbar->settings[toolbar->num_page][i].int_variable){
+                    SDL_SetRenderDrawColor(renderer, 50, 0, 0, 255); // checkbox selected
                     SDL_RenderFillRect(renderer, &rect);
-                } else {
-                    SDL_SetRenderDrawColor(renderer, 25, 25, 75, 255); // empty checkbox
+                } else if (*toolbar->settings[toolbar->num_page][i].int_variable == True){
+                    SDL_SetRenderDrawColor(renderer, 25, 25, 75, 255); // green checkbox
+                    SDL_RenderFillRect(renderer, &rect);
+                } else if (*toolbar->settings[toolbar->num_page][i].int_variable == False){
+                    SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR); // empty checkbox
                     SDL_RenderDrawRect(renderer, &rect);
                 }
 
@@ -327,6 +330,7 @@ void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar){
                 rect.h = 10;
                 rect.w = 4;
                 break;
+
             default:
                 printf("Error: bad toolbar->settings[%d].type. Must be Line or Checkbox. \n", i);
         }
