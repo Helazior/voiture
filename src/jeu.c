@@ -310,6 +310,7 @@ void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car) {
 }
 
 void del_checkPoint(Road* road, Player* player) {
+    // TODO: revérifier et comprendre pourquoi ça marchait sans le "for"
     for (int num = 0; num < NB_OF_PLAYERS; ++num) {
         if (player[num].cp.tab_valid_checkPoints[road->num_closest_cp] != False){
             player[num].cp.nb_valid_checkPoints--;
@@ -318,9 +319,11 @@ void del_checkPoint(Road* road, Player* player) {
             }
         }
         for(int i = road->num_closest_cp; i < road->len_tab_cp - 1; i++){
-            road->tab_cp[i] = road->tab_cp[i + 1];
             player[num].cp.tab_valid_checkPoints[i] = player[num].cp.tab_valid_checkPoints[i+1];
         }
+    }
+    for(int i = road->num_closest_cp; i < road->len_tab_cp - 1; i++) {
+        road->tab_cp[i] = road->tab_cp[i + 1];
     }
     road->len_tab_cp--;
 }

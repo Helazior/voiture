@@ -10,7 +10,7 @@
 #define CREATE_MAP_AUTO TRAVELLING_SALESMAN_ROAD
 
 #define NB_CP 200
-
+#define DIST_CP 900
 
 /**
  * Call function create_fixe/naif/travelling_road
@@ -37,7 +37,7 @@ void create_naif_road(Road* road);
  * @return If a switch has been done
  *
  */
-bool uncross_all_segments(SDL_Rect tab_checkpoints[], int nb_cp);
+bool uncross_all_segments(SDL_Rect tab_checkpoints[], int nb_cp, int extend_size);
 
 /**
  * Implement a travelling salesman algo

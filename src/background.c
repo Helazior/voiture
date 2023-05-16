@@ -95,11 +95,11 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
                     {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line},
                     {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line}
             },
-            {// TODO dist cp
+            {
                 //TODO: voir pourquoi au dessus de 300? a ne fait plus de map ?
                     {"Generate Map:", (int *) &callback->create_road, NULL, 0, 1, Button},
-                    {"Nb max of CP:", (int *) &road->nb_cp_max, NULL, 4, 300, Line},
-                    {"IA show simu traj:", (int *) &ia->show_simu_traj, NULL, 0, 1, Checkbox},
+                    {"Nb max of CP:", (int *) &road->generation.nb_cp_max, NULL, 4, 300, Line},
+                    {"Dist between CP:", (int *) &road->generation.dist_cp, NULL, 20, 2000, Line},
                     {"Cam follow car:", (int *) &cam->follow_car, NULL, 0, 1, Checkbox},
                     {"Show the background:", (int *) &bg->show, NULL, 0, 1, Checkbox},
                     {"road->size", &road->size, NULL, 0, 2000, Line},

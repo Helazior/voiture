@@ -8,7 +8,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
-#define NB_OF_PLAYERS 1
+#define NB_OF_PLAYERS 6
 
 #define FRAMES_PER_SECONDE 60
 
@@ -99,7 +99,10 @@ typedef struct Entity {
 typedef struct Road {
 	SDL_Rect tab_cp[NB_SQUARE];
 	int len_tab_cp;
-    int nb_cp_max; // To create random road
+    struct {
+        int nb_cp_max; // To create random road
+        int dist_cp;
+    } generation;
     int num_closest_cp;
 	int square_width;
 	Bool select;

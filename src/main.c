@@ -46,7 +46,9 @@ int main(void) {
 	//init struct Road;
 	Road road = {
 		.len_tab_cp = 0,
-        .nb_cp_max = NB_CP,
+        .generation = {
+                .nb_cp_max = NB_CP,
+                .dist_cp = DIST_CP},
 		.square_width = 40,
 		.num_closest_cp = 0,
 		.select = False,
@@ -65,11 +67,7 @@ int main(void) {
 		// init struct Entity
 		init_car(&player[i].car, renderer, i);
 		// init struct Keys_pressed;
-		player[i].key.up = False;
-		player[i].key.down = False;
-		player[i].key.left = False;
-		player[i].key.right = False;
-		player[i].key.drift = none;
+        release_the_keys(&player[i].key);
 		//init cp
 		player[i].cp.nb_valid_checkPoints = 0;
 		init_player_cp(&player[i].cp, road.len_tab_cp);
@@ -82,11 +80,6 @@ int main(void) {
 	}
 
     remove_hairpin_turns(&road, player);
-
-//    printf("\nlen_tab_cp = %d | nb_cp_max = %d \n ", road.len_tab_cp, road.nb_cp_max);
-//    for (int i = 0; i < road.len_tab_cp; ++i) {
-//        printf("%d\n", road.tab_cp[i].y);
-//    }
 
 	//init struct Camera;
 	Camera cam = {
@@ -136,21 +129,7 @@ int main(void) {
 		remain_time = (int)lroundf(1000.f / FRAMES_PER_SECONDE + (float)lastTime - (float)SDL_GetTicks());
 		remain_time *= (int)(remain_time > 0);
 		SDL_Delay(remain_time); // wait*/
-//        if (count_loops < 6) {
-//            pause();
-//            if (count_loops == 2)
-//                create_road(&road);
-//            if (count_loops == 3)
-//                greedy(road.tab_cp);
-//            if (count_loops == 4) {
-//                int nb_change = 0;
-//                while (uncross_segments(road.tab_cp) && nb_change++ < 10);
-//                printf("\n_____\n");
-//            }
-//            if (count_loops == 5) {
-//                remove_hairpin_turns(&road , player);
-//            }
-//        }
+
         lastTime = SDL_GetTicks();
 		while (SDL_PollEvent(&event))//events
 		{
@@ -218,6 +197,7 @@ int main(void) {
                                 // function to create road
                                 if (toolbar.select_var_int == (int *) &callback.create_road) {
                                     // TODO : faire un thread pour pas avoir de freeze
+                                    // TODO : réinitialiser les IA
                                     create_road(&road);
                                     remove_hairpin_turns(&road, player);
                                     *toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable = false; // TODO: generaliser

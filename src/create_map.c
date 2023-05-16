@@ -11,7 +11,6 @@
 #include "../include/create_map.h"
 
 // pourra être changé dans une variable plus tard
-#define DIST_CP 900
 // TODO: faire par rapport à la position de départ et la direction de la voiture
 #define START_X 1060
 #define START_Y (-234)
@@ -63,7 +62,7 @@ void create_fixe_road(Road* road){
 
 void create_naif_road(Road* road) {
     // TODO rendre plus modulable
-	road->len_tab_cp = road->nb_cp_max;
+	road->len_tab_cp = road->generation.nb_cp_max;
 	road->tab_cp[0].x = START_X;
 	road->tab_cp[0].y = START_Y;
 	double direction = 0.;
@@ -78,8 +77,8 @@ void create_naif_road(Road* road) {
 		float turn_to_loop = PI * (1. - ((float)road->len_tab_cp - 2.) / (float)road->len_tab_cp);
 		direction += (((double)(rand() % 6)) / 5. - 0.5) * TIGHT_TURNS + turn_to_loop; //[-0.5; 0.5]
 		// angle in radius
-		new_pos_x += (int)(cos(direction) * DIST_CP);
-		new_pos_y += (int)(sin(direction) * DIST_CP);
+		new_pos_x += (int)(cos(direction) * road->generation.dist_cp);
+		new_pos_y += (int)(sin(direction) * road->generation.dist_cp);
 		road->tab_cp[i].x = new_pos_x;
 		road->tab_cp[i].y = new_pos_y;
 
@@ -114,6 +113,7 @@ static void random_set_up_algo(Road* road) {
  */
 static void grid_set_up_algo(Road* road) {
     srand(time(NULL));
+    int dist_cp = road->generation.dist_cp;
     int width = (int)round(sqrt(road->len_tab_cp) + 0.5);
     int i;
     for (int row = 0; row < width; ++row) {
@@ -123,9 +123,9 @@ static void grid_set_up_algo(Road* road) {
             }
             i = row * width + column;
             road->tab_cp[i].x =
-                    (column - (width >> 1)) * DIST_CP + (rand() % 200) - 100;
+                    (column - (width >> 1)) * dist_cp + (rand() % dist_cp / 5) - dist_cp / 10 ;
             road->tab_cp[i].y =
-                    (row - (width >> 1)) * DIST_CP + (rand() % 200) - 100;
+                    (row - (width >> 1)) * dist_cp + (rand() % dist_cp / 5) - dist_cp / 10;
             road->tab_cp[i].w = road->square_width;
             road->tab_cp[i].h = road->square_width;
         }
@@ -137,7 +137,7 @@ static void grid_set_up_algo(Road* road) {
  * @param road
  */
 void travelling_set_up_cp(Road* road) {
-    road->len_tab_cp = road->nb_cp_max;
+    road->len_tab_cp = road->generation.nb_cp_max;
 #if 0
     random_set_up_algo(road);
 #else
@@ -179,9 +179,13 @@ static int index_of_nearest_CP(SDL_Rect* tab_checkpoints, int cp_index, int nb_c
         );
         if (tmp_dist < nearest_sqrt_dist) {
             nearest_sqrt_dist = tmp_dist;
+//            if (!nearest_sqrt_dist)
+//                perror("=0");
             nearest_cp_index = current_index;
         }
     }
+//    if(!nearest_sqrt_dist)
+//        exit(1);
     return nearest_cp_index;
 }
 
@@ -219,19 +223,21 @@ static bool is_intersect(SDL_Rect* a, SDL_Rect* b, SDL_Rect* c, SDL_Rect* d) {
 
 /**
  * Extend each segment to avoid collision with a large road
+ * The segments need to be not null
  * @return is_intersect
  */
-static bool is_intersect_extend(SDL_Rect a, SDL_Rect b, SDL_Rect c, SDL_Rect d) {
-    int road_size = DIST_CP / 5; // TODO: put in arg
-
-//    printf("\n%d, %d, %d, %d\n", a.x, a.y, b.x, b.y);
+static bool is_intersect_extend(SDL_Rect a, SDL_Rect b, SDL_Rect c, SDL_Rect d, int extend_size) {
     // make segments of size road_size
     SDL_Rect ab;
     ab.x = b.x - a.x;
     ab.y = b.y - a.y;
     int size_ab = (int)sqrt(ab.x * ab.x + ab.y * ab.y);
-    ab.x = ab.x * road_size / size_ab;
-    ab.y = ab.y * road_size / size_ab;
+//    printf("ab = %d\n", size_ab);
+//    if (size_ab == 0) {
+//        exit(2);
+//    }
+    ab.x = ab.x * extend_size / size_ab;
+    ab.y = ab.y * extend_size / size_ab;
     a.x -= ab.x;
     b.x += ab.x;
     a.y -= ab.y;
@@ -241,8 +247,11 @@ static bool is_intersect_extend(SDL_Rect a, SDL_Rect b, SDL_Rect c, SDL_Rect d) 
     cd.x = d.x - c.x;
     cd.y = d.y - c.y;
     int size_cd = (int)sqrt(cd.x * cd.x + cd.y * cd.y);
-    cd.x = cd.x / size_cd * road_size;
-    cd.y = cd.y / size_cd * road_size;
+//    printf("cd = %d\n", size_cd);
+//    if (size_cd == 0)
+//        exit(3);
+    cd.x = cd.x * extend_size / size_cd;
+    cd.y = cd.y * extend_size / size_cd;
     c.x -= cd.x;
     d.x += cd.x;
     c.y -= cd.y;
@@ -252,24 +261,32 @@ static bool is_intersect_extend(SDL_Rect a, SDL_Rect b, SDL_Rect c, SDL_Rect d) 
     return is_intersect(&a, &b, &c, &d);
 }
 
-static bool uncross_segments(SDL_Rect tab_checkpoints[], int nb_cp) {
+/**
+ * @param nb_cp At least 4
+ * @param extend_size the size to extend the segment to avoid that to road touch another road without crossing it
+ * @return has_been_changed
+ */
+static bool uncross_segments(SDL_Rect tab_checkpoints[], int nb_cp, int extend_size) {
     // index_segm1 && index_segm2 are always distincts to have an intersection :
     // so index_segm2 is at least 2 above index_segm1
+    if (nb_cp < 4)
+        return false;
     bool has_been_changed = false;
-    for (int index_segm1 = 0; index_segm1 < nb_cp - 2; ++index_segm1) {
+    for (int index_segm1 = 0; index_segm1 < nb_cp - 3; ++index_segm1) {
         for (int index_segm2 = index_segm1 + 2; index_segm2 < nb_cp; ++index_segm2) {
-            if (is_intersect_extend(tab_checkpoints[index_segm1],
+            // TODO : si ça prend du temps on pourrait opti en ne le faisant que sur les CP qui ont changés
+            if (is_intersect_extend(tab_checkpoints[index_segm1 % nb_cp],
                                     tab_checkpoints[(index_segm1 + 1) % nb_cp],
                                     tab_checkpoints[index_segm2 % nb_cp],
-                                    tab_checkpoints[(index_segm2 + 1) % nb_cp]
+                                    tab_checkpoints[(index_segm2 + 1) % nb_cp],
+                                    extend_size
             )) {
-//                printf("%d %d\n", index_segm1, index_segm2);
                 has_been_changed = true;
                 // swap the two nearest indexes to invert the smallest loop
-                if (index_segm2 - (index_segm1 + 1) < ((index_segm2 + 1) - index_segm1 + nb_cp) % nb_cp) {
-                    swap(&tab_checkpoints[index_segm1 + 1], &tab_checkpoints[index_segm2 % nb_cp]);
+                if (((index_segm2 % nb_cp) - (index_segm1 + 1)) % nb_cp < ((index_segm2 + 1) - index_segm1 + nb_cp) % nb_cp) {
+                    swap(&tab_checkpoints[(index_segm1 + 1) % nb_cp], &tab_checkpoints[index_segm2 % nb_cp]);
                 } else {
-                    swap(&tab_checkpoints[index_segm1], &tab_checkpoints[(index_segm2 + 1) % nb_cp]);
+                    swap(&tab_checkpoints[index_segm1 % nb_cp], &tab_checkpoints[(index_segm2 + 1) % nb_cp]);
                 }
             }
         }
@@ -277,9 +294,9 @@ static bool uncross_segments(SDL_Rect tab_checkpoints[], int nb_cp) {
     return has_been_changed;
 }
 
-bool uncross_all_segments(SDL_Rect tab_checkpoints[], int nb_cp) {
+bool uncross_all_segments(SDL_Rect tab_checkpoints[], int nb_cp, int extend_size) {
     int nb_change = 0;
-    while (uncross_segments(tab_checkpoints, nb_cp) && nb_change++ < 30); // TODO : nombre arbitraire, changer
+    while (uncross_segments(tab_checkpoints, nb_cp, extend_size) && nb_change++ < 30); // TODO : nombre arbitraire, changer
     return nb_change != 0;
 }
 
@@ -297,7 +314,6 @@ void remove_hairpin_turns(Road* road , Player* player) {
                         atan2(road->tab_cp[(i + 1) % road->len_tab_cp].y - road->tab_cp[i].y,
                               road->tab_cp[(i + 1) % road->len_tab_cp].x - road->tab_cp[i].x);
 
-
                 if (fabs(angle) < 1) { // TODO: la valeur est arbitraire, faire un truc modulaire
                     road->num_closest_cp = i;
                     del_checkPoint(road, player);
@@ -305,7 +321,17 @@ void remove_hairpin_turns(Road* road , Player* player) {
                 }
             }
         } while (has_removed);
-    } while(uncross_all_segments(road->tab_cp, road->len_tab_cp) && nb_loop++ < 10);
+    } while(uncross_all_segments(road->tab_cp, road->len_tab_cp, road->generation.dist_cp) && nb_loop++ < 5);
+
+    // TODO à faire bien :
+    for (int i = 0; i < NB_OF_PLAYERS; ++i) {
+        player[i].car.pos_initx = (float)road->tab_cp[0].x - 200;
+        player[i].car.pos_inity = (float)road->tab_cp[0].y + 100.f * (float)i;
+        player[i].car.posx = player[i].car.pos_initx;
+        player[i].car.posy = player[i].car.pos_inity;
+        player[i].car.frame.x = (int)(player[i].car.posx);
+        player[i].car.frame.y = (int)(player[i].car.posy);
+    }
 }
 
 /**
@@ -314,7 +340,7 @@ void remove_hairpin_turns(Road* road , Player* player) {
  */
 static void travelling_salesman_on_cp(Road* road) {
     greedy(road->tab_cp, road->len_tab_cp);
-    uncross_all_segments(road->tab_cp, road->len_tab_cp);
+    uncross_all_segments(road->tab_cp, road->len_tab_cp, road->generation.dist_cp);
 }
 
 void create_travelling_road(Road* road) {
