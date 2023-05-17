@@ -200,6 +200,7 @@ int main(void) {
                                     // TODO : réinitialiser les IA
                                     create_road(&road);
                                     remove_hairpin_turns(&road, player);
+                                    init_cam(&cam, &player[0].car);
                                     *toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable = false; // TODO: generaliser
                                 }
                                 // the box has just been unchecked

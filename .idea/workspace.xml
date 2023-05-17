@@ -3,7 +3,13 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
-  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+  <component name="CMakePresetLoader">{
+  &quot;useNewFormat&quot;: true
+}</component>
+  <component name="CMakeReloadState">
+    <option name="reloaded" value="true" />
+  </component>
+  <component name="CMakeRunConfigurationManager">
     <generated>
       <config projectName="voiture" targetName="run" />
       <config projectName="voiture" targetName="valgrind" />
@@ -21,16 +27,10 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="">
+    <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="On peut régler la distance et surtout bug de del_checkPoint réglé&#10;Le bug faisait une division par zéro lors de la création de map lorsqu'on avait plusieurs joueurs">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/exec" beforeDir="false" afterPath="$PROJECT_DIR$/exec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/ia.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/ia.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/jeu.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/jeu.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/ia.o" beforeDir="false" afterPath="$PROJECT_DIR$/obj/ia.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/jeu.o" beforeDir="false" afterPath="$PROJECT_DIR$/obj/jeu.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/main.o" beforeDir="false" afterPath="$PROJECT_DIR$/obj/main.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ia.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/ia.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/jeu.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/jeu.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/create_map.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/create_map.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -41,6 +41,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -82,19 +83,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="RunOnceActivity.cidr.known.project.marker" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="cf.first.check.clang-format" value="false" />
-    <property name="cidr.known.project.marker" value="true" />
-    <property name="cmake.loaded.for.project" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/Makefile" />
-    <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="CLionExternalConfigurable" />
-  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;creat-map&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/clement/voiture/CMakeLists.txt&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.gutterIcons&quot;,
+    &quot;structure.view.defaults.are.configured&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/include" />
@@ -106,12 +112,12 @@
         <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+    <configuration name="debug" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="voiture" TARGET_NAME="voiture" CONFIG_NAME="Debug" version="1" RUN_PATH="exec">
       <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+        <option name="CLION.COMPOUND.BUILD" enabled="true" />
       </method>
     </configuration>
-    <configuration name="run" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="voiture" TARGET_NAME="all" CONFIG_NAME="all" version="1" RUN_PATH="exec">
+    <configuration name="run" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="voiture" TARGET_NAME="all" version="1" RUN_PATH="exec">
       <method v="2">
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
       </method>
@@ -129,6 +135,7 @@
     </configuration>
     <list>
       <item itemvalue="CMake Application.voiture" />
+      <item itemvalue="Makefile Application.debug" />
       <item itemvalue="Makefile Application.run" />
       <item itemvalue="Makefile Target.run" />
     </list>
@@ -154,6 +161,16 @@
       <workItem from="1640539268339" duration="10045000" />
       <workItem from="1644946211310" duration="244000" />
       <workItem from="1645377049091" duration="22529000" />
+      <workItem from="1683746484163" duration="6932000" />
+      <workItem from="1683830966853" duration="3765000" />
+      <workItem from="1683838505989" duration="9196000" />
+      <workItem from="1683924008596" duration="9079000" />
+      <workItem from="1683971072117" duration="23129000" />
+      <workItem from="1684059832463" duration="24101000" />
+      <workItem from="1684174886755" duration="15006000" />
+      <workItem from="1684257974794" duration="4119000" />
+      <workItem from="1684262430982" duration="12472000" />
+      <workItem from="1684351420006" duration="3431000" />
     </task>
     <task id="LOCAL-00001" summary="Correction voiture sans cam">
       <created>1645378970581</created>
@@ -183,11 +200,94 @@
       <option name="project" value="LOCAL" />
       <updated>1645396258399</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Début de l'algo du voyageur de commerce + un peu de refacto">
+      <created>1683753407524</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1683753407524</updated>
+    </task>
+    <task id="LOCAL-00006" summary="algo du voyageur de commerce greedy">
+      <created>1683848032440</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1683848032440</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Première version du décroisement de route, succès moyen">
+      <created>1683927437979</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1683927437979</updated>
+    </task>
+    <task id="LOCAL-00008" summary="implementation de grid_set_up_algo qui répartit les points équitablement. Tests étape par étape visuel. Les algos marchent mais le rendu est à revoir">
+      <created>1683932909717</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1683932909717</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Correction bug, uncross_segment ne regardait pas le dernier cas">
+      <created>1683973993381</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1683973993381</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Extension des segments de &quot;is_intersect&quot; &#10;&#10;C'est pour éviter les collisions de route sans qu'elles se croisent. On étend artificiellement la route pour qu'elle se croise dans l'algo">
+      <created>1683981210682</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1683981210682</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Création de &quot;remove_hairpin_turns&quot; qui va enlever les virages en épingle">
+      <created>1683993251263</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1683993251263</updated>
+    </task>
+    <task id="LOCAL-00012" summary="réglage paramètres">
+      <created>1683995297475</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1683995297475</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Création d'une 2eme page dans la toolbar avec des &quot;Button&quot; pour plus tard lancer des fonctions en un clique">
+      <created>1684084049509</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1684084049510</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Le &quot;Button&quot; de création de map fonctionne">
+      <created>1684189799779</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1684189799779</updated>
+    </task>
+    <task id="LOCAL-00015" summary="On peut régler la distance et surtout bug de del_checkPoint réglé&#10;Le bug faisait une division par zéro lors de la création de map lorsqu'on avait plusieurs joueurs">
+      <created>1684274516061</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1684274516061</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VCPKGProject">
+    <isAutomaticEditVcpkgJson value="false" />
+    <isAutomaticCheckingOnLaunch value="false" />
+    <isAutomaticFoundErrors value="true" />
+    <isAutomaticFoundErrors value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
@@ -195,6 +295,17 @@
     <MESSAGE value="Correction voiture et enlevé warning dans IA" />
     <MESSAGE value="correction IA qui se mettait pas en route" />
     <MESSAGE value="Reste que l'IA à gérer pour les autres joueurs.&#10;&#10;Faut modifier Road pour en mettre une partie dans IA" />
-    <option name="LAST_COMMIT_MESSAGE" value="Reste que l'IA à gérer pour les autres joueurs.&#10;&#10;Faut modifier Road pour en mettre une partie dans IA" />
+    <MESSAGE value="Début de l'algo du voyageur de commerce + un peu de refacto" />
+    <MESSAGE value="algo du voyageur de commerce greedy" />
+    <MESSAGE value="Première version du décroisement de route, succès moyen" />
+    <MESSAGE value="implementation de grid_set_up_algo qui répartit les points équitablement. Tests étape par étape visuel. Les algos marchent mais le rendu est à revoir" />
+    <MESSAGE value="Correction bug, uncross_segment ne regardait pas le dernier cas" />
+    <MESSAGE value="Extension des segments de &quot;is_intersect&quot; &#10;&#10;C'est pour éviter les collisions de route sans qu'elles se croisent. On étend artificiellement la route pour qu'elle se croise dans l'algo" />
+    <MESSAGE value="Création de &quot;remove_hairpin_turns&quot; qui va enlever les virages en épingle" />
+    <MESSAGE value="réglage paramètres" />
+    <MESSAGE value="Création d'une 2eme page dans la toolbar avec des &quot;Button&quot; pour plus tard lancer des fonctions en un clique" />
+    <MESSAGE value="Le &quot;Button&quot; de création de map fonctionne" />
+    <MESSAGE value="On peut régler la distance et surtout bug de del_checkPoint réglé&#10;Le bug faisait une division par zéro lors de la création de map lorsqu'on avait plusieurs joueurs" />
+    <option name="LAST_COMMIT_MESSAGE" value="On peut régler la distance et surtout bug de del_checkPoint réglé&#10;Le bug faisait une division par zéro lors de la création de map lorsqu'on avait plusieurs joueurs" />
   </component>
 </project>
