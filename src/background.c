@@ -94,13 +94,13 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
             },
             {
                     {"Generate Map:", (int *) &callback->create_road, NULL, 0, 1, Button},
-                    {"Nb max of CP:", (int *) &road->generation.nb_cp_max, NULL, 4, 300, Line},
-                    {"Nb max of CP:", (int *) &road->generation.nb_cp_max, NULL, 4, 300, Line},
+                    {"Nb max of CP:", (int *) &road->generation.nb_cp_max, NULL, 4, 1000, Line},
                     {"CP's size angle to remove", NULL, &road->generation.cp_size_angle_to_remove, 0.f, 30.f, Line},
                     {"Dist between CP:", (int *) &road->generation.dist_cp, NULL, 20, 2000, Line},
                     {"Cam follow car:", (int *) &cam->follow_car, NULL, 0, 1, Checkbox},
                     {"Show the background:", (int *) &bg->show, NULL, 0, 1, Checkbox},
                     {"road->size", &road->size, NULL, 0, 2000, Line},
+                    {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line},
                     {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line}
             }
     };

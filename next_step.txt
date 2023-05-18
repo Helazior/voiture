@@ -1,5 +1,7 @@
-TODO: enlever les problèmes de mémoire. Sans doute à cause de la 2eme page
-Dans la branche creat-map on va créer une map automatiquement avec l'algo du voyageur de commerce, une animation montrera l'algo si on le souhaite (enum en option)
+TODO: mettre un nombre arbitraire d'arguments dans Toolbar
+TODO: lorsqu'on met plus de 300 cp ça fait n'imp, revoire l'algo
+
+creat-map on va créer une map automatiquement avec l'algo du voyageur de commerce, une animation montrera l'algo si on le souhaite (enum en option)
 
 À faire pour commencer :
 
@@ -10,6 +12,7 @@ Dans la branche creat-map on va créer une map automatiquement avec l'algo du vo
 
 
 [BUG à résoudre] :
+- Une map a fait une boucle infinie
 - Une map s'est créée avec que des CP jaunes
 (Done (c'était event->button le pb)) - quand j'appuie sur espace et que je veux déplacer un CP, gros bug qui fait disparaitre la route
 - Les traces de prédiction de l'IA sont sous le bg
