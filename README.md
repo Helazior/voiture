@@ -22,6 +22,14 @@ Install on Arch:
 sudo pacman -S sdl2 sdl2_image sdl2_ttf
 ```
 
+** **
+Install repo
+```
+git clone https://github.com/Helazior/voiture.git
+cd voiture
+mkdir obj
+```
+
 ** **  
 
 # Compiler
@@ -36,14 +44,21 @@ make
 make run
 ```
 
+with gcc -O3 optimisations :
+
+```
+make opti
+```
+
 debug mode :
 
 ```
 make debug
 ```
 
-with gcc -O3 optimisations :
+valgrind mode :
 
 ```
-make opti
+make valgrind
 ```
+
