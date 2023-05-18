@@ -1,3 +1,4 @@
+TODO: enlever les problèmes de mémoire. Sans doute à cause de la 2eme page
 Dans la branche creat-map on va créer une map automatiquement avec l'algo du voyageur de commerce, une animation montrera l'algo si on le souhaite (enum en option)
 
 À faire pour commencer :

@@ -156,6 +156,9 @@ void calcul_next_cp(Road* road, Ia* ia, PlayerCP* cp, Entity* car){
 	if (ia->active_traj == False){
 		ia->go_ahead = True;
 	}
+    if (road->len_tab_cp == 0) {
+        return;
+    }
 	if (ia->num_next_cp == -1 && cp->nb_valid_checkPoints > 1){
 		ia->num_next_cp = 0; // TODO à changer, faut prendre le prochain CP, pas le premier car il peut avoir été pris
 		while (cp->tab_valid_checkPoints[ia->num_next_cp++] != Start);

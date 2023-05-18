@@ -174,8 +174,7 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam, Bool first_car) {
 
 void manage_key(SDL_Event* event, Keys_pressed* key, Bool status, Camera* cam, Road* road, Toolbar* toolbar, Player* player, uint8_t num_player){
 	// TODO : faire un enum !
-	short add_to_var;
-	add_to_var = 1;
+#define ADD_TO_VAR 1
 	switch(event->key.keysym.sym){
 		case SDLK_UP:
 			key->up = status;
@@ -230,7 +229,7 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool status, Camera* cam, R
 		case SDLK_PLUS:
 		case SDLK_EQUALS:
 			if (toolbar->settings[toolbar->num_page][toolbar->num_setting].type == Line && (toolbar->select_var_int || toolbar->select_var_float)){
-				change_variable_keys(toolbar, add_to_var);
+				change_variable_keys(toolbar, ADD_TO_VAR);
 			}
 			break;
 		case SDLK_KP_MINUS:
@@ -239,7 +238,7 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool status, Camera* cam, R
 		case SDLK_LESS:
 		case SDLK_6:
 			if (toolbar->settings[toolbar->num_page][toolbar->num_setting].type == Line && (toolbar->select_var_int || toolbar->select_var_float)){
-				change_variable_keys(toolbar, -add_to_var);
+				change_variable_keys(toolbar, -ADD_TO_VAR);
 			}
 			break;
 		case SDLK_SPACE:
@@ -260,7 +259,7 @@ void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Play
         road->len_tab_cp++;
         for (int i = 0; i < NB_OF_PLAYERS; ++i) {
             player[i].cp.tab_valid_checkPoints[road->len_tab_cp - 1] = False;
-            if (road->len_tab_cp == 4){
+            if (road->len_tab_cp >= 4){
                 calcul_next_cp(road, player[i].ia, &player[i].cp, car);
             }
         }

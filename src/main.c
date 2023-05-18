@@ -42,13 +42,13 @@ int main(void) {
 		goto Quit;
 	}
 
-
 	//init struct Road;
 	Road road = {
 		.len_tab_cp = 0,
         .generation = {
                 .nb_cp_max = NB_CP,
-                .dist_cp = DIST_CP},
+                .dist_cp = DIST_CP,
+                .cp_size_angle_to_remove = 10.f},
 		.square_width = 40,
 		.num_closest_cp = 0,
 		.select = False,
@@ -56,6 +56,9 @@ int main(void) {
 		.selectx = 0,
 		.selecty = 0,
 	};
+    road.generation.nb_cp_max = NB_CP;
+    road.generation.dist_cp = DIST_CP;
+    road.generation.cp_size_angle_to_remove = 10.f;
 
     create_road(&road);
 
@@ -65,6 +68,7 @@ int main(void) {
 	Player player[NB_OF_PLAYERS];
 	for (int i = 0; i < NB_OF_PLAYERS; ++i) {
 		// init struct Entity
+        player[i].car.turn = TURN;
 		init_car(&player[i].car, renderer, i);
 		// init struct Keys_pressed;
         release_the_keys(&player[i].key);
@@ -156,7 +160,7 @@ int main(void) {
 							if (road.len_tab_cp > 0) {
 								// TODO : mettre pour tous
                                 del_closest_checkPoint(&road, &event, &cam, player);
-								if (road.len_tab_cp == 3) {
+								if (road.len_tab_cp <= 3) {
 									stop_ia(player);
 								}
 							}
@@ -178,41 +182,45 @@ int main(void) {
 						road.select = False;
 					} else if (event.button.button == SDL_BUTTON_LEFT) {
                         //TODO: mettre dans une fonction !!!
-                        toolbar.is_selecting = False;
-                        if ((toolbar.settings[toolbar.num_page][toolbar.num_setting].type == Checkbox
-                             || toolbar.settings[toolbar.num_page][toolbar.num_setting].type == Button) &&
-                            toolbar.select_var_int == toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable) {
+                        if (toolbar.is_selecting) {
+                            toolbar.is_selecting = False;
+                            if ((toolbar.settings[toolbar.num_page][toolbar.num_setting].type == Checkbox
+                                 || toolbar.settings[toolbar.num_page][toolbar.num_setting].type == Button)
+                                 && toolbar.select_var_int ==
+                                toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable) {
 
-                            *toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable =
-                                    (*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable + 1) % 2;
+                                *toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable =
+                                        (*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable + 1) % 2;
 
-                            // the box has just been checked
-                            if (*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable == True) {
-                                // the box is ia->active
-                                if (toolbar.select_var_int == (int *) &player[0].ia->active) {
-                                    // TODO : Utile ?
-                                    init_ia(player[0].ia, &road, &player[0].car, &player[0].cp);
+                                // the box has just been checked
+                                if (*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable == True) {
+                                    // the box is ia->active
+                                    if (toolbar.select_var_int == (int *) &player[0].ia->active) {
+                                        // TODO : Utile ?
+                                        init_ia(player[0].ia, &road, &player[0].car, &player[0].cp);
+                                    }
+                                    // TODO : à mettre dans une fonction
+                                    // function to create road
+                                    if (toolbar.select_var_int == (int *) &callback.create_road) {
+                                        // TODO : faire un thread pour pas avoir de freeze
+                                        // TODO : réinitialiser les IA
+                                        create_road(&road);
+                                        remove_hairpin_turns(&road, player);
+                                        init_cam(&cam, &player[0].car);
+                                        *toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable = false; // TODO: generaliser
+                                    }
+                                    // the box has just been unchecked
+                                } else {
+                                    // the box is ia->active
+                                    if (toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable ==
+                                        (int *) &player[0].ia->active) {
+                                        // the ia change keys, so we need to fixe them to False
+                                        release_the_keys(&player[0].key);
+                                    }
                                 }
-                                // TODO : à mettre dans une fonction
-                                // function to create road
-                                if (toolbar.select_var_int == (int *) &callback.create_road) {
-                                    // TODO : faire un thread pour pas avoir de freeze
-                                    // TODO : réinitialiser les IA
-                                    create_road(&road);
-                                    remove_hairpin_turns(&road, player);
-                                    init_cam(&cam, &player[0].car);
-                                    *toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable = false; // TODO: generaliser
-                                }
-                                // the box has just been unchecked
-                            } else {
-                                // the box is ia->active
-                                if (toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable == (int *) &player[0].ia->active) {
-                                    // the ia change keys, so we need to fixe them to False
-                                    release_the_keys(&player[0].key);
-								}
-							}
-							toolbar.select_var_int = NULL;
-						}
+                                toolbar.select_var_int = NULL;
+                            }
+                        }
 					}
 					break;
 				default:
@@ -244,7 +252,7 @@ int main(void) {
 		for (int i = 0; i < NB_OF_PLAYERS; ++i) {
 			// IA take control of the keys
 			// TODO : mettre avant les contrôles humains
-			if (player[i].ia->active && player[i].ia->num_next_cp != -1) {
+			if (player[i].ia->active && player[i].ia->num_next_cp != -1 && road.len_tab_cp >= 4) {
 				ia_manage_keys(player[i].ia, &player[i].key, &player[i].car, renderer, &cam, &road);
 			}
 		}

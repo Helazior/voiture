@@ -27,10 +27,21 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="On peut régler la distance et surtout bug de del_checkPoint réglé&#10;Le bug faisait une division par zéro lors de la création de map lorsqu'on avait plusieurs joueurs">
+    <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="Correction caméra lors d'une nouvelle map">
+      <change afterPath="$PROJECT_DIR$/vgcore.12182" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/vgcore.13430" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/vgcore.27482" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/vgcore.28578" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/exec" beforeDir="false" afterPath="$PROJECT_DIR$/exec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/background.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/background.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/jeu.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/jeu.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/next_step.txt" beforeDir="false" afterPath="$PROJECT_DIR$/next_step.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/background.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/background.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/create_map.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/create_map.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ia.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/ia.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/jeu.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/jeu.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -170,7 +181,9 @@
       <workItem from="1684174886755" duration="15006000" />
       <workItem from="1684257974794" duration="4119000" />
       <workItem from="1684262430982" duration="12472000" />
-      <workItem from="1684351420006" duration="3431000" />
+      <workItem from="1684351420006" duration="9701000" />
+      <workItem from="1684409872805" duration="8478000" />
+      <workItem from="1684439366906" duration="4281000" />
     </task>
     <task id="LOCAL-00001" summary="Correction voiture sans cam">
       <created>1645378970581</created>
@@ -277,7 +290,14 @@
       <option name="project" value="LOCAL" />
       <updated>1684274516061</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Correction caméra lors d'une nouvelle map">
+      <created>1684356320040</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1684356320040</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -306,6 +326,7 @@
     <MESSAGE value="Création d'une 2eme page dans la toolbar avec des &quot;Button&quot; pour plus tard lancer des fonctions en un clique" />
     <MESSAGE value="Le &quot;Button&quot; de création de map fonctionne" />
     <MESSAGE value="On peut régler la distance et surtout bug de del_checkPoint réglé&#10;Le bug faisait une division par zéro lors de la création de map lorsqu'on avait plusieurs joueurs" />
-    <option name="LAST_COMMIT_MESSAGE" value="On peut régler la distance et surtout bug de del_checkPoint réglé&#10;Le bug faisait une division par zéro lors de la création de map lorsqu'on avait plusieurs joueurs" />
+    <MESSAGE value="Correction caméra lors d'une nouvelle map" />
+    <option name="LAST_COMMIT_MESSAGE" value="Correction caméra lors d'une nouvelle map" />
   </component>
 </project>

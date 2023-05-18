@@ -19,31 +19,26 @@ typedef struct visible_sitting{
 	float min;
 	float max;
 	Type_of_settings type;
-}Visible_sitting;
+}Visible_setting;
 
 static int init_setting(
-		Setting settings[NB_PAGES][NB_SETTINGS],
-		Visible_sitting sub_sittings[NB_PAGES][NB_SETTINGS],
-		SDL_Renderer *renderer,
-		TTF_Font* font,
-		SDL_Color fg_color,
-		SDL_Color bg_color,
+        Setting settings[][NB_SETTINGS],
+        Visible_setting sub_settings[NB_PAGES][NB_SETTINGS],
+        SDL_Renderer *renderer,
+        TTF_Font* font,
+        SDL_Color fg_color,
+        SDL_Color bg_color,
         int toolbar_y
 		){
 
     for (int num_page = 0; num_page < NB_PAGES; ++num_page) {
         for (int num_var = 0; num_var < NB_SETTINGS; num_var++){
-            if (sub_sittings[num_page][num_var].int_variable != NULL){
-                settings[num_page][num_var].int_variable = sub_sittings[num_page][num_var].int_variable;
-            } else if (sub_sittings[num_page][num_var].float_variable != NULL) {
-                settings[num_page][num_var].float_variable = sub_sittings[num_page][num_var].float_variable;
-            } else {
-                printf("Error: no variable in the setting %d\n", num_var);
-            }
-            settings[num_page][num_var].type = sub_sittings[num_page][num_var].type;
-            settings[num_page][num_var].min = sub_sittings[num_page][num_var].min;
-            settings[num_page][num_var].max = sub_sittings[num_page][num_var].max;
-            SDL_Surface* text = TTF_RenderText_Shaded(font, sub_sittings[num_page][num_var].name, fg_color, bg_color);
+            settings[num_page][num_var].int_variable = sub_settings[num_page][num_var].int_variable;
+            settings[num_page][num_var].float_variable = sub_settings[num_page][num_var].float_variable;
+            settings[num_page][num_var].type = sub_settings[num_page][num_var].type;
+            settings[num_page][num_var].min = sub_settings[num_page][num_var].min;
+            settings[num_page][num_var].max = sub_settings[num_page][num_var].max;
+            SDL_Surface* text = TTF_RenderText_Shaded(font, sub_settings[num_page][num_var].name, fg_color, bg_color);
             if (!text){
                 SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[DEBUG] > %s", TTF_GetError());
                 return EXIT_FAILURE;
@@ -68,12 +63,14 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
 	toolbar->size.w = WIDTH_TOOLBAR;
 	toolbar->size.y = 0;
     toolbar->top_h = 30;
+    toolbar->pos_click_x = 0;
 
 	toolbar->select_var_int = NULL;
 	toolbar->select_var_float = NULL;
 	toolbar->is_selecting = False;
 
     toolbar->num_page = 0;
+    toolbar->num_setting = 0; // by default "-" and "+" change the first var
 
     //init font
     TTF_Font* font = TTF_OpenFont(FONT, FONT_SIZE);
@@ -83,7 +80,7 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
     }
     SDL_Color fg_color = { WHITE };
     SDL_Color bg_color = { COLOR_TOOLBAR };
-    Visible_sitting sub_sittings[2][NB_SETTINGS] = {
+    Visible_setting sub_settings[][NB_SETTINGS] = {
             {
                     {"IA:", (int*)&ia->active, NULL, 0, 1, Checkbox},
                     {"IA drift:", (int*)&ia->drift, NULL, 0, 1, Checkbox},
@@ -96,22 +93,21 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
                     {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line}
             },
             {
-                //TODO: voir pourquoi au dessus de 300? a ne fait plus de map ?
                     {"Generate Map:", (int *) &callback->create_road, NULL, 0, 1, Button},
                     {"Nb max of CP:", (int *) &road->generation.nb_cp_max, NULL, 4, 300, Line},
+                    {"Nb max of CP:", (int *) &road->generation.nb_cp_max, NULL, 4, 300, Line},
+                    {"CP's size angle to remove", NULL, &road->generation.cp_size_angle_to_remove, 0.f, 30.f, Line},
                     {"Dist between CP:", (int *) &road->generation.dist_cp, NULL, 20, 2000, Line},
                     {"Cam follow car:", (int *) &cam->follow_car, NULL, 0, 1, Checkbox},
                     {"Show the background:", (int *) &bg->show, NULL, 0, 1, Checkbox},
                     {"road->size", &road->size, NULL, 0, 2000, Line},
-                    {"car->turn", NULL, &car->turn, 0.1f, 30, Line},
-                    {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line},
                     {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line}
             }
     };
 
     // init struct Toolbar:
 
-	if (init_setting(toolbar->settings, sub_sittings, renderer, font, fg_color, bg_color, toolbar->top_h) == EXIT_FAILURE) {
+	if (init_setting(toolbar->settings, sub_settings, renderer, font, fg_color, bg_color, toolbar->top_h) == EXIT_FAILURE) {
         return EXIT_FAILURE;
     }
 

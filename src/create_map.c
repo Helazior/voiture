@@ -315,14 +315,14 @@ void remove_hairpin_turns(Road* road , Player* player) {
                         atan2(road->tab_cp[(i + 1) % road->len_tab_cp].y - road->tab_cp[i].y,
                               road->tab_cp[(i + 1) % road->len_tab_cp].x - road->tab_cp[i].x);
 
-                if (fabs(angle) < 1) { // TODO: la valeur est arbitraire, faire un truc modulaire
+                if (fabs(angle) < 0.1 * road->generation.cp_size_angle_to_remove) { // TODO : la valeur est arbitraire, faire un truc modulaire
                     road->num_closest_cp = i;
                     del_checkPoint(road, player);
                     has_removed = true;
                 }
             }
         } while (has_removed);
-    } while(uncross_all_segments(road->tab_cp, road->len_tab_cp, road->generation.dist_cp) && nb_loop++ < 5);
+    } while(uncross_all_segments(road->tab_cp, road->len_tab_cp, road->generation.dist_cp) && nb_loop++ < 30);
 
     // TODO à faire bien :
     for (int i = 0; i < NB_OF_PLAYERS; ++i) {

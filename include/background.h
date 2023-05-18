@@ -49,7 +49,7 @@ typedef struct Toolbar{
 	int pos_click_x;
     int* select_var_int;
     float* select_var_float;
-    Bool is_selecting;
+    bool is_selecting;
     int num_page; // of the toolbar
     int num_setting;
     Setting settings[NB_PAGES][NB_SETTINGS];
