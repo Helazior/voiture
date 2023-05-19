@@ -98,10 +98,10 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
                     {"CP's size angle to remove", NULL, &road->generation.cp_size_angle_to_remove, 0.f, 30.f, Line},
                     {"Dist between CP:", (int *) &road->generation.dist_cp, NULL, 20, 2000, Line},
                     {"Nb loops to uncross segments:", (int *) &road->generation.nb_loops_uncross_segments, NULL, 0, 100, Line},
+                    {"Algo greedy:", (int *) &road->generation.greedy, NULL, 0, 1, Checkbox},
+                    {"Algo uncross segments:", (int *) &road->generation.uncross_all_segments, NULL, 0, 1, Checkbox},
+                    {"Algo remove hairpin turns:", (int *) &road->generation.remove_hairpin_turns, NULL, 0, 1, Checkbox},
                     {"Cam follow car:", (int *) &cam->follow_car, NULL, 0, 1, Checkbox},
-                    {"Show the background:", (int *) &bg->show, NULL, 0, 1, Checkbox},
-                    {"road->size", &road->size, NULL, 0, 2000, Line},
-                    {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line}
             }
     };
 
@@ -314,7 +314,7 @@ void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar){
                     SDL_SetRenderDrawColor(renderer, 50, 0, 0, 255); // checkbox selected
                     SDL_RenderFillRect(renderer, &rect);
                 } else if (*toolbar->settings[toolbar->num_page][i].int_variable == True){
-                    SDL_SetRenderDrawColor(renderer, 25, 25, 75, 255); // green checkbox
+                    SDL_SetRenderDrawColor(renderer, 25, 25, 75, 255);
                     SDL_RenderFillRect(renderer, &rect);
                 } else if (*toolbar->settings[toolbar->num_page][i].int_variable == False){
                     SDL_SetRenderDrawColor(renderer, CP_TAKEN_COLOR); // empty checkbox

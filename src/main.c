@@ -49,10 +49,13 @@ int main(void) {
                 .nb_cp_max = NB_CP,
                 .dist_cp = DIST_CP,
                 .cp_size_angle_to_remove = 10.f,
-                .nb_loops_uncross_segments = 30},
+                .nb_loops_uncross_segments = 30,
+                .greedy = True,
+                .uncross_all_segments = True,
+                .remove_hairpin_turns = True},
 		.square_width = 40,
 		.num_closest_cp = 0,
-		.select = False,
+		.select = false,
 		.size = 500,
 		.selectx = 0,
 		.selecty = 0,
@@ -105,7 +108,9 @@ int main(void) {
 		goto Quit_texture;
 
     //init CallBack
-    Callback callback = {false};
+    Callback callback = {
+            .create_road = False
+    };
 	//init struct Toolbar;
 	Toolbar toolbar;
 	if (init_toolbar(&toolbar, renderer, &player[0].car, &road, player[0].ia, &cam, &bg, &callback) == EXIT_FAILURE)
@@ -165,7 +170,7 @@ int main(void) {
 							break;
 						case SDL_BUTTON_RIGHT:
 							if (road.len_tab_cp) {// if it exist at least 1 checkpoint
-														   // TODO : mettre pour tous
+                                // TODO : mettre pour tous
 								manage_checkpoint(&road, &event, &cam, &player[0].car);
 							}
 							break;
@@ -177,7 +182,7 @@ int main(void) {
 				case SDL_MOUSEBUTTONUP:
                     // TODO: à revoir !!!
 					if (event.button.button == SDL_BUTTON_RIGHT) {
-						road.select = False;
+						road.select = false;
 					} else if (event.button.button == SDL_BUTTON_LEFT) {
                         //TODO: mettre dans une fonction !!!
                         if (toolbar.is_selecting) {
@@ -202,8 +207,26 @@ int main(void) {
                                     if (toolbar.select_var_int == (int *) &callback.create_road) {
                                         // TODO : faire un thread pour pas avoir de freeze
                                         // TODO : réinitialiser les IA
-                                        create_road(&road);
-                                        remove_hairpin_turns(&road, player);
+
+                                        if (road.generation.greedy) {
+                                            travelling_set_up_cp(&road);
+                                            greedy(road.tab_cp, road.len_tab_cp);
+                                        }
+                                        if (road.generation.uncross_all_segments) {
+                                            uncross_all_segments(&road);
+                                        }
+                                        if (road.generation.remove_hairpin_turns) {
+                                            remove_hairpin_turns(&road, player);
+                                        } else {
+                                            for (int i = 0; i < NB_OF_PLAYERS; ++i) {
+                                                player[i].car.pos_initx = (float)road.tab_cp[0].x - 200;
+                                                player[i].car.pos_inity = (float)road.tab_cp[0].y + 100.f * (float)i;
+                                                player[i].car.posx = player[i].car.pos_initx;
+                                                player[i].car.posy = player[i].car.pos_inity;
+                                                player[i].car.frame.x = (int)(player[i].car.posx);
+                                                player[i].car.frame.y = (int)(player[i].car.posy);
+                                            }
+                                        }
                                         init_cam(&cam, &player[0].car);
                                         *toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable = false; // TODO: generaliser
                                     }

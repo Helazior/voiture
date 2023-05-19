@@ -104,10 +104,13 @@ typedef struct Road {
         int dist_cp;
         float cp_size_angle_to_remove;
         int nb_loops_uncross_segments;
+        Bool greedy;
+        Bool uncross_all_segments;
+        Bool remove_hairpin_turns;
     } generation;
     int num_closest_cp;
 	int square_width;
-	Bool select;
+	bool select;
 	int selectx;
 	int selecty;
 	int size;

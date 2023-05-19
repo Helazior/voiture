@@ -26,7 +26,7 @@ typedef enum{
 
 /**To call functions when clicking in the toolbar's settings*/
 typedef struct callback {
-    bool create_road;
+    Bool create_road;
 } Callback;
 
 /** 1 setting of 1 variable, int or float.

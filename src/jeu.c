@@ -304,7 +304,7 @@ void reset_valid_tab(Road* road, PlayerCP* cp, bool first_player) {
 
 //manage a checkpoint:
 void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car) {
-	road->select = True;
+	road->select = true;
 	closest_checkpoint(road, event, cam, car);
 }
 

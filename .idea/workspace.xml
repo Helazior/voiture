@@ -27,13 +27,13 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="Bug lorsqu'on a plus de 300 CP, revoir l'algo">
+    <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="Mise de la variable nb_loop_uncross_segments dans la toolbar">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/exec" beforeDir="false" afterPath="$PROJECT_DIR$/exec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/create_map.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/create_map.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/background.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/background.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/jeu.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/jeu.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/background.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/background.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/create_map.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/create_map.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/jeu.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/jeu.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -176,7 +176,7 @@
       <workItem from="1684351420006" duration="9701000" />
       <workItem from="1684409872805" duration="8478000" />
       <workItem from="1684439366906" duration="4281000" />
-      <workItem from="1684517623987" duration="6472000" />
+      <workItem from="1684517623987" duration="16076000" />
     </task>
     <task id="LOCAL-00001" summary="Correction voiture sans cam">
       <created>1645378970581</created>
@@ -297,7 +297,14 @@
       <option name="project" value="LOCAL" />
       <updated>1684446433472</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Mise de la variable nb_loop_uncross_segments dans la toolbar">
+      <created>1684527054463</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1684527054463</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -308,6 +315,17 @@
     <isAutomaticCheckingOnLaunch value="false" />
     <isAutomaticFoundErrors value="true" />
     <isAutomaticFoundErrors value="true" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
@@ -328,6 +346,7 @@
     <MESSAGE value="On peut régler la distance et surtout bug de del_checkPoint réglé&#10;Le bug faisait une division par zéro lors de la création de map lorsqu'on avait plusieurs joueurs" />
     <MESSAGE value="Correction caméra lors d'une nouvelle map" />
     <MESSAGE value="Bug lorsqu'on a plus de 300 CP, revoir l'algo" />
-    <option name="LAST_COMMIT_MESSAGE" value="Bug lorsqu'on a plus de 300 CP, revoir l'algo" />
+    <MESSAGE value="Mise de la variable nb_loop_uncross_segments dans la toolbar" />
+    <option name="LAST_COMMIT_MESSAGE" value="Mise de la variable nb_loop_uncross_segments dans la toolbar" />
   </component>
 </project>
