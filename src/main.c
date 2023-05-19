@@ -48,7 +48,8 @@ int main(void) {
         .generation = {
                 .nb_cp_max = NB_CP,
                 .dist_cp = DIST_CP,
-                .cp_size_angle_to_remove = 10.f},
+                .cp_size_angle_to_remove = 10.f,
+                .nb_loops_uncross_segments = 30},
 		.square_width = 40,
 		.num_closest_cp = 0,
 		.select = False,
@@ -56,9 +57,6 @@ int main(void) {
 		.selectx = 0,
 		.selecty = 0,
 	};
-    road.generation.nb_cp_max = NB_CP;
-    road.generation.dist_cp = DIST_CP;
-    road.generation.cp_size_angle_to_remove = 10.f;
 
     create_road(&road);
 

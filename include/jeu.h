@@ -103,6 +103,7 @@ typedef struct Road {
         int nb_cp_max; // To create random road
         int dist_cp;
         float cp_size_angle_to_remove;
+        int nb_loops_uncross_segments;
     } generation;
     int num_closest_cp;
 	int square_width;

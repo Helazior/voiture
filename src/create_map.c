@@ -295,14 +295,15 @@ static bool uncross_segments(SDL_Rect tab_checkpoints[], int nb_cp, int extend_s
     return has_been_changed;
 }
 
-bool uncross_all_segments(SDL_Rect tab_checkpoints[], int nb_cp, int extend_size) {
+bool uncross_all_segments(Road* road) {
     int nb_change = 0;
-    while (uncross_segments(tab_checkpoints, nb_cp, extend_size) && nb_change++ < 30); // TODO : nombre arbitraire, changer
+    while (uncross_segments(road->tab_cp, road->len_tab_cp, road->generation.dist_cp * 0.2) && nb_change++ < road->generation.nb_loops_uncross_segments); // TODO : nombre arbitraire, changer
     return nb_change != 0;
 }
 
 void remove_hairpin_turns(Road* road , Player* player) {
-    int nb_loop = 0;
+    int nb_loops_uncross = 0;
+    int nb_loops_remove_angle = 0;
     bool has_removed;
     do {
         do {
@@ -321,8 +322,8 @@ void remove_hairpin_turns(Road* road , Player* player) {
                     has_removed = true;
                 }
             }
-        } while (has_removed);
-    } while(uncross_all_segments(road->tab_cp, road->len_tab_cp, road->generation.dist_cp) && nb_loop++ < 30);
+        } while (has_removed && nb_loops_remove_angle++ < 20);
+    } while(uncross_all_segments(road) && nb_loops_uncross++ < road->generation.nb_loops_uncross_segments);
 
     // TODO à faire bien :
     for (int i = 0; i < NB_OF_PLAYERS; ++i) {
@@ -341,7 +342,7 @@ void remove_hairpin_turns(Road* road , Player* player) {
  */
 static void travelling_salesman_on_cp(Road* road) {
     greedy(road->tab_cp, road->len_tab_cp);
-    uncross_all_segments(road->tab_cp, road->len_tab_cp, road->generation.dist_cp);
+    uncross_all_segments(road);
 }
 
 void create_travelling_road(Road* road) {

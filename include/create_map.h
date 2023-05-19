@@ -37,7 +37,7 @@ void create_naif_road(Road* road);
  * @return If a switch has been done
  *
  */
-bool uncross_all_segments(SDL_Rect tab_checkpoints[], int nb_cp, int extend_size);
+bool uncross_all_segments(Road* road);
 
 /**
  * Implement a travelling salesman algo
