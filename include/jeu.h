@@ -31,7 +31,7 @@
 #define NEXT_CP_COLOR GREEN
 
 #define NB_PIX_DRIFT 800
-#define NB_SQUARE 400
+#define NB_MAX_SQUARES 1000
 
 #define ACCELERATION 10.
 #define FROTTEMENT 8.
@@ -97,7 +97,7 @@ typedef struct Entity {
 }Entity;
 
 typedef struct Road {
-	SDL_Rect tab_cp[NB_SQUARE];
+	SDL_Rect tab_cp[NB_MAX_SQUARES];
 	int len_tab_cp;
     struct {
         int nb_cp_max; // To create random road
@@ -125,7 +125,7 @@ typedef struct Road {
 } Road;
 
 typedef struct PlayerCP {
-    Bool tab_valid_checkPoints[NB_SQUARE];
+    Bool tab_valid_checkPoints[NB_MAX_SQUARES];
     int nb_valid_checkPoints;
 } PlayerCP;
 

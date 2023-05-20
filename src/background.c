@@ -95,7 +95,7 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
                     {"road->size", &road->size, NULL, 0, 2000, Line},
                     {"car->turn", NULL, &car->turn, 0.1f, 30, Line},
                     {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line},
-                    null_setting,
+                    {"cam->zoom", NULL, &cam->zoom, 0.02f, 2, Line},
                     null_setting,
                     null_setting,
                     null_setting,
@@ -105,7 +105,7 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
             },
             {
                     {"Generate Map:", (int *) &callback->create_road, NULL, 0, 1, Button},
-                    {"Nb max of CP:", (int *) &road->generation.nb_cp_max, NULL, 4, 1000, Line},
+                    {"Nb max of CP:", (int *) &road->generation.nb_cp_max, NULL, 4, NB_MAX_SQUARES, Line},
                     {"CP's size angle to remove", NULL, &road->generation.cp_size_angle_to_remove, 0.f, 30.f, Line},
                     {"Dist between CP:", (int *) &road->generation.dist_cp, NULL, 20, 2000, Line},
                     {"Nb loops to uncross segments:", (int *) &road->generation.nb_loops_uncross_segments, NULL, 0, 100, Line},

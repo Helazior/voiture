@@ -251,7 +251,7 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool status, Camera* cam, R
 
 //add a checkpoint:
 void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Player* player){
-	if (road->len_tab_cp < NB_SQUARE){
+	if (road->len_tab_cp < NB_MAX_SQUARES){
 		road->tab_cp[road->len_tab_cp].x = event->button.x - (float)road->square_width / 2 + cam->x + (event->button.x + cam->x - car->frame.x) * (float)(-1. + 1 / cam->zoom);
 		road->tab_cp[road->len_tab_cp].y = event->button.y - (float)road->square_width / 2 + cam->y + (event->button.y + cam->y - car->frame.y) * (float)(-1. + 1 / cam->zoom);
 		road->tab_cp[road->len_tab_cp].w = road->square_width;
