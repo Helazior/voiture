@@ -32,7 +32,9 @@ static int init_setting(
         int toolbar_y
 		){
 
+    int toolbar_y_numepage;
     for (int num_page = 0; num_page < NB_PAGES; ++num_page) {
+        toolbar_y_numepage = toolbar_y;
         for (int num_var = 0; num_var < NB_SETTINGS; num_var++){
             settings[num_page][num_var].int_variable = sub_settings[num_page][num_var].int_variable;
             settings[num_page][num_var].float_variable = sub_settings[num_page][num_var].float_variable;
@@ -51,7 +53,8 @@ static int init_setting(
                 return EXIT_FAILURE;
             }
             SDL_QueryTexture(settings[num_page][num_var].texture, NULL, NULL, &tex_size_w, &tex_size_h);
-            settings[num_page][num_var].tex_size.y = toolbar_y + 20 + 100 * num_var;
+            settings[num_page][num_var].tex_size.y = toolbar_y + 20 + toolbar_y_numepage;
+            toolbar_y_numepage += settings[num_page][num_var].type == Line ? 70 : 30;
             settings[num_page][num_var].tex_size.w = tex_size_w;
             settings[num_page][num_var].tex_size.h = tex_size_h;
             SDL_FreeSurface(text);
@@ -81,6 +84,7 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
     }
     SDL_Color fg_color = { WHITE };
     SDL_Color bg_color = { COLOR_TOOLBAR };
+    Visible_setting null_setting = {" ", NULL, NULL, 0, 0, Empty};
     Visible_setting sub_settings[][NB_SETTINGS] = {
             {
                     {"IA:", (int*)&ia->active, NULL, 0, 1, Checkbox},
@@ -91,7 +95,13 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
                     {"road->size", &road->size, NULL, 0, 2000, Line},
                     {"car->turn", NULL, &car->turn, 0.1f, 30, Line},
                     {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line},
-                    {"car->acceleration", NULL, &car->acceleration, 0.1f, 30, Line}
+                    null_setting,
+                    null_setting,
+                    null_setting,
+                    null_setting,
+                    null_setting,
+                    null_setting,
+                    null_setting,
             },
             {
                     {"Generate Map:", (int *) &callback->create_road, NULL, 0, 1, Button},
@@ -103,11 +113,16 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
                     {"Algo uncross segments:", (int *) &road->generation.uncross_all_segments, NULL, 0, 1, Checkbox},
                     {"Algo remove hairpin turns:", (int *) &road->generation.remove_hairpin_turns, NULL, 0, 1, Checkbox},
                     {"Cam follow car:", (int *) &cam->follow_car, NULL, 0, 1, Checkbox},
+                    null_setting,
+                    null_setting,
+                    null_setting,
+                    null_setting,
+                    null_setting,
+                    null_setting,
             }
     };
 
     // init struct Toolbar:
-
 	if (init_setting(toolbar->settings, sub_settings, renderer, font, fg_color, bg_color, toolbar->top_h) == EXIT_FAILURE) {
         return EXIT_FAILURE;
     }
@@ -323,7 +338,7 @@ void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar){
 	SDL_Rect rect = {0, 0, 4, 10};
 	int i;
 	for(i = 0; i < NB_SETTINGS; i++){ //for each seatting
-		toolbar->settings[toolbar->num_page][i].tex_size.x = toolbar->size.x + 100;
+		toolbar->settings[toolbar->num_page][i].tex_size.x = toolbar->size.x + 50;
 		//text
 		SDL_RenderCopy(renderer, toolbar->settings[toolbar->num_page][i].texture, NULL, &(toolbar->settings[toolbar->num_page][i].tex_size));
 		//line
@@ -387,9 +402,11 @@ void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar){
                 rect.h = 10;
                 rect.w = 4;
                 break;
+            case Empty:
+                break;
 
             default:
-                printf("Error: bad toolbar->settings[%d].type. Must be Line or Checkbox. \n", i);
+                fprintf(stderr, "Error: bad toolbar->settings[%d].type. Must be Line, Checkbox, Button or Empty. \n", i);
         }
 	}
 }

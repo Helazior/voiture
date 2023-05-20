@@ -114,7 +114,7 @@ int main(void) {
 	//init struct Toolbar;
 	Toolbar toolbar;
 	if (init_toolbar(&toolbar, renderer, &player[0].car, &road, player[0].ia, &cam, &bg, &callback) == EXIT_FAILURE)
-		goto Quit;
+        goto Quit;
 
 
 	//__________________Start________________

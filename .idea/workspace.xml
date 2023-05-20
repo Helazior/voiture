@@ -27,8 +27,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="les algos sont dans la toolbar">
+    <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="reféacto en créant la fonction manage_selected_toolbar">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exec" beforeDir="false" afterPath="$PROJECT_DIR$/exec" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/background.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/background.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/background.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/background.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.c" afterDir="false" />
@@ -175,7 +176,7 @@
       <workItem from="1684439366906" duration="4281000" />
       <workItem from="1684517623987" duration="16699000" />
       <workItem from="1684582782888" duration="21000" />
-      <workItem from="1684582814402" duration="1643000" />
+      <workItem from="1684582814402" duration="5899000" />
     </task>
     <task id="LOCAL-00001" summary="Correction voiture sans cam">
       <created>1645378970581</created>
@@ -310,7 +311,14 @@
       <option name="project" value="LOCAL" />
       <updated>1684537472300</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="reféacto en créant la fonction manage_selected_toolbar">
+      <created>1684585074524</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1684585074524</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -354,6 +362,7 @@
     <MESSAGE value="Bug lorsqu'on a plus de 300 CP, revoir l'algo" />
     <MESSAGE value="Mise de la variable nb_loop_uncross_segments dans la toolbar" />
     <MESSAGE value="les algos sont dans la toolbar" />
-    <option name="LAST_COMMIT_MESSAGE" value="les algos sont dans la toolbar" />
+    <MESSAGE value="reféacto en créant la fonction manage_selected_toolbar" />
+    <option name="LAST_COMMIT_MESSAGE" value="reféacto en créant la fonction manage_selected_toolbar" />
   </component>
 </project>

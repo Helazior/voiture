@@ -12,7 +12,7 @@
 #define SIZE_LINE_TOOLBAR 200
 #define WIDTH_TOOLBAR 300
 
-#define NB_SETTINGS 9
+#define NB_SETTINGS 15
 #define NB_PAGES 2
 
 #define NB_COLORS_BG 6
@@ -20,7 +20,8 @@
 typedef enum{
 	Checkbox = 0,
 	Line = 1,
-    Button = 2
+    Button = 2,
+    Empty = -1,
 }Type_of_settings;
 
 
