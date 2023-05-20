@@ -74,6 +74,8 @@ void change_variable(Toolbar* toolbar);
 
 void change_variable_keys(Toolbar* toolbar, short add);
 
+void manage_selected_toolbar(Toolbar* toolbar, Road* road, Camera* cam, Callback* callback, Player* player0);
+
 void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar);
 
 void render_keys(SDL_Renderer *renderer, Keys_pressed* key, Camera* cam);

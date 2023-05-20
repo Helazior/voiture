@@ -180,67 +180,12 @@ int main(void) {
 					}
 					break;
 				case SDL_MOUSEBUTTONUP:
-                    // TODO: à revoir !!!
 					if (event.button.button == SDL_BUTTON_RIGHT) {
 						road.select = false;
 					} else if (event.button.button == SDL_BUTTON_LEFT) {
-                        //TODO: mettre dans une fonction !!!
                         if (toolbar.is_selecting) {
-                            toolbar.is_selecting = False;
-                            if ((toolbar.settings[toolbar.num_page][toolbar.num_setting].type == Checkbox
-                                 || toolbar.settings[toolbar.num_page][toolbar.num_setting].type == Button)
-                                 && toolbar.select_var_int ==
-                                toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable) {
-
-                                *toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable =
-                                        (*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable + 1) % 2;
-
-                                // the box has just been checked
-                                if (*toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable == True) {
-                                    // the box is ia->active
-                                    if (toolbar.select_var_int == (int *) &player[0].ia->active) {
-                                        // TODO : Utile ?
-                                        init_ia(player[0].ia, &road, &player[0].car, &player[0].cp);
-                                    }
-                                    // TODO : à mettre dans une fonction
-                                    // function to create road
-                                    if (toolbar.select_var_int == (int *) &callback.create_road) {
-                                        // TODO : faire un thread pour pas avoir de freeze
-                                        // TODO : réinitialiser les IA
-
-                                        if (road.generation.greedy) {
-                                            travelling_set_up_cp(&road);
-                                            greedy(road.tab_cp, road.len_tab_cp);
-                                        }
-                                        if (road.generation.uncross_all_segments) {
-                                            uncross_all_segments(&road);
-                                        }
-                                        if (road.generation.remove_hairpin_turns) {
-                                            remove_hairpin_turns(&road, player);
-                                        } else {
-                                            for (int i = 0; i < NB_OF_PLAYERS; ++i) {
-                                                player[i].car.pos_initx = (float)road.tab_cp[0].x - 200;
-                                                player[i].car.pos_inity = (float)road.tab_cp[0].y + 100.f * (float)i;
-                                                player[i].car.posx = player[i].car.pos_initx;
-                                                player[i].car.posy = player[i].car.pos_inity;
-                                                player[i].car.frame.x = (int)(player[i].car.posx);
-                                                player[i].car.frame.y = (int)(player[i].car.posy);
-                                            }
-                                        }
-                                        init_cam(&cam, &player[0].car);
-                                        *toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable = false; // TODO: generaliser
-                                    }
-                                    // the box has just been unchecked
-                                } else {
-                                    // the box is ia->active
-                                    if (toolbar.settings[toolbar.num_page][toolbar.num_setting].int_variable ==
-                                        (int *) &player[0].ia->active) {
-                                        // the ia change keys, so we need to fixe them to False
-                                        release_the_keys(&player[0].key);
-                                    }
-                                }
-                                toolbar.select_var_int = NULL;
-                            }
+                            // TODO: à revoir !!!
+                            manage_selected_toolbar(&toolbar, &road, &cam, &callback, player);
                         }
 					}
 					break;
