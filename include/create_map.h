@@ -59,5 +59,5 @@ void create_travelling_road(Road* road);
 void remove_hairpin_turns(Road* road , Player* player);
 
 void travelling_set_up_cp(Road* road);//à suppr TODO mettre en privé
-void greedy(SDL_Rect tab_checkpoints[], int nb_cp);
+void greedy(Road* road);
 #endif //VOITURE_CREATE_MAP_H

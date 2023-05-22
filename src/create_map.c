@@ -1,6 +1,7 @@
 /**
  * create random map with Travelling salesman algo to link the points (or my algo or perlin noise)
 */
+// TODO : uncross inutile seul, appeler remove angle de uncross + Bug qui fait que la boucle ne s'arrête dès qu'elle n'a plus de modif.
 // TODO: refactoriser dans plusieurs fichiers
 #include <SDL2/SDL_stdinc.h>
 #include <stdint.h>
@@ -16,6 +17,8 @@
 #define START_Y (-234)
 
 #define TIGHT_TURNS 2.
+
+#define DEMO_MODE 1
 
 
 void create_road(Road* road) {
@@ -36,6 +39,13 @@ void create_road(Road* road) {
         default:
             perror("CREATE_MAP_AUTO has bad value");
             break;
+    }
+}
+
+static void save_road_debug(Road* road, int num_road_saved) {
+    road->generation.len_tab_cp[num_road_saved] = road->len_tab_cp;
+    for (int i = 0; i < road->len_tab_cp; ++i) {
+        road->generation.tab_cp_at_step[num_road_saved][i] = road->tab_cp[i];
     }
 }
 
@@ -92,7 +102,6 @@ void create_naif_road(Road* road) {
  * @param road
  */
 static void random_set_up_algo(Road* road) {
-
     srand(time(NULL));
     int radius_max = (int)(700. * sqrtf(road->len_tab_cp));
     // TODO : mettre le premier à côté de la voiture
@@ -139,6 +148,7 @@ static void grid_set_up_algo(Road* road) {
  */
 void travelling_set_up_cp(Road* road) {
     road->len_tab_cp = road->generation.nb_cp_max;
+
 #if 0
     random_set_up_algo(road);
 #else
@@ -200,11 +210,14 @@ static void swap(SDL_Rect* a, SDL_Rect* b) {
  * This the first step of other algos that manage the crossed road
  * @param road
  */
-void greedy(SDL_Rect tab_checkpoints[], int nb_cp) {
-    for (int i = 0; i < nb_cp-1; ++i) {
-        int nearest_cp_index = index_of_nearest_CP(tab_checkpoints, i, nb_cp);
-        swap(&tab_checkpoints[nearest_cp_index], &tab_checkpoints[(i + 1) % nb_cp]);
+void greedy(Road* road) {
+    for (int i = 0; i < road->len_tab_cp-1; ++i) {
+        int nearest_cp_index = index_of_nearest_CP(road->tab_cp, i, road->len_tab_cp);
+        swap(&road->tab_cp[nearest_cp_index], &road->tab_cp[(i + 1) % road->len_tab_cp]);
     }
+#if DEMO_MODE
+    save_road_debug(road, 0);
+#endif
 }
 
 /**
@@ -341,7 +354,7 @@ void remove_hairpin_turns(Road* road , Player* player) {
  * @param road
  */
 static void travelling_salesman_on_cp(Road* road) {
-    greedy(road->tab_cp, road->len_tab_cp);
+    greedy(road);
     uncross_all_segments(road);
 }
 

@@ -8,7 +8,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
-#define NB_OF_PLAYERS 6
+#define NB_OF_PLAYERS 2
 
 #define FRAMES_PER_SECONDE 60
 
@@ -100,6 +100,8 @@ typedef struct Road {
 	SDL_Rect tab_cp[NB_MAX_SQUARES];
 	int len_tab_cp;
     struct {
+        SDL_Rect tab_cp_at_step[3][NB_MAX_SQUARES];
+        int len_tab_cp[1];
         int nb_cp_max; // To create random road
         int dist_cp;
         float cp_size_angle_to_remove;
@@ -107,6 +109,7 @@ typedef struct Road {
         Bool greedy;
         Bool uncross_all_segments;
         Bool remove_hairpin_turns;
+        Bool generate_continuously;
     } generation;
     int num_closest_cp;
 	int square_width;

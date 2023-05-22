@@ -105,6 +105,7 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
             },
             {
                     {"Generate Map:", (int *) &callback->create_road, NULL, 0, 1, Button},
+                    {"Generate Continuously:", (int *) &road->generation.generate_continuously, NULL, 0, 1, Checkbox},
                     {"Nb max of CP:", (int *) &road->generation.nb_cp_max, NULL, 4, NB_MAX_SQUARES, Line},
                     {"CP's size angle to remove", NULL, &road->generation.cp_size_angle_to_remove, 0.f, 30.f, Line},
                     {"Dist between CP:", (int *) &road->generation.dist_cp, NULL, 20, 2000, Line},
@@ -113,7 +114,6 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
                     {"Algo uncross segments:", (int *) &road->generation.uncross_all_segments, NULL, 0, 1, Checkbox},
                     {"Algo remove hairpin turns:", (int *) &road->generation.remove_hairpin_turns, NULL, 0, 1, Checkbox},
                     {"Cam follow car:", (int *) &cam->follow_car, NULL, 0, 1, Checkbox},
-                    null_setting,
                     null_setting,
                     null_setting,
                     null_setting,
@@ -132,11 +132,13 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
 }
 
 //check if the user click in a box of setting
-static Bool is_in(int x, int y, SDL_Rect* size) {
-    //TODO C'est pas la bonne hitbox pour les barres car j'ai changé la position qui ne dépend plus de la taille du texte.
-	int x_mean;
-	x_mean = size->x + size->w / 2;
-	return x >= x_mean - SIZE_LINE_TOOLBAR / 2 - 10 && x <= x_mean + SIZE_LINE_TOOLBAR / 2 + 10 && y > size->y && y < size->y + 3 * size->h;
+static Bool is_in(int x, int y, SDL_Rect* tex_size, SDL_Rect* toolbar_size, Type_of_settings type) {
+    // TODO: revoir
+//	return x >= x_mean - SIZE_LINE_TOOLBAR / 2 - 10 && x <= x_mean + SIZE_LINE_TOOLBAR / 2 + 10 && y > size->y - 5 && y < size->y + 2 * size->h;
+    if (type == Line)
+        return x >= toolbar_size->x && x <= toolbar_size->x + toolbar_size->w && y > tex_size->y - 5 && y < tex_size->y + 2 * tex_size->h + 10;
+    if (type == Button || type == Checkbox)
+        return x >= toolbar_size->x && x <= toolbar_size->x + toolbar_size->w && y > tex_size->y - 5 && y < tex_size->y + tex_size->h + 5;
 }
 
 void click_toolbar(Toolbar* toolbar){
@@ -154,7 +156,7 @@ void click_toolbar(Toolbar* toolbar){
 	int i;
 	for (i = 0; i < NB_SETTINGS; i++){
         //TODO C'est pas la bonne hitbox
-		if (is_in(toolbar->pos_click_x, mouse_y , &(toolbar->settings[toolbar->num_page][i].tex_size))){
+        if (is_in(toolbar->pos_click_x, mouse_y, &toolbar->settings[toolbar->num_page][i].tex_size, &toolbar->size, toolbar->settings[toolbar->num_page][i].type)){
 			//put the corresponding variable in select_var
 			toolbar->select_var_int = toolbar->settings[toolbar->num_page][i].int_variable;
 			toolbar->select_var_float = toolbar->settings[toolbar->num_page][i].float_variable;
@@ -223,6 +225,12 @@ void change_variable_keys(Toolbar* toolbar, short add){
 	}
 }
 
+static void download_road(Road* road, int num_road_saved) {
+    road->len_tab_cp = road->generation.len_tab_cp[num_road_saved];
+    for (int i = 0; i < road->len_tab_cp; ++i) {
+        road->tab_cp[i] = road->generation.tab_cp_at_step[num_road_saved][i];
+    }
+}
 void manage_selected_toolbar(Toolbar* toolbar, Road* road, Camera* cam, Callback* callback, Player* player) {
     // TODO : revoir
     toolbar->is_selecting = False;
@@ -249,7 +257,9 @@ void manage_selected_toolbar(Toolbar* toolbar, Road* road, Camera* cam, Callback
 
                 if (road->generation.greedy) {
                     travelling_set_up_cp(road);
-                    greedy(road->tab_cp, road->len_tab_cp);
+                    greedy(road);
+                } else {
+                    download_road(road, 0);
                 }
                 if (road->generation.uncross_all_segments) {
                     uncross_all_segments(road);
