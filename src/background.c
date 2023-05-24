@@ -139,6 +139,7 @@ static Bool is_in(int x, int y, SDL_Rect* tex_size, SDL_Rect* toolbar_size, Type
         return x >= toolbar_size->x && x <= toolbar_size->x + toolbar_size->w && y > tex_size->y - 5 && y < tex_size->y + 2 * tex_size->h + 10;
     if (type == Button || type == Checkbox)
         return x >= toolbar_size->x && x <= toolbar_size->x + toolbar_size->w && y > tex_size->y - 5 && y < tex_size->y + tex_size->h + 5;
+    return False;
 }
 
 void click_toolbar(Toolbar* toolbar){
@@ -167,7 +168,33 @@ void click_toolbar(Toolbar* toolbar){
 	}
 }
 
-void change_variable(Toolbar* toolbar){
+/** @return If one of the parameter of the road has changed, the map generate continuously */
+Bool has_road_var_changed(Road* road) {
+    return (road->generation.has_changed.cp_size_angle_to_remove
+            || road->generation.has_changed.nb_loops_uncross_segments
+            || road->generation.has_changed.dist_cp
+            || road->generation.has_changed.nb_cp_max)
+           && road->generation.generate_continuously;
+//           && (road->generation.greedy
+//               || road->generation.uncross_all_segments
+//               || road->generation.remove_hairpin_turns);
+}
+
+static void road_has_changed_int(Road* road, int* selected_var_int) {
+    if (selected_var_int == &road->generation.nb_cp_max)
+        road->generation.has_changed.nb_cp_max = True;
+    else if (selected_var_int == &road->generation.dist_cp)
+        road->generation.has_changed.dist_cp = True;
+    else if (selected_var_int == &road->generation.nb_loops_uncross_segments)
+        road->generation.has_changed.nb_loops_uncross_segments = True;
+}
+
+static void road_has_changed_float(Road* road, float* selected_var_float) {
+    if (selected_var_float == &road->generation.cp_size_angle_to_remove)
+        road->generation.has_changed.cp_size_angle_to_remove = True;
+}
+
+void change_variable(Toolbar* toolbar, Road* road){
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
 	// Line
@@ -179,7 +206,9 @@ void change_variable(Toolbar* toolbar){
 				*(toolbar->select_var_int) = (int)toolbar->settings[toolbar->num_page][toolbar->num_setting].max;
 			} else if (*(toolbar->select_var_int) < (int)toolbar->settings[toolbar->num_page][toolbar->num_setting].min){
 				*(toolbar->select_var_int) = (int)toolbar->settings[toolbar->num_page][toolbar->num_setting].min;
-			}
+			} else {
+                road_has_changed_int(road, toolbar->select_var_int);
+            }
 			// float variable
 		} else if (toolbar->select_var_float) {
 			*(toolbar->select_var_float) += (float)(mouse_x - toolbar->pos_click_x) * (toolbar->settings[toolbar->num_page][toolbar->num_setting].max - toolbar->settings[toolbar->num_page][toolbar->num_setting].min) / SIZE_LINE_TOOLBAR;
@@ -187,7 +216,9 @@ void change_variable(Toolbar* toolbar){
 				*(toolbar->select_var_float) = toolbar->settings[toolbar->num_page][toolbar->num_setting].max;
 			} else if (*(toolbar->select_var_float) < toolbar->settings[toolbar->num_page][toolbar->num_setting].min){
 				*(toolbar->select_var_float) = toolbar->settings[toolbar->num_page][toolbar->num_setting].min;
-			}
+			} else {
+                road_has_changed_float(road, toolbar->select_var_float);
+            }
 		} else {
 			printf("Error: select_var NULL\n");
 		}
@@ -205,24 +236,29 @@ static float minor_by_1f(float a) {
     return (a < 1.f) ? 1.f : a;
 }
 
-void change_variable_keys(Toolbar* toolbar, short add){
-	if (toolbar->select_var_int){
-		*(toolbar->select_var_int) += add * minor_by_1((int)((toolbar->settings[toolbar->num_page][toolbar->num_setting].max - toolbar->settings[toolbar->num_page][toolbar->num_setting].min) / SIZE_LINE_TOOLBAR));
-		if (*(toolbar->select_var_int) > (int)toolbar->settings[toolbar->num_page][toolbar->num_setting].max){
-			*(toolbar->select_var_int) = (int)toolbar->settings[toolbar->num_page][toolbar->num_setting].max;
-		} else if (*(toolbar->select_var_int) < (int)toolbar->settings[toolbar->num_page][toolbar->num_setting].min){
-			*(toolbar->select_var_int) = (int)toolbar->settings[toolbar->num_page][toolbar->num_setting].min;
-		}
-	} else if (toolbar->select_var_float) {
-		*(toolbar->select_var_float) += (float)add * minor_by_1f((toolbar->settings[toolbar->num_page][toolbar->num_setting].max - toolbar->settings[toolbar->num_page][toolbar->num_setting].min) / SIZE_LINE_TOOLBAR);
-		if (*(toolbar->select_var_float) > toolbar->settings[toolbar->num_page][toolbar->num_setting].max){
-			*(toolbar->select_var_float) = toolbar->settings[toolbar->num_page][toolbar->num_setting].max;
-		}else if (*(toolbar->select_var_float) < toolbar->settings[toolbar->num_page][toolbar->num_setting].min){
-			*(toolbar->select_var_float) = toolbar->settings[toolbar->num_page][toolbar->num_setting].min;
-		}
-	} else {
+void change_variable_keys(Toolbar* toolbar, short add, Road* road){
+    if (toolbar->select_var_int) {
+        *(toolbar->select_var_int) += add * minor_by_1((int)((toolbar->settings[toolbar->num_page][toolbar->num_setting].max - toolbar->settings[toolbar->num_page][toolbar->num_setting].min) / SIZE_LINE_TOOLBAR));
+        if (*(toolbar->select_var_int) > (int)toolbar->settings[toolbar->num_page][toolbar->num_setting].max){
+            *(toolbar->select_var_int) = (int)toolbar->settings[toolbar->num_page][toolbar->num_setting].max;
+        } else if (*(toolbar->select_var_int) < (int)toolbar->settings[toolbar->num_page][toolbar->num_setting].min){
+            *(toolbar->select_var_int) = (int)toolbar->settings[toolbar->num_page][toolbar->num_setting].min;
+        } else {
+            // TODO : nul de devoir rajouter road de partout :/
+            road_has_changed_int(road, toolbar->select_var_int);
+        }
+    } else if (toolbar->select_var_float) {
+        *(toolbar->select_var_float) += (float)add * minor_by_1f((toolbar->settings[toolbar->num_page][toolbar->num_setting].max - toolbar->settings[toolbar->num_page][toolbar->num_setting].min) / SIZE_LINE_TOOLBAR);
+        if (*(toolbar->select_var_float) > toolbar->settings[toolbar->num_page][toolbar->num_setting].max){
+            *(toolbar->select_var_float) = toolbar->settings[toolbar->num_page][toolbar->num_setting].max;
+        } else if (*(toolbar->select_var_float) < toolbar->settings[toolbar->num_page][toolbar->num_setting].min){
+            *(toolbar->select_var_float) = toolbar->settings[toolbar->num_page][toolbar->num_setting].min;
+        } else {
+            road_has_changed_float(road, toolbar->select_var_float);
+        }
+    } else {
         perror("Error: select_var NULL\n");
-	}
+    }
 }
 
 static void download_road(Road* road, int num_road_saved) {
@@ -231,19 +267,32 @@ static void download_road(Road* road, int num_road_saved) {
         road->tab_cp[i] = road->generation.tab_cp_at_step[num_road_saved][i];
     }
 }
+
+static void init_has_changed(Road* road) {
+    road->generation.has_changed.cp_size_angle_to_remove = False;
+    road->generation.has_changed.nb_loops_uncross_segments = False;
+    road->generation.has_changed.dist_cp = False;
+    road->generation.has_changed.nb_cp_max = False;
+}
+
 void manage_selected_toolbar(Toolbar* toolbar, Road* road, Camera* cam, Callback* callback, Player* player) {
     // TODO : revoir
+
+    // TODO : au lieu de le faire là, faire une function que refait la map selon les variables et qui sera appelé à chaque fois
+    // Comme ça dès qu'on modifie la variable on refait la map directement
+    Bool has_road_variable_changed = has_road_var_changed(road);
     toolbar->is_selecting = False;
-    if ((toolbar->settings[toolbar->num_page][toolbar->num_setting].type == Checkbox
+    if (((toolbar->settings[toolbar->num_page][toolbar->num_setting].type == Checkbox
          || toolbar->settings[toolbar->num_page][toolbar->num_setting].type == Button)
-        && toolbar->select_var_int ==
-           toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable) {
+        && toolbar->select_var_int == toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable)
+        || has_road_variable_changed) {
 
         *toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable =
                 (*toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable + 1) % 2;
 
         // the box has just been checked
-        if (*toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable == True) {
+        if (*toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable == True
+            || has_road_variable_changed) {
             // the box is ia->active
             if (toolbar->select_var_int == (int *) &player[0].ia->active) {
                 // TODO : Utile ?
@@ -251,7 +300,8 @@ void manage_selected_toolbar(Toolbar* toolbar, Road* road, Camera* cam, Callback
             }
             // TODO : à mettre dans une fonction
             // function to create road
-            if (toolbar->select_var_int == (int *) &callback->create_road) {
+            if (toolbar->select_var_int == (int *) &callback->create_road
+                || has_road_variable_changed) {
                 // TODO : faire un thread pour pas avoir de freeze
                 // TODO : réinitialiser les IA
 
@@ -267,6 +317,9 @@ void manage_selected_toolbar(Toolbar* toolbar, Road* road, Camera* cam, Callback
                 if (road->generation.remove_hairpin_turns) {
                     remove_hairpin_turns(road, player);
                 } else {
+                    if (road->generation.has_changed.dist_cp && !(road->generation.greedy || road->generation.uncross_all_segments)) {
+                        // TODO : éloigner x et y selon l'ancienne dist et la nouvelle + changer les sauvegardes intermédiaires
+                    }
                     for (int i = 0; i < NB_OF_PLAYERS; ++i) {
                         player[i].car.pos_initx = (float)road->tab_cp[0].x - 200;
                         player[i].car.pos_inity = (float)road->tab_cp[0].y + 100.f * (float)i;
@@ -278,6 +331,7 @@ void manage_selected_toolbar(Toolbar* toolbar, Road* road, Camera* cam, Callback
                 }
                 init_cam(cam, &player[0].car);
                 *toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable = false; // TODO: generaliser
+                init_has_changed(road);
             }
             // the box has just been unchecked
         } else {

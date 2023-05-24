@@ -27,13 +27,14 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="correction bug lorsqu'il y a beaucoup de CP et ajout zoom dans les settings">
+    <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="Première correction hitbox toolbar + sauvegarde des étapes de créations de maps + variable qui modifie en continu (mais non implémentée)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/exec" beforeDir="false" afterPath="$PROJECT_DIR$/exec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/create_map.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/create_map.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/background.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/background.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/jeu.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/jeu.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/next_step.txt" beforeDir="false" afterPath="$PROJECT_DIR$/next_step.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/background.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/background.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/create_map.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/create_map.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/jeu.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/jeu.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -179,7 +180,8 @@
       <workItem from="1684517623987" duration="16699000" />
       <workItem from="1684582782888" duration="21000" />
       <workItem from="1684582814402" duration="7644000" />
-      <workItem from="1684775312982" duration="11687000" />
+      <workItem from="1684775312982" duration="12710000" />
+      <workItem from="1684956422545" duration="8689000" />
     </task>
     <task id="LOCAL-00001" summary="Correction voiture sans cam">
       <created>1645378970581</created>
@@ -335,7 +337,14 @@
       <option name="project" value="LOCAL" />
       <updated>1684589937892</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="Première correction hitbox toolbar + sauvegarde des étapes de créations de maps + variable qui modifie en continu (mais non implémentée)">
+      <created>1684787407040</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1684787407040</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -382,6 +391,7 @@
     <MESSAGE value="reféacto en créant la fonction manage_selected_toolbar" />
     <MESSAGE value="Plus de settings et null setting possible" />
     <MESSAGE value="correction bug lorsqu'il y a beaucoup de CP et ajout zoom dans les settings" />
-    <option name="LAST_COMMIT_MESSAGE" value="correction bug lorsqu'il y a beaucoup de CP et ajout zoom dans les settings" />
+    <MESSAGE value="Première correction hitbox toolbar + sauvegarde des étapes de créations de maps + variable qui modifie en continu (mais non implémentée)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Première correction hitbox toolbar + sauvegarde des étapes de créations de maps + variable qui modifie en continu (mais non implémentée)" />
   </component>
 </project>

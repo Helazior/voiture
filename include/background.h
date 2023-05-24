@@ -71,9 +71,11 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
 
 void click_toolbar(Toolbar* toolbar);
 
-void change_variable(Toolbar* toolbar);
+Bool has_road_var_changed(Road* road);
 
-void change_variable_keys(Toolbar* toolbar, short add);
+void change_variable(Toolbar* toolbar, Road* road);
+
+void change_variable_keys(Toolbar* toolbar, short add, Road* road);
 
 void manage_selected_toolbar(Toolbar* toolbar, Road* road, Camera* cam, Callback* callback, Player* player0);
 

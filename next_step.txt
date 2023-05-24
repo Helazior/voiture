@@ -91,6 +91,8 @@ avec IA et sans drift :
 //fantome de la course
 //retenir plusieurs circuits
 
+// ctrl-z pour revenir en arrière sur l'édition
+
 // plusieurs bots
 // plusieurs joueurs en local
 // plusieurs joueurs en ligne

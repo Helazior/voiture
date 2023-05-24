@@ -45,15 +45,22 @@ int main(void) {
 	//init struct Road;
 	Road road = {
 		.len_tab_cp = 0,
-        .generation = {
-                .nb_cp_max = NB_CP,
-                .dist_cp = DIST_CP,
-                .cp_size_angle_to_remove = 10.f,
-                .nb_loops_uncross_segments = 30,
-                .greedy = True,
-                .uncross_all_segments = True,
-                .remove_hairpin_turns = True,
-                .generate_continuously = False},
+		.generation = {
+			.nb_cp_max = NB_CP,
+			.dist_cp = DIST_CP,
+			.cp_size_angle_to_remove = 10.f,
+			.nb_loops_uncross_segments = 30,
+			.greedy = True,
+			.uncross_all_segments = True,
+			.remove_hairpin_turns = True,
+			.generate_continuously = False,
+			{
+				.nb_cp_max = False,
+				.dist_cp = False,
+				.cp_size_angle_to_remove = False,
+				.nb_loops_uncross_segments = False,
+			}
+		},
 		.square_width = 40,
 		.num_closest_cp = 0,
 		.select = false,
@@ -62,7 +69,7 @@ int main(void) {
 		.selecty = 0,
 	};
 
-    create_road(&road);
+	create_road(&road);
 
 
 	// TODO : passer car, key et ia en pointeur et les allouer.
@@ -70,10 +77,10 @@ int main(void) {
 	Player player[NB_OF_PLAYERS];
 	for (int i = 0; i < NB_OF_PLAYERS; ++i) {
 		// init struct Entity
-        player[i].car.turn = TURN;
+		player[i].car.turn = TURN;
 		init_car(&player[i].car, renderer, i);
 		// init struct Keys_pressed;
-        release_the_keys(&player[i].key);
+		release_the_keys(&player[i].key);
 		//init cp
 		player[i].cp.nb_valid_checkPoints = 0;
 		init_player_cp(&player[i].cp, road.len_tab_cp);
@@ -85,7 +92,7 @@ int main(void) {
 		}
 	}
 
-    remove_hairpin_turns(&road, player);
+	remove_hairpin_turns(&road, player);
 
 	//init struct Camera;
 	Camera cam = {
@@ -108,14 +115,14 @@ int main(void) {
 	if (init_background(renderer, &bg) == EXIT_FAILURE)
 		goto Quit_texture;
 
-    //init CallBack
-    Callback callback = {
-            .create_road = False
-    };
+	//init CallBack
+	Callback callback = {
+		.create_road = False
+	};
 	//init struct Toolbar;
 	Toolbar toolbar;
 	if (init_toolbar(&toolbar, renderer, &player[0].car, &road, player[0].ia, &cam, &bg, &callback) == EXIT_FAILURE)
-        goto Quit;
+		goto Quit;
 
 
 	//__________________Start________________
@@ -138,7 +145,7 @@ int main(void) {
 		remain_time *= (int)(remain_time > 0);
 		SDL_Delay(remain_time); // wait*/
 
-        lastTime = SDL_GetTicks();
+		lastTime = SDL_GetTicks();
 		while (SDL_PollEvent(&event))//events
 		{
 			switch (event.type) {
@@ -163,7 +170,7 @@ int main(void) {
 						case SDL_BUTTON_MIDDLE:
 							if (road.len_tab_cp > 0) {
 								// TODO : mettre pour tous
-                                del_closest_checkPoint(&road, &event, &cam, player);
+								del_closest_checkPoint(&road, &event, &cam, player);
 								if (road.len_tab_cp <= 3) {
 									stop_ia(player);
 								}
@@ -171,7 +178,7 @@ int main(void) {
 							break;
 						case SDL_BUTTON_RIGHT:
 							if (road.len_tab_cp) {// if it exist at least 1 checkpoint
-                                // TODO : mettre pour tous
+												  // TODO : mettre pour tous
 								manage_checkpoint(&road, &event, &cam, &player[0].car);
 							}
 							break;
@@ -184,10 +191,10 @@ int main(void) {
 					if (event.button.button == SDL_BUTTON_RIGHT) {
 						road.select = false;
 					} else if (event.button.button == SDL_BUTTON_LEFT) {
-                        if (toolbar.is_selecting) {
-                            // TODO: à revoir !!!
-                            manage_selected_toolbar(&toolbar, &road, &cam, &callback, player);
-                        }
+						if (toolbar.is_selecting || has_road_var_changed(&road)) {
+							// TODO: à revoir !!!
+							manage_selected_toolbar(&toolbar, &road, &cam, &callback, player);
+						}
 					}
 					break;
 				default:
@@ -195,7 +202,7 @@ int main(void) {
 			}
 		}
 		if (toolbar.is_selecting) {
-			change_variable(&toolbar);
+			change_variable(&toolbar, &road);
 		}
 		// if resized
 		// TODO : à mettre dans une fonction

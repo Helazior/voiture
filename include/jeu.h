@@ -110,6 +110,12 @@ typedef struct Road {
         Bool uncross_all_segments;
         Bool remove_hairpin_turns;
         Bool generate_continuously;
+        struct {
+            Bool nb_cp_max;
+            Bool dist_cp;
+            Bool cp_size_angle_to_remove;
+            Bool nb_loops_uncross_segments;
+        } has_changed;
     } generation;
     int num_closest_cp;
 	int square_width;
