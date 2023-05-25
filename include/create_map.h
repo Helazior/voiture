@@ -30,14 +30,7 @@ void create_fixe_road(Road* road);
  */
 void create_naif_road(Road* road);
 
-
-/**
- * The optimal solution does not have intersection in the road, so the function uncross all the segments
- * @param tab_checkpoints
- * @return If a switch has been done
- *
- */
-bool uncross_all_segments(Road* road);
+void uncross_and_remove(Road* road, Player* player);
 
 /**
  * Implement a travelling salesman algo
@@ -47,16 +40,6 @@ void create_travelling_road(Road* road);
 
 // TODO: load_map_from_file()
 // create_saved_map(Road* road);
-
-/**
- * After the travelling salesman, it remain some hairpin_turns.
- * This solution consist to remove the corresponding CPs
- * For the moment the function reinitialize players' CPs, so the function can be call in game
- * @param road
- * @param player
- * @return If a cp has been deleted
- */
-void remove_hairpin_turns(Road* road , Player* player);
 
 void travelling_set_up_cp(Road* road);//à suppr TODO mettre en privé
 void greedy(Road* road);

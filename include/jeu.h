@@ -105,10 +105,9 @@ typedef struct Road {
         int nb_cp_max; // To create random road
         int dist_cp;
         float cp_size_angle_to_remove;
-        int nb_loops_uncross_segments;
+        int nb_loops;
         Bool greedy;
-        Bool uncross_all_segments;
-        Bool remove_hairpin_turns;
+        Bool uncross_and_remove;
         Bool generate_continuously;
         struct {
             Bool nb_cp_max;

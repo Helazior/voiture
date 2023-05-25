@@ -77,6 +77,8 @@ void change_variable(Toolbar* toolbar, Road* road);
 
 void change_variable_keys(Toolbar* toolbar, short add, Road* road);
 
+void regenerate_map(Road* road, Camera* cam, Player* player, Callback* callback);
+
 void manage_selected_toolbar(Toolbar* toolbar, Road* road, Camera* cam, Callback* callback, Player* player0);
 
 void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar);

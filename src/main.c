@@ -49,10 +49,9 @@ int main(void) {
 			.nb_cp_max = NB_CP,
 			.dist_cp = DIST_CP,
 			.cp_size_angle_to_remove = 10.f,
-			.nb_loops_uncross_segments = 30,
+			.nb_loops = 10,
 			.greedy = True,
-			.uncross_all_segments = True,
-			.remove_hairpin_turns = True,
+			.uncross_and_remove = True,
 			.generate_continuously = False,
 			{
 				.nb_cp_max = False,
@@ -92,7 +91,7 @@ int main(void) {
 		}
 	}
 
-	remove_hairpin_turns(&road, player);
+    uncross_and_remove(&road, player);
 
 	//init struct Camera;
 	Camera cam = {
@@ -191,7 +190,7 @@ int main(void) {
 					if (event.button.button == SDL_BUTTON_RIGHT) {
 						road.select = false;
 					} else if (event.button.button == SDL_BUTTON_LEFT) {
-						if (toolbar.is_selecting || has_road_var_changed(&road)) {
+						if (toolbar.is_selecting) {
 							// TODO: à revoir !!!
 							manage_selected_toolbar(&toolbar, &road, &cam, &callback, player);
 						}
@@ -204,6 +203,8 @@ int main(void) {
 		if (toolbar.is_selecting) {
 			change_variable(&toolbar, &road);
 		}
+        if (has_road_var_changed(&road))
+            regenerate_map(&road, &cam, player, &callback);
 		// if resized
 		// TODO : à mettre dans une fonction
 		SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));

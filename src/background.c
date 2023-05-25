@@ -108,12 +108,12 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
                     {"Generate Continuously:", (int *) &road->generation.generate_continuously, NULL, 0, 1, Checkbox},
                     {"Nb max of CP:", (int *) &road->generation.nb_cp_max, NULL, 4, NB_MAX_SQUARES, Line},
                     {"CP's size angle to remove", NULL, &road->generation.cp_size_angle_to_remove, 0.f, 30.f, Line},
-                    {"Dist between CP:", (int *) &road->generation.dist_cp, NULL, 20, 2000, Line},
-                    {"Nb loops to uncross segments:", (int *) &road->generation.nb_loops_uncross_segments, NULL, 0, 100, Line},
+                    {"Dist between CP:", (int *) &road->generation.dist_cp, NULL, 200, 2000, Line},
+                    {"Nb loops to uncross segments:", (int *) &road->generation.nb_loops, NULL, 0, 100, Line},
                     {"Algo greedy:", (int *) &road->generation.greedy, NULL, 0, 1, Checkbox},
-                    {"Algo uncross segments:", (int *) &road->generation.uncross_all_segments, NULL, 0, 1, Checkbox},
-                    {"Algo remove hairpin turns:", (int *) &road->generation.remove_hairpin_turns, NULL, 0, 1, Checkbox},
+                    {"Algo uncross segments:", (int *) &road->generation.uncross_and_remove, NULL, 0, 1, Checkbox},
                     {"Cam follow car:", (int *) &cam->follow_car, NULL, 0, 1, Checkbox},
+                    null_setting,
                     null_setting,
                     null_setting,
                     null_setting,
@@ -142,7 +142,7 @@ static Bool is_in(int x, int y, SDL_Rect* tex_size, SDL_Rect* toolbar_size, Type
     return False;
 }
 
-void click_toolbar(Toolbar* toolbar){
+void click_toolbar(Toolbar* toolbar) {
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
 	toolbar->pos_click_x = mouse_x;
@@ -176,7 +176,7 @@ Bool has_road_var_changed(Road* road) {
             || road->generation.has_changed.nb_cp_max)
            && road->generation.generate_continuously;
 //           && (road->generation.greedy
-//               || road->generation.uncross_all_segments
+//               || road->generation.uncross_and_remove
 //               || road->generation.remove_hairpin_turns);
 }
 
@@ -185,7 +185,7 @@ static void road_has_changed_int(Road* road, int* selected_var_int) {
         road->generation.has_changed.nb_cp_max = True;
     else if (selected_var_int == &road->generation.dist_cp)
         road->generation.has_changed.dist_cp = True;
-    else if (selected_var_int == &road->generation.nb_loops_uncross_segments)
+    else if (selected_var_int == &road->generation.nb_loops)
         road->generation.has_changed.nb_loops_uncross_segments = True;
 }
 
@@ -275,24 +275,50 @@ static void init_has_changed(Road* road) {
     road->generation.has_changed.nb_cp_max = False;
 }
 
+void regenerate_map(Road* road, Camera* cam, Player* player, Callback* callback) {
+    // TODO : réinitialiser les IA
+
+    if (road->generation.greedy) {
+        travelling_set_up_cp(road);
+        greedy(road);
+    } else {
+        download_road(road, 0);
+    }
+    if (road->generation.uncross_and_remove) {
+        uncross_and_remove(road, player);
+    } else {
+        if (road->generation.has_changed.dist_cp && !(road->generation.greedy || road->generation.uncross_and_remove)) {
+            // TODO : éloigner x et y selon l'ancienne dist et la nouvelle + changer les sauvegardes intermédiaires
+        }
+        for (int i = 0; i < NB_OF_PLAYERS; ++i) {
+            player[i].car.pos_initx = (float)road->tab_cp[0].x - 200;
+            player[i].car.pos_inity = (float)road->tab_cp[0].y + 100.f * (float)i;
+            player[i].car.posx = player[i].car.pos_initx;
+            player[i].car.posy = player[i].car.pos_inity;
+            player[i].car.frame.x = (int)(player[i].car.posx);
+            player[i].car.frame.y = (int)(player[i].car.posy);
+        }
+    }
+    init_cam(cam, &player[0].car);
+    callback->create_road = False;
+    init_has_changed(road);
+}
+
 void manage_selected_toolbar(Toolbar* toolbar, Road* road, Camera* cam, Callback* callback, Player* player) {
     // TODO : revoir
 
     // TODO : au lieu de le faire là, faire une function que refait la map selon les variables et qui sera appelé à chaque fois
     // Comme ça dès qu'on modifie la variable on refait la map directement
-    Bool has_road_variable_changed = has_road_var_changed(road);
     toolbar->is_selecting = False;
     if (((toolbar->settings[toolbar->num_page][toolbar->num_setting].type == Checkbox
          || toolbar->settings[toolbar->num_page][toolbar->num_setting].type == Button)
-        && toolbar->select_var_int == toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable)
-        || has_road_variable_changed) {
+        && toolbar->select_var_int == toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable)) {
 
         *toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable =
                 (*toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable + 1) % 2;
 
         // the box has just been checked
-        if (*toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable == True
-            || has_road_variable_changed) {
+        if (*toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable == True) {
             // the box is ia->active
             if (toolbar->select_var_int == (int *) &player[0].ia->active) {
                 // TODO : Utile ?
@@ -300,38 +326,9 @@ void manage_selected_toolbar(Toolbar* toolbar, Road* road, Camera* cam, Callback
             }
             // TODO : à mettre dans une fonction
             // function to create road
-            if (toolbar->select_var_int == (int *) &callback->create_road
-                || has_road_variable_changed) {
+            if (toolbar->select_var_int == (int *) &callback->create_road) {
                 // TODO : faire un thread pour pas avoir de freeze
-                // TODO : réinitialiser les IA
-
-                if (road->generation.greedy) {
-                    travelling_set_up_cp(road);
-                    greedy(road);
-                } else {
-                    download_road(road, 0);
-                }
-                if (road->generation.uncross_all_segments) {
-                    uncross_all_segments(road);
-                }
-                if (road->generation.remove_hairpin_turns) {
-                    remove_hairpin_turns(road, player);
-                } else {
-                    if (road->generation.has_changed.dist_cp && !(road->generation.greedy || road->generation.uncross_all_segments)) {
-                        // TODO : éloigner x et y selon l'ancienne dist et la nouvelle + changer les sauvegardes intermédiaires
-                    }
-                    for (int i = 0; i < NB_OF_PLAYERS; ++i) {
-                        player[i].car.pos_initx = (float)road->tab_cp[0].x - 200;
-                        player[i].car.pos_inity = (float)road->tab_cp[0].y + 100.f * (float)i;
-                        player[i].car.posx = player[i].car.pos_initx;
-                        player[i].car.posy = player[i].car.pos_inity;
-                        player[i].car.frame.x = (int)(player[i].car.posx);
-                        player[i].car.frame.y = (int)(player[i].car.posy);
-                    }
-                }
-                init_cam(cam, &player[0].car);
-                *toolbar->settings[toolbar->num_page][toolbar->num_setting].int_variable = false; // TODO: generaliser
-                init_has_changed(road);
+                regenerate_map(road, cam, player, callback);
             }
             // the box has just been unchecked
         } else {

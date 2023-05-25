@@ -308,37 +308,71 @@ static bool uncross_segments(SDL_Rect tab_checkpoints[], int nb_cp, int extend_s
     return has_been_changed;
 }
 
-bool uncross_all_segments(Road* road) {
-    int nb_change = 0;
-    while (uncross_segments(road->tab_cp, road->len_tab_cp, road->generation.dist_cp * 0.2) && nb_change++ < road->generation.nb_loops_uncross_segments); // TODO : nombre arbitraire, changer
-    return nb_change != 0;
-}
 
-void remove_hairpin_turns(Road* road , Player* player) {
-    int nb_loops_uncross = 0;
+static int remove_hairpin_turns(Road* road, Player* player) {
+//    int nb_loops_uncross = 0;
     int nb_loops_remove_angle = 0;
     bool has_removed;
+    bool has_removed_once = false;
+//    do {
     do {
-        do {
-            has_removed = false;
-            for (int i = 0; i < road->len_tab_cp; ++i) {
-                double angle =
-                        atan2(road->tab_cp[(i - 1 + road->len_tab_cp) % road->len_tab_cp].y - road->tab_cp[i].y,
-                              road->tab_cp[(i - 1 + road->len_tab_cp) % road->len_tab_cp].x - road->tab_cp[i].x)
-                        -
-                        atan2(road->tab_cp[(i + 1) % road->len_tab_cp].y - road->tab_cp[i].y,
-                              road->tab_cp[(i + 1) % road->len_tab_cp].x - road->tab_cp[i].x);
+        has_removed = false;
+        for (int i = 0; i < road->len_tab_cp; ++i) {
+            double angle =
+                    atan2(road->tab_cp[(i - 1 + road->len_tab_cp) % road->len_tab_cp].y - road->tab_cp[i].y,
+                          road->tab_cp[(i - 1 + road->len_tab_cp) % road->len_tab_cp].x - road->tab_cp[i].x)
+                    -
+                    atan2(road->tab_cp[(i + 1) % road->len_tab_cp].y - road->tab_cp[i].y,
+                          road->tab_cp[(i + 1) % road->len_tab_cp].x - road->tab_cp[i].x);
 
-                if (fabs(angle) < 0.1 * road->generation.cp_size_angle_to_remove) { // TODO : la valeur est arbitraire, faire un truc modulaire
-                    road->num_closest_cp = i;
-                    del_checkPoint(road, player);
-                    has_removed = true;
-                }
+            if (fabs(angle) < 0.1 * road->generation.cp_size_angle_to_remove) { // TODO : la valeur est arbitraire, faire un truc modulaire
+                road->num_closest_cp = i;
+                del_checkPoint(road, player);
+                has_removed = true;
+                has_removed_once = true;
             }
-        } while (has_removed && nb_loops_remove_angle++ < 20);
-    } while(uncross_all_segments(road) && nb_loops_uncross++ < road->generation.nb_loops_uncross_segments);
+        }
+    } while (has_removed && nb_loops_remove_angle++ < 10);
+//    } while(uncross_and_remove(road) && nb_loops_uncross++ < road->generation.nb_loops);
 
     // TODO à faire bien :
+//    for (int i = 0; i < NB_OF_PLAYERS; ++i) {
+//        player[i].car.pos_initx = (float)road->tab_cp[0].x - 200;
+//        player[i].car.pos_inity = (float)road->tab_cp[0].y + 100.f * (float)i;
+//        player[i].car.posx = player[i].car.pos_initx;
+//        player[i].car.posy = player[i].car.pos_inity;
+//        player[i].car.frame.x = (int)(player[i].car.posx);
+//        player[i].car.frame.y = (int)(player[i].car.posy);
+//    }
+    return has_removed_once;
+}
+
+/**
+ * Firstly, to optimize to road, it's know that the optimal solution does not have intersection in the road,
+ * so the function uncross all the segments.
+ * After the travelling salesman, it remain some hairpin_turns.
+ * This solution consist to remove the corresponding CPs.
+ * Note that this is no longer the travelling salesman algo but this is good for a car track.
+ * For the moment the function reinitialize players' CPs, so the function can be call in game
+ * @param road
+ * @param player
+ * @return
+ */
+void uncross_and_remove(Road* road, Player* player) {
+    if (!road->len_tab_cp)
+        return;
+    int nb_change;
+    int has_uncross = true;
+    int has_remove = true;
+    int nb_loop = 0;
+    do {
+        nb_change = 0;
+        while (uncross_segments(road->tab_cp, road->len_tab_cp, road->tab_cp[0].w)
+                             && nb_change++ < 10);
+        has_uncross = (nb_change > 0);
+        has_remove = remove_hairpin_turns(road, player);
+    } while ((has_uncross || has_remove) && nb_loop++ < road->generation.nb_loops);
+
     for (int i = 0; i < NB_OF_PLAYERS; ++i) {
         player[i].car.pos_initx = (float)road->tab_cp[0].x - 200;
         player[i].car.pos_inity = (float)road->tab_cp[0].y + 100.f * (float)i;
@@ -355,7 +389,7 @@ void remove_hairpin_turns(Road* road , Player* player) {
  */
 static void travelling_salesman_on_cp(Road* road) {
     greedy(road);
-    uncross_all_segments(road);
+//    uncross_and_remove(road, player);
 }
 
 void create_travelling_road(Road* road) {
@@ -363,5 +397,5 @@ void create_travelling_road(Road* road) {
     // TODO : Et enlever "travelling" devant les fonctions statiques
     // TODO : comprendre pourquoi il y a toujours un CP sous la voiture
     travelling_set_up_cp(road);
-    travelling_salesman_on_cp(road);
+    travelling_salesman_on_cp(road); // TODO seulement greedy poyr l'instant
 }
