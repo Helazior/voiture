@@ -140,6 +140,9 @@ static void grid_set_up_algo(Road* road) {
             road->tab_cp[i].h = road->square_width;
         }
     }
+#if DEMO_MODE
+    save_road_debug(road, 0);
+#endif
 }
 
 /**
@@ -216,7 +219,7 @@ void greedy(Road* road) {
         swap(&road->tab_cp[nearest_cp_index], &road->tab_cp[(i + 1) % road->len_tab_cp]);
     }
 #if DEMO_MODE
-    save_road_debug(road, 0);
+    save_road_debug(road, 1);
 #endif
 }
 

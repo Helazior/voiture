@@ -110,10 +110,10 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
                     {"CP's size angle to remove", NULL, &road->generation.cp_size_angle_to_remove, 0.f, 30.f, Line},
                     {"Dist between CP:", (int *) &road->generation.dist_cp, NULL, 200, 2000, Line},
                     {"Nb loops to uncross segments:", (int *) &road->generation.nb_loops, NULL, 0, 100, Line},
+                    {"Algo set up CP:", (int *) &road->generation.set_up_cp, NULL, 0, 1, Checkbox},
                     {"Algo greedy:", (int *) &road->generation.greedy, NULL, 0, 1, Checkbox},
                     {"Algo uncross segments:", (int *) &road->generation.uncross_and_remove, NULL, 0, 1, Checkbox},
                     {"Cam follow car:", (int *) &cam->follow_car, NULL, 0, 1, Checkbox},
-                    null_setting,
                     null_setting,
                     null_setting,
                     null_setting,
@@ -261,7 +261,7 @@ void change_variable_keys(Toolbar* toolbar, short add, Road* road){
     }
 }
 
-static void download_road(Road* road, int num_road_saved) {
+static void recover_old_road(Road* road, int num_road_saved) { // TODO: changer le nom
     road->len_tab_cp = road->generation.len_tab_cp[num_road_saved];
     for (int i = 0; i < road->len_tab_cp; ++i) {
         road->tab_cp[i] = road->generation.tab_cp_at_step[num_road_saved][i];
@@ -278,11 +278,15 @@ static void init_has_changed(Road* road) {
 void regenerate_map(Road* road, Camera* cam, Player* player, Callback* callback) {
     // TODO : réinitialiser les IA
 
-    if (road->generation.greedy) {
+    if (road->generation.set_up_cp) {
         travelling_set_up_cp(road);
+    } else if (road->generation.greedy) {
+        recover_old_road(road, 0);
+    }
+    if (road->generation.greedy) {
         greedy(road);
-    } else {
-        download_road(road, 0);
+    } else if (!road->generation.set_up_cp){ // TODO: changer les conditions en un truc clean
+        recover_old_road(road, 1);
     }
     if (road->generation.uncross_and_remove) {
         uncross_and_remove(road, player);
@@ -299,7 +303,7 @@ void regenerate_map(Road* road, Camera* cam, Player* player, Callback* callback)
             player[i].car.frame.y = (int)(player[i].car.posy);
         }
     }
-    init_cam(cam, &player[0].car);
+	init_cam(cam, &player[0].car);
     callback->create_road = False;
     init_has_changed(road);
 }

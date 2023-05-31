@@ -50,6 +50,7 @@ int main(void) {
 			.dist_cp = DIST_CP,
 			.cp_size_angle_to_remove = 10.f,
 			.nb_loops = 10,
+            .set_up_cp = True,
 			.greedy = True,
 			.uncross_and_remove = True,
 			.generate_continuously = False,

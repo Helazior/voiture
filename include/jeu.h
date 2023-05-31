@@ -100,12 +100,13 @@ typedef struct Road {
 	SDL_Rect tab_cp[NB_MAX_SQUARES];
 	int len_tab_cp;
     struct {
-        SDL_Rect tab_cp_at_step[3][NB_MAX_SQUARES];
-        int len_tab_cp[1];
+        SDL_Rect tab_cp_at_step[2][NB_MAX_SQUARES];
+        int len_tab_cp[2];
         int nb_cp_max; // To create random road
         int dist_cp;
         float cp_size_angle_to_remove;
         int nb_loops;
+        Bool set_up_cp;
         Bool greedy;
         Bool uncross_and_remove;
         Bool generate_continuously;
