@@ -128,7 +128,9 @@ static void grid_set_up_algo(Road* road) {
     for (int row = 0; row < width; ++row) {
         for (int column = 0; column < width; ++column) {
             if (row * width + column >= road->len_tab_cp) {
-//                printf("%d %d\n", road->tab_cp[0].x, road->tab_cp[0].y);
+#if DEMO_MODE
+                save_road_debug(road, 0);
+#endif
                 return;
             }
             i = row * width + column;
