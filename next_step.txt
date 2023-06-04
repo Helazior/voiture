@@ -75,6 +75,7 @@ avec IA et sans drift :
 // fichier .json au lieu des defines
 
 /*À faire*/
+// bouger dans la fenêtre avec 2 doigts glissés
 (fait)// barre et touche pour agrandir la largeur de route
 (fait)// barre pour gerer la vitesse/acceleration/frottement/virage/dérapage
 (un peu fait)// case à cocher pour que la caméra ne suive plus la voiture, dans ce cas, on peut se déplacer avec les flêches ou avec la souris au bord de l'écran

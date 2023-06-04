@@ -49,7 +49,7 @@ int main(void) {
 			.nb_cp_max = NB_CP,
 			.dist_cp = DIST_CP,
 			.cp_size_angle_to_remove = 10.f,
-			.nb_loops = 10,
+			.nb_loops = 20,
             .set_up_cp = True,
 			.greedy = True,
 			.uncross_and_remove = True,
@@ -64,7 +64,7 @@ int main(void) {
 		.square_width = 40,
 		.num_closest_cp = 0,
 		.select = false,
-		.size = 500,
+		.size = 600,
 		.selectx = 0,
 		.selecty = 0,
 	};

@@ -330,7 +330,9 @@ static int remove_hairpin_turns(Road* road, Player* player) {
                     atan2(road->tab_cp[(i + 1) % road->len_tab_cp].y - road->tab_cp[i].y,
                           road->tab_cp[(i + 1) % road->len_tab_cp].x - road->tab_cp[i].x);
 
-            if (fabs(angle) < 0.1 * road->generation.cp_size_angle_to_remove) { // TODO : la valeur est arbitraire, faire un truc modulaire
+            angle += (angle < M_PI) ? 2 * M_PI : 0;
+            angle -= (angle > M_PI) ? 2 * M_PI : 0;
+            if (fabs(angle) < 0.1 * road->generation.cp_size_angle_to_remove) {
                 road->num_closest_cp = i;
                 del_checkPoint(road, player);
                 has_removed = true;
@@ -340,7 +342,6 @@ static int remove_hairpin_turns(Road* road, Player* player) {
     } while (has_removed && nb_loops_remove_angle++ < 10);
 //    } while(uncross_and_remove(road) && nb_loops_uncross++ < road->generation.nb_loops);
 
-    // TODO à faire bien :
 //    for (int i = 0; i < NB_OF_PLAYERS; ++i) {
 //        player[i].car.pos_initx = (float)road->tab_cp[0].x - 200;
 //        player[i].car.pos_inity = (float)road->tab_cp[0].y + 100.f * (float)i;
@@ -372,8 +373,8 @@ void uncross_and_remove(Road* road, Player* player) {
     int nb_loop = 0;
     do {
         nb_change = 0;
-        while (uncross_segments(road->tab_cp, road->len_tab_cp, road->tab_cp[0].w)
-                             && nb_change++ < 10);
+        while (uncross_segments(road->tab_cp, road->len_tab_cp, 4 * road->tab_cp[0].w)
+                             && nb_change++ < 20);
         has_uncross = (nb_change > 0);
         has_remove = remove_hairpin_turns(road, player);
     } while ((has_uncross || has_remove) && nb_loop++ < road->generation.nb_loops);

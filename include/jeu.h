@@ -31,7 +31,7 @@
 #define NEXT_CP_COLOR GREEN
 
 #define NB_PIX_DRIFT 800
-#define NB_MAX_SQUARES 1000
+#define NB_MAX_SQUARES 800
 
 #define ACCELERATION 10.
 #define FROTTEMENT 8.
@@ -187,6 +187,8 @@ void reset_valid_tab(Road* road, PlayerCP* cp, bool first_player);
 void manage_skid_marks(Entity* car, Keys_pressed* key);
 //car
 void move_car(Entity *car, Keys_pressed* key, Camera* cam, Bool first_car);
+
+void reinitialize_map(Player player[], Road* road, Camera* cam);
 //key
 void manage_key(SDL_Event* event, Keys_pressed* key, Bool state, Camera* cam, Road* road, Toolbar* toolbar, Player* player, uint8_t num_player);
 //put the 3 last checkpoints into the 3 first:
@@ -199,7 +201,7 @@ void del_checkPoint(Road* road, Player* player);
 void del_closest_checkPoint(Road* road, SDL_Event* event, Camera* cam, Player* player);
 //found the closest checkpoint to the clic:
 void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
-//manage a checkpoint:
+//move a checkpoint following the mouse:
 void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 
 void display(SDL_Renderer *renderer, Player* player, Road* road, Camera* cam, Toolbar* toolbar, Background* bg, int nb_fps);// display all

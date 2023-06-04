@@ -172,6 +172,20 @@ void move_car(Entity* car, Keys_pressed* key, Camera* cam, Bool first_car) {
     }
 }
 
+// replace car, reinitialize CPs' state and camera
+void reinitialize_map(Player player[], Road* road, Camera* cam) {
+    for (int i = 0; i < NB_OF_PLAYERS; ++i) {
+        player[i].car.posx = player[i].car.pos_initx;
+        player[i].car.posy = player[i].car.pos_inity;
+        player[i].car.speed = 0.;
+        reset_valid_tab(road, &player[i].cp, i == 0);
+        if (player[i].ia->active)
+            init_ia(player[i].ia, road, &player[i].car, &player[i].cp);
+    }
+    if (cam->follow_car == False)
+        init_cam(cam, &player[0].car);
+}
+
 void manage_key(SDL_Event* event, Keys_pressed* key, Bool status, Camera* cam, Road* road, Toolbar* toolbar, Player* player, uint8_t num_player){
 	// TODO : faire un enum !
 #define ADD_TO_VAR 1
@@ -208,16 +222,7 @@ void manage_key(SDL_Event* event, Keys_pressed* key, Bool status, Camera* cam, R
 			}
 			break;
 		case SDLK_ESCAPE:
-            for (int i = 0; i < NB_OF_PLAYERS; ++i) {
-                player[i].car.posx = player[i].car.pos_initx;
-                player[i].car.posy = player[i].car.pos_inity;
-                player[i].car.speed = 0.;
-                reset_valid_tab(road, &player[i].cp, i == 0);
-                if (player[i].ia->active)
-                    init_ia(player[i].ia, road, &player[i].car, &player[i].cp);
-            }
-            if (cam->follow_car == False)
-                init_cam(cam, &player[0].car);
+            reinitialize_map(player, road, cam);
             break;
         case SDLK_p:
             cam->zoom *= 1.1;
@@ -431,13 +436,17 @@ static void render_checkPoints(SDL_Renderer *renderer, Road* road, Camera* cam, 
 		road->tab_cp[road->num_closest_cp].x = pos_clique_x + road->selectx;
 		road->tab_cp[road->num_closest_cp].y = pos_clique_y + road->selecty;
 
+        // debug
 //        i = road->num_closest_cp;
-//        printf("angle = %f\n",
+//        float angle =
 //        atan2(road->tab_cp[(i - 1 + road->len_tab_cp) % road->len_tab_cp].y - road->tab_cp[i].y,
 //              road->tab_cp[(i - 1 + road->len_tab_cp) % road->len_tab_cp].x - road->tab_cp[i].x)
 //        -
 //        atan2(road->tab_cp[(i + 1) % road->len_tab_cp].y - road->tab_cp[i].y,
-//              road->tab_cp[(i + 1) % road->len_tab_cp].x - road->tab_cp[i].x));
+//              road->tab_cp[(i + 1) % road->len_tab_cp].x - road->tab_cp[i].x);
+//        angle += (angle < M_PI) ? 2 * M_PI : 0;
+//        angle -= (angle > M_PI) ? 2 * M_PI : 0;
+//        printf("angle = %f\n", angle);
     }
 
 	for (i = 0; i < road->len_tab_cp; i++){

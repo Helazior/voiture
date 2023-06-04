@@ -9,8 +9,8 @@
 #define TRAVELLING_SALESMAN_ROAD 3
 #define CREATE_MAP_AUTO TRAVELLING_SALESMAN_ROAD
 
-#define NB_CP 200
-#define DIST_CP 900
+#define NB_CP 50
+#define DIST_CP 1200
 
 /**
  * Call function create_fixe/naif/travelling_road

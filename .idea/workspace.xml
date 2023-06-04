@@ -27,14 +27,16 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="Début pour generate_continuously, il vaut mieux l'exécuter autre part">
+    <list default="true" id="0a7b12dc-d43a-4aeb-b839-88182169ce91" name="Default Changelist" comment="Correction bug lorsqu'on mettait uniquement greedy">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/exec" beforeDir="false" afterPath="$PROJECT_DIR$/exec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/background.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/background.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/create_map.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/create_map.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/jeu.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/jeu.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/next_step.txt" beforeDir="false" afterPath="$PROJECT_DIR$/next_step.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/background.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/background.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/create_map.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/create_map.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/jeu.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/jeu.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -182,7 +184,11 @@
       <workItem from="1684582814402" duration="7644000" />
       <workItem from="1684775312982" duration="12710000" />
       <workItem from="1684956422545" duration="8788000" />
-      <workItem from="1685041711384" duration="13127000" />
+      <workItem from="1685041711384" duration="14321000" />
+      <workItem from="1685057332761" duration="35000" />
+      <workItem from="1685561783813" duration="3053000" />
+      <workItem from="1685643841899" duration="3047000" />
+      <workItem from="1685869972994" duration="4581000" />
     </task>
     <task id="LOCAL-00001" summary="Correction voiture sans cam">
       <created>1645378970581</created>
@@ -352,7 +358,28 @@
       <option name="project" value="LOCAL" />
       <updated>1684965205527</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Generate_continuously fini">
+      <created>1685056383011</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1685056383011</updated>
+    </task>
+    <task id="LOCAL-00026" summary="séparation de set up cp et greedy dans le menu">
+      <created>1685564248108</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1685564248108</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Correction bug lorsqu'on mettait uniquement greedy">
+      <created>1685647037972</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1685647037972</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -377,8 +404,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="Correction voiture sans cam" />
-    <MESSAGE value="Correction voiture et enlevé warning dans IA" />
     <MESSAGE value="correction IA qui se mettait pas en route" />
     <MESSAGE value="Reste que l'IA à gérer pour les autres joueurs.&#10;&#10;Faut modifier Road pour en mettre une partie dans IA" />
     <MESSAGE value="Début de l'algo du voyageur de commerce + un peu de refacto" />
@@ -401,6 +426,9 @@
     <MESSAGE value="correction bug lorsqu'il y a beaucoup de CP et ajout zoom dans les settings" />
     <MESSAGE value="Première correction hitbox toolbar + sauvegarde des étapes de créations de maps + variable qui modifie en continu (mais non implémentée)" />
     <MESSAGE value="Début pour generate_continuously, il vaut mieux l'exécuter autre part" />
-    <option name="LAST_COMMIT_MESSAGE" value="Début pour generate_continuously, il vaut mieux l'exécuter autre part" />
+    <MESSAGE value="Generate_continuously fini" />
+    <MESSAGE value="séparation de set up cp et greedy dans le menu" />
+    <MESSAGE value="Correction bug lorsqu'on mettait uniquement greedy" />
+    <option name="LAST_COMMIT_MESSAGE" value="Correction bug lorsqu'on mettait uniquement greedy" />
   </component>
 </project>

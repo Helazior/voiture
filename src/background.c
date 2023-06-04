@@ -303,7 +303,7 @@ void regenerate_map(Road* road, Camera* cam, Player* player, Callback* callback)
             player[i].car.frame.y = (int)(player[i].car.posy);
         }
     }
-	init_cam(cam, &player[0].car);
+    reinitialize_map(player, road, cam);
     callback->create_road = False;
     init_has_changed(road);
 }
