@@ -8,7 +8,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
-#define NB_OF_PLAYERS 1
+#define NB_OF_PLAYERS 2
 
 #define FRAMES_PER_SECONDE 60
 
@@ -31,7 +31,7 @@
 #define NEXT_CP_COLOR GREEN
 
 #define NB_PIX_DRIFT 800
-#define NB_SQUARE 400
+#define NB_MAX_SQUARES 800
 
 #define ACCELERATION 10.
 #define FRICTION 8.
@@ -97,11 +97,29 @@ typedef struct Entity {
 }Entity;
 
 typedef struct Road {
-	SDL_Rect tab_checkPoints[NB_SQUARE];
-	int len_tab_checkPoints;
-    int num_clos_check;
+	SDL_Rect tab_cp[NB_MAX_SQUARES];
+	int len_tab_cp;
+    struct {
+        SDL_Rect tab_cp_at_step[2][NB_MAX_SQUARES];
+        int len_tab_cp[2];
+        int nb_cp_max; // To create random road
+        int dist_cp;
+        float cp_size_angle_to_remove;
+        int nb_loops;
+        Bool set_up_cp;
+        Bool greedy;
+        Bool uncross_and_remove;
+        Bool generate_continuously;
+        struct {
+            Bool nb_cp_max;
+            Bool dist_cp;
+            Bool cp_size_angle_to_remove;
+            Bool nb_loops_uncross_segments;
+        } has_changed;
+    } generation;
+    int num_closest_cp;
 	int square_width;
-	Bool select;
+	bool select;
 	int selectx;
 	int selecty;
 	int size;
@@ -116,7 +134,7 @@ typedef struct Road {
 } Road;
 
 typedef struct PlayerCP {
-    Bool tab_valid_checkPoints[NB_SQUARE];
+    Bool tab_valid_checkPoints[NB_MAX_SQUARES];
     int nb_valid_checkPoints;
 } PlayerCP;
 
@@ -173,17 +191,21 @@ void reset_valid_tab(Road* road, PlayerCP* cp, bool first_player);
 void manage_skid_marks(Entity* car, Keys_pressed* key);
 //car
 void move_car(Entity *car, Keys_pressed* key, Camera* cam, Bool first_car);
+
+void reinitialize_map(Player player[], Road* road, Camera* cam);
 //key
 void manage_key(SDL_Event* event, Keys_pressed* key, Bool state, Camera* cam, Road* road, Toolbar* toolbar, Player* player, uint8_t num_player);
 //put the 3 last checkpoints into the 3 first:
 __attribute__((unused)) void close_circuit(Road road);
 //add a checkpoint:
 void add_checkPoint(Road* road, SDL_Event* event, Camera* cam, Entity* car, Player* player);
-//del a checkpoint:
-void del_checkPoint(Road* road, SDL_Event* event, Camera* cam, Player* player);
+// del the checkpoint in road->num_closest_cp
+void del_checkPoint(Road* road, Player* player);
+//del the closest checkpoint of the click:
+void del_closest_checkPoint(Road* road, SDL_Event* event, Camera* cam, Player* player);
 //found the closest checkpoint to the clic:
 void closest_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
-//manage a checkpoint:
+//move a checkpoint following the mouse:
 void manage_checkpoint(Road* road, SDL_Event* event, Camera* cam, Entity* car);
 
 void display(SDL_Renderer *renderer, Player* player, Road* road, Camera* cam, Toolbar* toolbar, Background* bg, int nb_fps);// display all

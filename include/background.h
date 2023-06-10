@@ -8,44 +8,52 @@
 #define FONT "akaashNormal.ttf"
 #define FONT_SIZE 18
 #define COLOR_TOOLBAR ORANGE
+#define COLOR_TOP_TOOLBAR 100, 25, 0, 255
 #define SIZE_LINE_TOOLBAR 200
 #define WIDTH_TOOLBAR 300
 
-#define NB_SETTINGS 9
+#define NB_SETTINGS 15
+#define NB_PAGES 2
 
 #define NB_COLORS_BG 6
 
 typedef enum{
 	Checkbox = 0,
-	Line = 1
+	Line = 1,
+    Button = 2,
+    Empty = -1,
 }Type_of_settings;
 
 
+/**To call functions when clicking in the toolbar's settings*/
+typedef struct callback {
+    Bool create_road;
+} Callback;
+
+/** 1 setting of 1 variable, int or float.
+ * As a line, checkbox or button */
 typedef struct Setting{
 	int* int_variable;
 	float* float_variable;
-	SDL_Texture* texture;
+	SDL_Texture* texture; // The name
 	SDL_Rect tex_size; //automatic
 	Type_of_settings type;
 	float min;
 	float max;
 }Setting;
 
-
+/**  A Toolbar is a 2D array of pages of Settings that you have to select */
 typedef struct Toolbar{
 	SDL_Rect size; // size of Toolbar
-	// le texte sera une structure, on fera donc un tableau de texte
+    int top_h;
 	//SDL_Color color;
-	Setting settings[NB_SETTINGS];
-
-	int num_page; // of the toolbar
-	int num_setting;
-	int* select_var_int;
-	float* select_var_float;
-	Bool is_selecting;
-	//int pages[5];
-	//int tab_settings[30]; //tab
 	int pos_click_x;
+    int* select_var_int;
+    float* select_var_float;
+    bool is_selecting;
+    int num_page; // of the toolbar
+    int num_setting;
+    Setting settings[NB_PAGES][NB_SETTINGS];
 }Toolbar;
 
 
@@ -58,14 +66,20 @@ typedef struct Background{
     SDL_Rect number_size;
 }Background;
 
-//init all the toolbar at the right of the screen
-int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia, Camera* cam, Background* bg);
+//init all the settings at the right of the screen
+int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* road, Ia* ia, Camera* cam, Background* bg, Callback* callback);
 
 void click_toolbar(Toolbar* toolbar);
 
-void change_variable(Toolbar* toolbar);
+Bool has_road_var_changed(Road* road);
 
-void change_variable_keys(Toolbar* toolbar, short add);
+void change_variable(Toolbar* toolbar, Road* road);
+
+void change_variable_keys(Toolbar* toolbar, short add, Road* road);
+
+void regenerate_map(Road* road, Camera* cam, Player* player, Callback* callback);
+
+void manage_selected_toolbar(Toolbar* toolbar, Road* road, Camera* cam, Callback* callback, Player* player0);
 
 void render_toolbar(SDL_Renderer *renderer, Toolbar* toolbar);
 

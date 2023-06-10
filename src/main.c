@@ -1,10 +1,10 @@
 /*main.c*/
 
-/*Jeu de course ayant 3 buts:
+/*Jeu de course ayant 3 buts :
  * Jouer à un jeu de course
- * Voir comment fonctionne l'IA de la voiture avec des annimations
+ * Voir comment fonctionne l'IA de la voiture avec des animations
  * Créer un univers (3D ?) de façon procédurale, et pouvoir le visiter avec plusieurs caméras
- * Le tout parametrable à volonté, à tout moment
+ * Le tout paramétrable à volonté, à tout moment
  *
  * Voir détails dans le fichier texte*/
 
@@ -20,7 +20,7 @@
 #include "../include/collision_car.h"
 #include "../include/create_map.h"
 
-#define ZOOM_INIT 0.4
+#define ZOOM_INIT 0.35
 //#define ZOOM_INIT 1
 
 extern unsigned int startLapTime;
@@ -42,22 +42,34 @@ int main(void) {
 		goto Quit;
 	}
 
-
 	//init struct Road;
 	Road road = {
-		.len_tab_checkPoints = 0,
+		.len_tab_cp = 0,
+		.generation = {
+			.nb_cp_max = NB_CP,
+			.dist_cp = DIST_CP,
+			.cp_size_angle_to_remove = 10.f,
+			.nb_loops = 20,
+            .set_up_cp = True,
+			.greedy = True,
+			.uncross_and_remove = True,
+			.generate_continuously = False,
+			{
+				.nb_cp_max = False,
+				.dist_cp = False,
+				.cp_size_angle_to_remove = False,
+				.nb_loops_uncross_segments = False,
+			}
+		},
 		.square_width = 40,
-		.num_clos_check = 0,
-		.select = False,
-		.size = 500,
+		.num_closest_cp = 0,
+		.select = false,
+		.size = 600,
 		.selectx = 0,
 		.selecty = 0,
 	};
-	if (CREATE_MAP_AUTO) {
-		create_alea_road(&road);
-	} else {
-		create_fixe_road(&road);
-	}
+
+	create_road(&road);
 
 
 	// TODO : passer car, key et ia en pointeur et les allouer.
@@ -65,16 +77,13 @@ int main(void) {
 	Player player[NB_OF_PLAYERS];
 	for (int i = 0; i < NB_OF_PLAYERS; ++i) {
 		// init struct Entity
+		player[i].car.turn = TURN;
 		init_car(&player[i].car, renderer, i);
 		// init struct Keys_pressed;
-		player[i].key.up = False;
-		player[i].key.down = False;
-		player[i].key.left = False;
-		player[i].key.right = False;
-		player[i].key.drift = none;
+		release_the_keys(&player[i].key);
 		//init cp
 		player[i].cp.nb_valid_checkPoints = 0;
-		init_player_cp(&player[i].cp, road.len_tab_checkPoints);
+		init_player_cp(&player[i].cp, road.len_tab_cp);
 		//init struct Ia;
 		if (!init_player_ia(&player[i].ia, (i == 0)))
 			goto Quit;
@@ -82,6 +91,8 @@ int main(void) {
 			init_ia(player[i].ia, &road, &player[i].car, &player[i].cp);
 		}
 	}
+
+    uncross_and_remove(&road, player);
 
 	//init struct Camera;
 	Camera cam = {
@@ -108,14 +119,15 @@ int main(void) {
 	if (init_background(renderer, &bg) == EXIT_FAILURE)
 		goto Quit_texture;
 
-	//init struct Toolbar;
-	Toolbar toolbar = {
-		.select_var_int = NULL,
-		.select_var_float = NULL
+	//init CallBack
+	Callback callback = {
+		.create_road = False
 	};
-
-	if (init_toolbar(&toolbar, renderer, &player[0].car, &road, player[0].ia, &cam, &bg) == EXIT_FAILURE)
+	//init struct Toolbar;
+	Toolbar toolbar;
+	if (init_toolbar(&toolbar, renderer, &player[0].car, &road, player[0].ia, &cam, &bg, &callback) == EXIT_FAILURE)
 		goto Quit;
+
 
 	//__________________Start________________
 	int remain_time;
@@ -136,6 +148,7 @@ int main(void) {
 		remain_time = (int)lroundf(1000.f / FRAMES_PER_SECONDE + (float)lastTime - (float)SDL_GetTicks());
 		remain_time *= (int)(remain_time > 0);
 		SDL_Delay(remain_time); // wait*/
+
 		lastTime = SDL_GetTicks();
 		while (SDL_PollEvent(&event))//events
 		{
@@ -159,18 +172,17 @@ int main(void) {
 							}
 							break;
 						case SDL_BUTTON_MIDDLE:
-							if (road.len_tab_checkPoints > 0) {
+							if (road.len_tab_cp > 0) {
 								// TODO : mettre pour tous
-								del_checkPoint(&road, &event, &cam, player);
-								if (road.len_tab_checkPoints == 3) {
+								del_closest_checkPoint(&road, &event, &cam, player);
+								if (road.len_tab_cp <= 3) {
 									stop_ia(player);
 								}
 							}
-
 							break;
 						case SDL_BUTTON_RIGHT:
-							if (road.len_tab_checkPoints) {// if it exist at least 1 checkpoint
-														   // TODO : mettre pour tous
+							if (road.len_tab_cp) {// if it exist at least 1 checkpoint
+												  // TODO : mettre pour tous
 								manage_checkpoint(&road, &event, &cam, &player[0].car);
 							}
 							break;
@@ -181,30 +193,11 @@ int main(void) {
 					break;
 				case SDL_MOUSEBUTTONUP:
 					if (event.button.button == SDL_BUTTON_RIGHT) {
-						road.select = False;
+						road.select = false;
 					} else if (event.button.button == SDL_BUTTON_LEFT) {
-						toolbar.is_selecting = False;
-						if (toolbar.settings[toolbar.num_setting].type == Checkbox &&
-								toolbar.select_var_int == toolbar.settings[toolbar.num_setting].int_variable) {
-							*toolbar.settings[toolbar.num_setting].int_variable =
-								(*toolbar.settings[toolbar.num_setting].int_variable + 1) % 2;
-
-							// the box has just been checked
-							if (*toolbar.settings[toolbar.num_setting].int_variable == True) {
-								// the box is ia->active
-								if (toolbar.settings[toolbar.num_setting].int_variable == (int *) player[0].ia->active) {
-									init_ia(player[0].ia, &road, &player[0].car, &player[0].cp);
-
-								}
-								// the box has just been unchecked
-							} else {
-								// the box is ia->active
-								if (toolbar.settings[toolbar.num_setting].int_variable == (int *) &player[0].ia->active) {
-									// the ia change keys, so we need to fixe them to False
-									stop_first_ia(&player[0].key);
-								}
-							}
-							toolbar.select_var_int = NULL;
+						if (toolbar.is_selecting) {
+							// TODO: à revoir !!!
+							manage_selected_toolbar(&toolbar, &road, &cam, &callback, player);
 						}
 					}
 					break;
@@ -213,10 +206,12 @@ int main(void) {
 			}
 		}
 		if (toolbar.is_selecting) {
-			change_variable(&toolbar);
+			change_variable(&toolbar, &road);
 		}
-		clear(renderer);
-		// if rezised
+		clear(renderer); // TODO: à enlever ?
+        if (has_road_var_changed(&road))
+            regenerate_map(&road, &cam, player, &callback);
+		// if resized
 		// TODO : à mettre dans une fonction
 		SDL_GetRendererOutputSize(renderer, &(cam.winSize_w), &(cam.winSize_h));
 		cam.winSize_w -= toolbar.size.w;
@@ -237,7 +232,7 @@ int main(void) {
 		for (int i = 0; i < NB_OF_PLAYERS; ++i) {
 			// IA take control of the keys
 			// TODO : mettre avant les contrôles humains
-			if (player[i].ia->active && player[i].ia->num_next_cp != -1) {
+			if (player[i].ia->active && player[i].ia->num_next_cp != -1 && road.len_tab_cp >= 4) {
 				ia_manage_keys(player[i].ia, &player[i].key, &player[i].car, renderer, &cam, &road);
 			}
 		}
