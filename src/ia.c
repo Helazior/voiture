@@ -41,6 +41,7 @@ Ia* init_player_ia(Ia** ia, bool is_player_car) {
 	(*ia)->next_next_cp.y = 0;
 	(*ia)->go_ahead = False;
 	(*ia)->active_traj = False;
+    (*ia)->car_turn_same_direction_that_road = False;
 	// TEST
 	(*ia)->next_cp_turn = NONE;
 	return (*ia);
@@ -54,10 +55,7 @@ void init_ia(Ia* ia, Road* road, Entity* car, PlayerCP* cp){
 
 void stop_ia(Player* player){
     for (int i = 0; i < NB_OF_PLAYERS; ++i) {
-        player[i].key.up = False;
-        player[i].key.down = False;
-        player[i].key.left = False;
-        player[i].key.right = False;
+        release_the_keys(&player[i].key);
         player[i].key.drift = none;
     }
 }
@@ -90,16 +88,15 @@ static void calcul_angle_next_cp(Road* road, Ia* ia){
 	ia->next_next_cp.y = next_cp_y;
 
 	// to have the same distance between the 3 CP
-	// // TODO ça rend l'IA pire : pourquoi ?
+	// TODO ça rend l'IA pire : pourquoi ?
+	if (ia->show_simu_traj){
+		float coeff = distance(ia->next_cp.x, ia->next_cp.y, prev_cp_x, prev_cp_y) / distance(ia->next_cp.x, ia->next_cp.y, ia->next_next_cp.x, ia->next_next_cp.y);
+		next_cp_x = ia->next_cp.x + (ia->next_next_cp.x - ia->next_cp.x) * coeff;
+		next_cp_y = ia->next_cp.y + (ia->next_next_cp.y - ia->next_cp.y) * coeff;
+	}
 
-	/*if (ia->show_simu_traj){*/
-		/*float coeff = distance(ia->next_cp.x, ia->next_cp.y, prev_cp_x, prev_cp_y) / distance(ia->next_cp.x, ia->next_cp.y, ia->next_next_cp.x, ia->next_next_cp.y);*/
-		/*next_cp_x = ia->next_cp.x + (ia->next_next_cp.x - ia->next_cp.x) * coeff;*/
-		/*next_cp_y = ia->next_cp.y + (ia->next_next_cp.y - ia->next_cp.y) * coeff;*/
-	/*}*/
 
-
-	// y is inversed
+	// y is unversed
 	ia->angle_cp = atan2f(-(next_cp_y - prev_cp_y), next_cp_x - prev_cp_x);
 }
 	
@@ -124,7 +121,7 @@ static void calcul_angle_car_angle_cp(Ia* ia, Entity* car){
 
 static void calcul_angle_car_cp(Ia* ia, Entity* car){
 	ia->angle_vect_car_cp = atan2f(-(ia->next_cp.y - car->posy), ia->next_cp.x - car->posx); // angle for the vect (car.x, car.y) - (cp.x, cp.y) 
-	ia->angle_car_cp = (float)(fmod(car->angle - ia->angle_vect_car_cp + 3*PI, 2 * PI) - PI);
+	ia->angle_car_cp = (float)(fmod(car->angle - ia->angle_vect_car_cp + 3*PI, 2 * PI) - PI); // [-pi, pi]
 	//TODO!!!!!!!!!!! Faire un produit scalaire ! x0*y1 - x1*y0
 	/*printf("angle  vect car-cp = %f\n", angle_vect_car_cp);*/
 }
@@ -208,6 +205,7 @@ void calcul_next_cp(Road* road, Ia* ia, PlayerCP* cp, Entity* car){
 
 // lighter function of move_car
 static void simu_move_car(Entity* car, Keys_pressed* key){
+	// TODO: faire un truc en commun avec move_car
 	//keys_to_struct
 	if (car->speed < 1 && key->drift){
 		key->drift = none;
@@ -256,6 +254,18 @@ static Bool is_angle_negative(Ia* ia, float tolerance, Entity* car){ // car angl
 	return (ia->angle_car_angle_cp <= - tolerance);
 }
 
+/**
+ * @return if three points are listed in a counterclockwise order
+ */
+static int ccw(Coord* a, Coord* b, Coord* c) {
+    return (c->y - a->y) * (b->x - a->x) > (b->y - a->y) * (c->x - a->x);
+}
+
+static Bool is_car_turn_same_direction_as_road(Ia* ia, Turn car_turn) {
+    int is_turn_right = ccw(&ia->prev_cp, &ia->next_cp, &ia->next_next_cp);
+    return (is_turn_right && car_turn == RIGHT) || (!is_turn_right && car_turn == LEFT);
+}
+
 static void show_simu_traj(Entity* car, Camera* cam, SDL_Renderer* renderer, float centre_x, float centre_y){
     SDL_Rect rect = {
             (int)(car->posx - cam->x),
@@ -279,7 +289,7 @@ static bool calcul_went_to_cp(Entity* car, Ia* ia){
 	return (fabsf(ia->car_angle_cp) > PI / 2.0); // NOT < PI/2 => too far from the CP => no need to slow down !
 }
 
-static void simu_traj_no_line(int* forecast, int nb_iter, Entity* car, Camera* cam, Ia* ia, Keys_pressed* key, SDL_Renderer* renderer, float centre_x, float centre_y, int nb_iter_line, Road* road, Turn first_turn){
+static void simu_traj_no_line(Forecast* forecast, int nb_iter, Entity* car, Camera* cam, Ia* ia, Keys_pressed* key, SDL_Renderer* renderer, float centre_x, float centre_y, int nb_iter_line, Road* road, Turn first_turn){
 	// TODO : pour optimiser on pourrait repprendre au moment de la ligne droite !
 	// TODO : ATTENTION, il ne faut pas qu'il remonte trop ! Donc limiter la remonter
 	// TODO : laisser un peu plus decsendre ! Il freine souvent pour rien
@@ -404,159 +414,186 @@ static void simu_traj_no_line(int* forecast, int nb_iter, Entity* car, Camera* c
 	}
 }
 
-static int simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, SDL_Renderer* renderer, Camera* cam, Road* road){
-	// It is a copy of the structure not to modify it!
-	// TODO : voir si la copie est vraiment longue
-	// tant qu'il n'a pas dépassé le checkpoint (par rapport à la parpendiculaire)
-	
-	// TEST : on fait un nombre d'itération assez bas, pour qu'il fasse la stratédie que s'il n'est pas trop loin
-	float w = (float)car.frame.w * cam->zoom;
-	float h = (float)car.frame.h * cam->zoom;
-	float centre_x = car.posx + w / 2 - cam->x;
-	float centre_y = car.posy + h / 2 - cam->y;
 
-	if (ia.show_simu_traj){
-		SDL_SetRenderDrawColor(renderer, BLACK);
-	}
+/**
+ *
+ * @return What to do in the next frame (see enum "forecast")
+ */
+static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, SDL_Renderer* renderer, Camera* cam, Road* road){
+    // It is a copy of the structure to not to modify it!
+    // TODO : voir si la copie est vraiment longue
+    // tant qu'il n'a pas dépassé le checkpoint (par rapport à la perpendicular)
 
-	car.angle += car.angle_drift;
-	car_init.angle += car.angle_drift;
-	int nb_iter = 0;
-	int nb_iter_line = 0;
-	calcul_car_angle_cp(&ia, &car);
-	/*printf("__________\n%f ;%f\n", ia.angle_car_cp, ia.angle_cp); */
-	/*printf("angle = %f\n", ia.car_angle_cp); */
-	calcul_angle_car_cp(&ia, &car);
-	/*printf("ia.angle_car_angle_cp = %f\n", ia.angle_car_angle_cp); */
-	Turn first_turn;
-	// TODO :  mettre 0.01
-	if (ia.angle_car_cp < 0){
-		first_turn = LEFT;
-	} else {
-		first_turn = RIGHT;
-	}
-	key.down = False;
-	while (ia.car_angle_cp > - PI / 2 && ia.car_angle_cp < PI / 2 && (float)nb_iter <= 15*FRAMES_PER_SECONDE / car.turn){ // while he hasn't passed the cp !
-			/*key.left = False;*/
-			/*key.right = False;*/
-			/*nb_iter_line ++;*/
-			if (ia.angle_car_cp < 0.0){
-				key.left = True;
-				key.right = False;
-				if (first_turn == RIGHT){
-					nb_iter_line ++;
-				}
-			} else if (ia.angle_car_cp >= 0.0){
-				key.left = False;
-				key.right = True;
-				if (first_turn == LEFT){
-					nb_iter_line ++;
-				}
-			}
-		simu_move_car(&car, &key);
-		calcul_car_angle_cp(&ia, &car);
-		if (ia.show_simu_traj){
-			show_simu_traj(&car, cam, renderer, centre_x, centre_y);
-		}
-		nb_iter++;
-	}
-	// TODO : faire un type enum
-	int forecast = SPEED_UP; // continue to speed up
-	calcul_angle_car_cp(&ia, &car_init);
-	// 1 - the traj arrive too far from the CP
-	// TODO : [BUG][j'ai commencé un premier jet] attention, des fois quand il est près il est trop loin au lieu de trop près. checker dist car_init-car < dist car-CP
-	// to avoid to go to the bad if statement by error (to fix the bug)
-	/*printf("dist = %f\n", distance(car.posx, car.posy, car_init.posx, car_init.posy) - distance(car.posx, car.posy, ia.next_cp.x, ia.next_cp.y)); */
-	if (too_far(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)road->size * 2/6)){
-		//printf("too far\n"); 
+    float w = (float)car.frame.w * cam->zoom;
+    float h = (float)car.frame.h * cam->zoom;
+    float centre_x = car.posx + w / 2 - cam->x;
+    float centre_y = car.posy + h / 2 - cam->y;
 
+    if (ia.show_simu_traj){
+        SDL_SetRenderDrawColor(renderer, BLACK);
+    }
 
-		// 1/ not enought angle and left
-		if (ia.angle_car_cp <= 0. && is_angle_positive(&ia, 0.f, &car)){
-			/*forecast = BREAK;*/
-			// TODO : essayer en tournant à droite en freinant pour voir
-			forecast = DRIFT_RIGHT;
-		}
-		// 1/ not enought angle and right
-		else if (ia.angle_car_cp >= 0. && is_angle_negative(&ia, 0.f, &car)){
-			/*forecast = BREAK;*/
-			// TODO : essayer en tournant à gauche en freinant pour voir
-			forecast = DRIFT_LEFT;
-			// 2/ too much angle
-
-		} else if (ia.angle_car_cp >= 0. && is_angle_positive(&ia, 0.f, &car)){
-			forecast = BREAK;
-			// TODO drif if possible
-
-		} else if (ia.angle_car_cp <= 0. && is_angle_negative(&ia, 0.f, &car)){
-			forecast = BREAK;
-			// TODO drif if possible
-
-		} else {
-			printf("Error angle IA\n"); 
-		}
+    car.angle += car.angle_drift;
+    car_init.angle += car.angle_drift;
+    int nb_iter = 0;
+    int nb_iter_line = 0;
+    calcul_car_angle_cp(&ia, &car);
+    /*printf("__________\n%f ;%f\n", ia.angle_car_cp, ia.angle_cp); */
+    /*printf("angle = %f\n", ia.car_angle_cp); */
+    calcul_angle_car_cp(&ia, &car);
+    /*printf("ia.angle_car_angle_cp = %f\n", ia.angle_car_angle_cp); */
+    Turn first_turn;
+    // TODO :  mettre 0.01 ou plutôt faire avec le produit scalaire pour estimer s'il peut tomber juste
+    if (ia.angle_car_cp < 0){
+        first_turn = LEFT;
+    } else {
+        first_turn = RIGHT;
+    }
+    key.down = False;
+    // TODO faire avec clock cycle comme pour la création de route pour savoir si on a passé le CP !
+    while (ia.car_angle_cp > - PI / 2 && ia.car_angle_cp < PI / 2 && (float)nb_iter <= 15*FRAMES_PER_SECONDE / car.turn){ // while he hasn't passed the cp !
+        /*key.left = False;*/
+        /*key.right = False;*/
+        /*nb_iter_line ++;*/
+        if (ia.angle_car_cp < 0.0){
+            key.left = True;
+            key.right = False;
+            if (first_turn == RIGHT){
+                nb_iter_line ++;
+            }
+        } else if (ia.angle_car_cp >= 0.0){
+            key.left = False;
+            key.right = True;
+            if (first_turn == LEFT){
+                nb_iter_line ++;
+            }
+        }
+        simu_move_car(&car, &key);
+        calcul_car_angle_cp(&ia, &car);
+        if (ia.show_simu_traj){
+            show_simu_traj(&car, cam, renderer, centre_x, centre_y);
+        }
+        nb_iter++;
+    }
+    Forecast forecast = SPEED_UP; // continue to speed up
+    calcul_angle_car_cp(&ia, &car_init);
+    ia.car_turn_same_direction_that_road = is_car_turn_same_direction_as_road(&ia, first_turn);
+    // 1. if the car turn the same direction that the road, or in the opposite direction or straight forward
+    if (ia.car_angle_cp < 0.1) {
+        // TODO vérifier et faire les angles
+        if (too_far(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)road->size * 2/6)) {
+        } else if (too_close(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)(road->size + 1./6. + (float)car.frame.h / 2.)) && nb_iter > 0){
+        } else {
+        }
+    } else if (ia.car_turn_same_direction_that_road) {
+        if (too_far(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)road->size * 2/6)){
+        } else if (too_close(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)(road->size + 1./6. + (float)car.frame.h / 2.)) && nb_iter > 0){
+        } else {
+        }
+    } else {
+        if (too_far(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)road->size * 2/6)) {
+        } else if (too_close(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)(road->size + 1./6. + (float)car.frame.h / 2.)) && nb_iter > 0) {
+        } else {
+        }
+    }
 
 
-		// 2 - the traj arrive too close from the CP
-	} else if (too_close(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)(road->size + 1./6. + (float)car.frame.h / 2.)) && nb_iter > 0){
-		//printf("Too close \n");	
-
-		// 1/ not enought angle and left
-		if (ia.angle_car_cp <= 0. && is_angle_positive(&ia, 0.1f, &car)) {
-			/*forecast = BREAK;*/
-			// TODO : drifter
-			forecast = DRIFT_LEFT;
-		}
-		// 1/ not enought angle and right
-		else if (ia.angle_car_cp >= 0. && is_angle_negative(&ia, 0.1f, &car)) {
-			/*forecast = BREAK;*/
-			// TODO : drifter
-			forecast = DRIFT_RIGHT;
-		}
-
-		// 2/ too much angle
-
-		else if (ia.angle_car_cp >= 0. && is_angle_positive(&ia, 0.1f, &car)) {
-			printf("SPEED_UP");
-			forecast = SPEED_UP;
-		} else if (ia.angle_car_cp <= 0. && is_angle_negative(&ia, 0.1f, &car)) {
-			printf("SPEED_UP2");
-			forecast = SPEED_UP;
-
-		} else {
-			printf("On fonce !\n");
-			forecast = SPEED_UP;
-		}
 
 
-	} else if (ia.go_ahead == False){
-		// TODO Mal géré mais y a de l'idée
-		// 1/ not enought angle, cp on the left and the car have to go to the right (but first left)
-		if (is_angle_positive(&ia, 0.1, &car)){
-			/*printf("1 : angle right -> (go to left) : %f \n",ia.angle_car_angle_cp ); */
-			forecast = GO_LEFT; // left
-			simu_traj_no_line(&forecast, nb_iter, &car_init, cam, &ia, &key, renderer, centre_x, centre_y, nb_iter_line, road, first_turn);
-			// TODO : drift au lieu de freiner peut être bien
-		}
-		// 1/ not enought angle, cp on the right and the car have to go to the left (but first right)
-		else if (is_angle_negative(&ia, 0.1f, &car)){
-			/*printf("2 :  angle left -> (go to right) : %f \n",ia.angle_car_angle_cp ); */
-			forecast = GO_RIGHT; // right
-			simu_traj_no_line(&forecast, nb_iter, &car_init, cam, &ia, &key, renderer, centre_x, centre_y, nb_iter_line, road, first_turn);
-			// TODO : drift au lieu de freiner peut être bien
-		} else {
-			/*printf("3 : ok ! \n");	*/
-			forecast = SPEED_UP;
-		}
 
-	} else {
-		/*printf("go_ahead validé ! %d\n", ia.go_ahead); */
-	}
+
+// 1 - the traj arrive too far from the CP
+// TODO : [BUG][j'ai commencé un premier jet] attention, des fois quand il est près il est trop loin au lieu de trop près. checker dist car_init-car < dist car-CP
+// to avoid to go to the bad if statement by error (to fix the bug)
+    /*printf("dist = %f\n", distance(car.posx, car.posy, car_init.posx, car_init.posy) - distance(car.posx, car.posy, ia.next_cp.x, ia.next_cp.y)); */
+    if (too_far(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)road->size * 2/6)){
+        //printf("too far\n");
+
+
+        // 1/ not enough angle and left
+        if (ia.angle_car_cp <= 0. && is_angle_positive(&ia, 0.f, &car)){
+            /*forecast = BREAK;*/
+            // TODO : essayer en tournant à droite en freinant pour voir
+            forecast = DRIFT_RIGHT;
+        }
+            // 1/ not enough angle and right
+        else if (ia.angle_car_cp >= 0. && is_angle_negative(&ia, 0.f, &car)){
+            /*forecast = BREAK;*/
+            // TODO : essayer en tournant à gauche en freinant pour voir
+            forecast = DRIFT_LEFT;
+            // 2/ too much angle
+
+        } else if (ia.angle_car_cp >= 0. && is_angle_positive(&ia, 0.f, &car)){
+            forecast = BREAK;
+            // TODO drif if possible
+
+        } else if (ia.angle_car_cp <= 0. && is_angle_negative(&ia, 0.f, &car)){
+            forecast = BREAK;
+            // TODO drif if possible
+
+        } else {
+            printf("Error angle IA\n");
+        }
+
+
+        // 2 - the traj arrive too close from the CP
+        // TODO: régler les trajectoires décalé par rapport au CP
+    } else if (too_close(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)(road->size + 1./6. + (float)car.frame.h / 2.)) && nb_iter > 0){
+        //printf("Too close \n");
+
+        // 1/ not enough angle and left
+        if (ia.angle_car_cp <= 0. && is_angle_positive(&ia, 0.1f, &car)) {
+            /*forecast = BREAK;*/
+            forecast = DRIFT_LEFT;
+        }
+            // 1/ not enough angle and right
+        else if (ia.angle_car_cp >= 0. && is_angle_negative(&ia, 0.1f, &car)) {
+            /*forecast = BREAK;*/
+            forecast = DRIFT_RIGHT;
+        }
+
+            // 2/ too much angle
+
+        else if (ia.angle_car_cp >= 0. && is_angle_positive(&ia, 0.1f, &car)) {
+            printf("SPEED_UP");
+            forecast = SPEED_UP;
+        } else if (ia.angle_car_cp <= 0. && is_angle_negative(&ia, 0.1f, &car)) {
+            printf("SPEED_UP2");
+            forecast = SPEED_UP;
+
+        } else {
+            printf("On fonce !\n");
+            forecast = SPEED_UP;
+        }
+
+
+    } else if (ia.go_ahead == False){
+        // TODO Mal géré mais y a de l'idée
+        // 1/ not enought angle, cp on the left and the car have to go to the right (but first left)
+        if (is_angle_positive(&ia, 0.1f, &car)){
+            /*printf("1 : angle right -> (go to left) : %f \n",ia.angle_car_angle_cp ); */
+            forecast = GO_LEFT; // left
+            simu_traj_no_line(&forecast, nb_iter, &car_init, cam, &ia, &key, renderer, centre_x, centre_y, nb_iter_line, road, first_turn);
+            // TODO : drift au lieu de freiner peut être bien
+        }
+            // 1/ not enought angle, cp on the right and the car have to go to the left (but first right)
+        else if (is_angle_negative(&ia, 0.1f, &car)){
+            /*printf("2 :  angle left -> (go to right) : %f \n",ia.angle_car_angle_cp ); */
+            forecast = GO_RIGHT; // right
+            simu_traj_no_line(&forecast, nb_iter, &car_init, cam, &ia, &key, renderer, centre_x, centre_y, nb_iter_line, road, first_turn);
+            // TODO : drift au lieu de freiner peut être bien
+        } else {
+            /*printf("3 : ok ! \n");	*/
+            forecast = SPEED_UP;
+        }
+
+    } else {
+        /*printf("go_ahead validé ! %d\n", ia.go_ahead); */
+    }
 /*printf("forecast = %d\n", forecast); */
 /*printf("nb_iter = %d\n", nb_iter); */
-return forecast;
+    return forecast;
 }
-
 static void ia_manage_drift(Keys_pressed* key, Entity* car){
 	if (key->up){
 		key->drift = none;
@@ -616,7 +653,7 @@ void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* render
 		key->left = False;
 		key->right = True;
 	}
-	if (forecast == 6){
+	if (forecast == GO_AHEAD){
 		//printf("go_ahead actif\n");
 		ia->go_ahead = True;
 	}

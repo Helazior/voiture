@@ -8,9 +8,9 @@
 #define SHOW_SIMU_TRAJ True
 
 typedef enum{
-	LEFT,
-	RIGHT,
-	NONE,
+	LEFT=0,
+    RIGHT=1,
+	NONE=2,
 }Turn;
 
 typedef struct Ia {
@@ -19,7 +19,7 @@ typedef struct Ia {
 	Bool show_simu_traj; // active IA or not
 	Coord next_cp;
 	int num_next_cp;
-	float angle_cp; // final angle in the cp
+	float angle_cp; // final angle the car will take on the cp
 	float angle_car_angle_cp; // angle between the angle car and the final angle in the cp
 	float angle_car_cp; // angle to go to the next cp
 	float car_angle_cp; // angle (car-cp) and angle cp -> (car_cp ^ angle_cp )
@@ -31,6 +31,7 @@ typedef struct Ia {
 	Coord vect_next_cp;
 	Coord vect_car;
 	Turn next_cp_turn;
+    Bool car_turn_same_direction_that_road;
 }Ia;
 
 Ia* init_player_ia(Ia** ia, bool is_player_car);
