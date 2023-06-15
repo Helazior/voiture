@@ -144,6 +144,7 @@ typedef struct Keys_pressed {
 	Bool left;
 	Bool right;
 	enum{
+        // TODO mettre en majuscule ou première lettre en maj
 		none = 0,
 		drift_left = 1,
 		drift_right = 2

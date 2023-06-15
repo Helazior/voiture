@@ -261,9 +261,44 @@ static int ccw(Coord* a, Coord* b, Coord* c) {
     return (c->y - a->y) * (b->x - a->x) > (b->y - a->y) * (c->x - a->x);
 }
 
-static Bool is_car_turn_same_direction_as_road(Ia* ia, Turn car_turn) {
-    int is_turn_right = ccw(&ia->prev_cp, &ia->next_cp, &ia->next_next_cp);
-    return (is_turn_right && car_turn == RIGHT) || (!is_turn_right && car_turn == LEFT);
+static Bool is_car_turn_same_direction_as_road(Turn road_turn, Turn car_turn) {
+    printf("road_turn = %d, car_turn = %d\n", road_turn, car_turn);
+    //return (road_turn == RIGHT && car_turn == RIGHT) || (road_turn == LEFT && car_turn == LEFT);
+    return !road_turn ^ car_turn;
+}
+
+typedef enum {
+    INSIDE_BEND,
+    OUTSIDE_BEND,
+    GOOD_ANGLE
+} AngleAtCP;
+
+/**
+ * @return if the angle of the predictable trajectory at the CP go towards the inside ou outside of the bend
+ */
+static AngleAtCP is_angle_inside_or_outside_bend(Turn road_turn, float car_angle_at_cp, float tolerance_inside, float tolerance_outside) {
+    // TODO: je crois que dans le schéma c'est par rapport au virage de la voiture alors qu'ici par rapport à la route : changer
+    if ((road_turn == RIGHT && car_angle_at_cp > tolerance_inside) || (road_turn == LEFT && car_angle_at_cp < tolerance_inside))
+        return INSIDE_BEND;
+    else if ((road_turn == RIGHT && car_angle_at_cp < tolerance_outside || road_turn == LEFT && car_angle_at_cp > tolerance_outside))
+        return OUTSIDE_BEND;
+    return GOOD_ANGLE;
+}
+
+static Forecast drift_same_direction(Turn road_turn) {
+    return road_turn == RIGHT? DRIFT_RIGHT : DRIFT_LEFT;
+}
+
+static Forecast drift_opposite_direction(Turn road_turn) {
+    return road_turn == RIGHT? DRIFT_LEFT : DRIFT_RIGHT;
+}
+
+static Forecast turn_same_direction(Turn road_turn) {
+    return road_turn == RIGHT? GO_RIGHT : GO_LEFT;
+}
+
+static Forecast turn_opposite_direction(Turn road_turn) {
+    return road_turn == RIGHT? GO_LEFT : GO_RIGHT;
 }
 
 static void show_simu_traj(Entity* car, Camera* cam, SDL_Renderer* renderer, float centre_x, float centre_y){
@@ -276,10 +311,10 @@ static void show_simu_traj(Entity* car, Camera* cam, SDL_Renderer* renderer, flo
 
     rect.x = (int)((1 - cam->zoom) * centre_x + cam->zoom * rect.x);
     rect.y = (int)((1 - cam->zoom) * centre_y + cam->zoom * rect.y);
-	if (rect.x > 0 && rect.x < cam->winSize_w && rect.y > 0 && rect.y < cam->winSize_h){
-		// TODO : ne faire que quand c'est voiture 0, ou alors bien placer les points
-		SDL_RenderFillRect(renderer, &rect);
-	}
+    if (rect.x > 0 && rect.x < cam->winSize_w && rect.y > 0 && rect.y < cam->winSize_h){
+        // TODO : ne faire que quand c'est voiture 0, ou alors bien placer les points
+        SDL_RenderFillRect(renderer, &rect);
+    }
 }
 
 static bool calcul_went_to_cp(Entity* car, Ia* ia){
@@ -476,24 +511,114 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
         nb_iter++;
     }
     Forecast forecast = SPEED_UP; // continue to speed up
-    calcul_angle_car_cp(&ia, &car_init);
-    ia.car_turn_same_direction_that_road = is_car_turn_same_direction_as_road(&ia, first_turn);
+    float angle_of_car_at_CP_pos = ia.car_angle_cp;
+    calcul_angle_car_cp(&ia, &car_init); // re calcul the initial value
+    Turn road_turn = ccw(&ia.prev_cp, &ia.next_cp, &ia.next_next_cp);
+    ia.car_turn_same_direction_that_road = is_car_turn_same_direction_as_road(road_turn, first_turn);
     // 1. if the car turn the same direction that the road, or in the opposite direction or straight forward
-    if (ia.car_angle_cp < 0.1) {
-        // TODO vérifier et faire les angles
+    // TODO revoir too_close et too_far et faire interior_band && exterior_band
+    AngleAtCP angle_of_car_to_bend;
+    if (fabsf(ia.car_angle_cp) < 0.1) {
+        // TODO vérifier, revoir too_close avec le nb_iter
+        printf("tout droit\n");
         if (too_far(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)road->size * 2/6)) {
-        } else if (too_close(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)(road->size + 1./6. + (float)car.frame.h / 2.)) && nb_iter > 0){
+            printf(" -> Extérieur virage -> dérape même sens TODO tourne\n");
+            // TODO cas turn
+            forecast = drift_same_direction(road_turn);
+        } else if (too_close(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)(road->size * 4./6. + (float)car.frame.h / 2.)) && nb_iter > 0){
+            printf(" -> Intérieur virage -> tourne/dérape sens inverse TODO tourne\n");
+            // TODO cas turn
+            forecast = drift_opposite_direction(road_turn);
         } else {
+            printf(" -> Sur trajectoire CP -> tout droit\n");
+            forecast = SPEED_UP;
         }
     } else if (ia.car_turn_same_direction_that_road) {
+        printf("tourne même sens");
         if (too_far(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)road->size * 2/6)){
-        } else if (too_close(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)(road->size + 1./6. + (float)car.frame.h / 2.)) && nb_iter > 0){
+            printf(" -> Extérieur virage\n");
+            // TODO: angle intérieur
+
+            // TODO: faire les 3 cas
+            forecast = drift_same_direction(road_turn);
+
+        } else if (too_close(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)(road->size * 4./6. + (float)car.frame.h / 2.)) && nb_iter > 0){
+            angle_of_car_to_bend = is_angle_inside_or_outside_bend(road_turn, angle_of_car_at_CP_pos, 0.3f, 0.1f);
+            printf(" -> Intérieur virage");
+                // TODO: voir selon direction voiture
+                if (angle_of_car_to_bend == INSIDE_BEND) {
+                    printf(" -> angle trop serré -> TODO : voir selon direction voiture\n");
+                    forecast = turn_same_direction(road_turn);
+                } else {
+                    printf(" -> angle trop lâche / même angle -> aller/déraper sens inverse\n");
+                    forecast = drift_opposite_direction(road_turn);
+                }
         } else {
+            angle_of_car_to_bend = is_angle_inside_or_outside_bend(road_turn, angle_of_car_at_CP_pos, 0.5f, 0.2f);
+            printf(" -> Sur route CP");
+            if (angle_of_car_to_bend == INSIDE_BEND) {
+                printf(" -> angle trop serré -> dérapage même sens\n");
+                forecast = drift_same_direction(road_turn);
+            } else if (angle_of_car_to_bend == OUTSIDE_BEND) {
+                printf(" -> angle trop lâche -> ");
+                // TODO faire cas complémentaires
+                // TODO: ne se déclenche pas, revoir angle_of_car_at_CP_pos
+                if (fabsf(angle_of_car_at_CP_pos) < 0.4) {
+                    printf("dérapage bon sens\n");
+                    forecast = turn_same_direction(road_turn); // TODO drift dans certains cas
+                } else if (fabsf(angle_of_car_at_CP_pos) < 1.5){
+                    printf("dérapage opp sens\n");
+                    forecast = drift_opposite_direction(road_turn);
+                }
+            } else {
+                printf(" -> même angle -> virage même sens\n");
+                forecast = turn_same_direction(road_turn);
+            }
         }
     } else {
+        printf("tourne sens inverse");
+        // outside turn
         if (too_far(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)road->size * 2/6)) {
-        } else if (too_close(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)(road->size + 1./6. + (float)car.frame.h / 2.)) && nb_iter > 0) {
+            printf(" -> Extérieur virage");
+            angle_of_car_to_bend = is_angle_inside_or_outside_bend(road_turn, angle_of_car_at_CP_pos, 0.5f, 0.1f);
+            if (angle_of_car_to_bend == INSIDE_BEND) {
+                printf(" -> angle trop serré -> dérapage sens inverse TODO cas plus précis\n");
+                // TODO cas plus précis
+                forecast = drift_opposite_direction(road_turn);
+            } else if (angle_of_car_to_bend == OUTSIDE_BEND) {
+                printf(" -> angle trop lâche -> dérapage bon sens");
+                forecast = drift_same_direction(road_turn);
+            } else {
+                printf(" -> même angle -> tourner bon sens, TODO ça dépend à quel point trop loin\n");
+                forecast = drift_same_direction(road_turn);
+            }
+        } else if (too_close(&car, &ia, (int)car_init.posx, (int)car_init.posy, (float)(road->size * 4./6. + (float)car.frame.h / 2.)) && nb_iter > 0) {
+            printf(" -> Intérieur virage");
+            angle_of_car_to_bend = is_angle_inside_or_outside_bend(road_turn, angle_of_car_at_CP_pos, 0.4f, 0.1f);
+            if (angle_of_car_to_bend == INSIDE_BEND) {
+                printf(" -> angle trop serré -> dérapage sens inverse au virage\n");
+                forecast = drift_opposite_direction(road_turn);
+            } else if (angle_of_car_to_bend == OUTSIDE_BEND) {
+                printf(" -> angle trop lâche -> dérapage sens virage\n");
+                forecast = drift_same_direction(road_turn);
+            } else {
+                printf(" -> même angle -> continue à tourner sens inverse\n");
+                forecast = turn_opposite_direction(road_turn);
+            }
         } else {
+            angle_of_car_to_bend = is_angle_inside_or_outside_bend(road_turn, angle_of_car_at_CP_pos, 0.3f, 0.1f);
+            printf(" -> Sur route CP");
+            if (angle_of_car_to_bend == INSIDE_BEND) {
+                printf(" -> angle trop serré -> dérapage même sens\n");
+                forecast = drift_same_direction(road_turn);
+            } else if (angle_of_car_to_bend == OUTSIDE_BEND) {
+                printf(" -> angle trop lâche -> virage \n");
+                forecast = drift_same_direction(road_turn);
+            } else {
+                printf(" -> même angle -> virage sens inverse, mais TODO\n");
+                // TODO revoir cas plus précis
+                forecast = turn_opposite_direction(road_turn);
+            }
         }
     }
 
@@ -501,7 +626,7 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
 
 
 
-
+#if 0
 // 1 - the traj arrive too far from the CP
 // TODO : [BUG][j'ai commencé un premier jet] attention, des fois quand il est près il est trop loin au lieu de trop près. checker dist car_init-car < dist car-CP
 // to avoid to go to the bad if statement by error (to fix the bug)
@@ -590,6 +715,7 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
     } else {
         /*printf("go_ahead validé ! %d\n", ia.go_ahead); */
     }
+#endif
 /*printf("forecast = %d\n", forecast); */
 /*printf("nb_iter = %d\n", nb_iter); */
     return forecast;
