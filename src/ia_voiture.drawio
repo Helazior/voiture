@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2023-06-16T00:01:47.394Z" agent="Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/114.0" etag="h0IzWSIGD1iUX3ZmuSi4" version="21.4.0" type="github">
+<mxfile host="app.diagrams.net" modified="2023-06-17T11:39:39.905Z" agent="Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/114.0" etag="4N2osDb_MWxbTKH7hZoe" version="21.4.0" type="github">
   <diagram name="Page-1" id="5Nz___J6LYQ87e6h-gi0">
-    <mxGraphModel dx="2131" dy="2996" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="2261" dy="3128" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -347,8 +347,14 @@
         <mxCell id="3-PiMnzY5ZTK7BSDOf5m-21" value="angle très différent" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="250" y="210" width="60" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="e5JiYk6_XmeiwqI1Ji7s-1" value="revoir de d&#39;angle intérieur car je me suis trompé dans le code" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="e5JiYk6_XmeiwqI1Ji7s-1" value="revoir de d&#39;angle intérieur car je me suis trompé dans le code" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="50" y="-920" width="180" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="BD78xWxKQeKTRCKFmKYb-1" value="TODO faire plutôt par rapport à l&#39;angle" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="690" y="-470" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="BD78xWxKQeKTRCKFmKYb-2" value="TODO : À inverser et revoire" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="650" y="-960" width="60" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
