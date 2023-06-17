@@ -119,6 +119,10 @@ float dist2(float x1, float y1, float x2, float y2){
 	return pow((float)x1 - (float)x2, 2) + pow(((float)y1 - (float)y2), 2); // TODO : faire x*x au lieu de pow(x,2) pour opti
 }
 
+float dist2Coord(Coord* a, Coord* b){
+    return dist2(a->x, a->y, b->x, b->y);
+}
+
 void manage_skid_marks(Entity* car, Keys_pressed* key){
 	if (key->drift){
 		car->tab_skid_marks_x[car->pos_tab] = car->posx;

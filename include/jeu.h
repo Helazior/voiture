@@ -187,6 +187,8 @@ float distance(float x1, float y1, float x2, float y2);
 
 float dist2(float x1, float y1, float x2, float y2);
 
+float dist2Coord(Coord* a, Coord* b);
+
 void reset_valid_tab(Road* road, PlayerCP* cp, bool first_player);
 //drift
 void manage_skid_marks(Entity* car, Keys_pressed* key);

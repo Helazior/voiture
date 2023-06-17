@@ -25,6 +25,7 @@ creat-map on va créer une map automatiquement avec l'algo du voyageur de commer
 - Zoom ? puis Alt tab plusieurs fois = seg fault, se voit directement avec valgrind
 - la hitbox de la voiture ne tourne pas ?
 - mettre la caméra sur le centre de la voiture et non le coin haut gauche
+- Dans les settings si on change l'IA sans dérapage alors qu'elle y est elle ne peut plus l'enlever
 
 OPTIMISATION :
 
@@ -56,6 +57,7 @@ avec IA et sans drift :
 
 
 [AMELIORATIONS]
+- Faire une option pour des courbes logarithmiques dans les réglages. Utile pour le zoom, pour le nombre de CP etc.
 - Dans la traj d'IA -> angle_cp, mettre les checkpoints à la même distance pour avoir moins à tourner si le prochain CP est loin, et plus s'il est prêt.
 
 /*autre*/
