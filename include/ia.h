@@ -21,12 +21,13 @@ typedef struct Ia {
 	int num_next_cp;
 	float angle_cp; // final angle the car will take on the cp
 	float angle_car_angle_cp; // angle between the angle car and the final angle in the cp
-	float angle_car_cp; // angle to go to the next cp
-	float car_angle_cp; // angle (car-cp) and angle cp -> (car_cp ^ angle_cp )
+	float angle_car_cp; // angle to go to the next cp = traj_cp
+	float car_angle_cp; // angle (car-cp) and angle cp -> (car_cp ^ angle_cp ) = angle_cp
 	float angle_vect_car_cp; // angle (car-nextCP)
 	Coord prev_cp;
 	Coord next_next_cp;
 	Bool go_ahead;
+    int persist_direction;
 	Bool active_traj;
 	Coord vect_next_cp;
 	Coord vect_car;

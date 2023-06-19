@@ -46,7 +46,7 @@
 #define NB_GRID_ROW 15
 #define NB_GRID_COLUMN 27
 
-#define CAM_FOLLOW_CAR False
+#define CAM_FOLLOW_CAR True
 
 
 typedef enum {
