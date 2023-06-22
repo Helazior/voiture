@@ -20,9 +20,9 @@ typedef struct Ia {
 	Coord next_cp;
 	int num_next_cp;
 	float angle_cp; // final angle the car will take on the cp
-	float angle_car_angle_cp; // angle between the angle car and the final angle in the cp
-	float angle_car_cp; // angle to go to the next cp = traj_cp
-	float car_angle_cp; // angle (car-cp) and angle cp -> (car_cp ^ angle_cp ) = angle_cp
+	float angle_car_and_angle_cp; // angle between the angle car and the final angle in the cp = angle_car - angle_cp
+	float car_cp_and_angle_car; // angle between thr vector (car-cp) and the angle of the car -> angle to go to the next cp = traj_cp
+	float car_cp_and_angle_cp; // angle between the vector (car-cp) and the angle of the cp -> (car_cp ^ angle_cp )
 	float angle_vect_car_cp; // angle (car-nextCP)
 	Coord prev_cp;
 	Coord next_next_cp;

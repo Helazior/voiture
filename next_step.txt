@@ -9,6 +9,10 @@ creat-map on va créer une map automatiquement avec l'algo du voyageur de commer
 -mettre des commentaires pour chaque fonction et structure
 -les enums c'est en majuscule non ?
 - Faire un système de log en mode débug
+- dézoomer avec la molette
+- ctrl-clique pour bouger la map
+- pouvoir bouger la voiture
+- l'IA ne devrait pas pouvoir être perturbée par le clavier joueur
 
 
 [BUG à résoudre] :
