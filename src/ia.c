@@ -281,7 +281,7 @@ typedef enum {
  * @return if the angle of the predictable trajectory at the CP go towards the inside ou outside of the bend
  */
 static AngleAtCP is_angle_inside_or_outside_bend(Turn road_turn, double car_angle_at_cp, double tolerance_inside, double tolerance_outside) {
-    // TODO: je crois que dans le schéma c'est par rapport au virage de la voiture alors qu'ici par rapport à la route : changer
+    // TODO : voir par rapport au vecteur next_cp - next_next_cp lors des virages presque plats
 //    printf("road_turn = %d", road_turn);
     if ((road_turn == RIGHT && car_angle_at_cp > tolerance_inside) || (road_turn == LEFT && car_angle_at_cp < -tolerance_inside))
         return ANGLE_INSIDE_BEND;
@@ -559,7 +559,7 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
 //    printf("ia.angle_car_and_angle_cp = %f\n", ia.angle_car_and_angle_cp);
     calcul_angle_car_and_angle_cp(&ia, &car);
     double angle_car_have_to_turn_at_CP_pos = -ia.angle_car_and_angle_cp;
-    printf("\nangle = %f\n", angle_car_have_to_turn_at_CP_pos);
+    printf("angle = %f\n", angle_car_have_to_turn_at_CP_pos);
     calcul_car_cp_and_angle_car(&ia, &car_init); // re calcul the initial value
     ia.car_turn_same_direction_that_road =  is_car_turn_same_direction_as_road(road_turn, first_turn);
     TurnTrajectory trajectory = is_traj_in_road(road_turn, &ia, &car, road->size / 2 - car.frame.w / 2);
@@ -684,11 +684,19 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
                 break;
             case GOOD_TRAJ:
                 printf(" -> Sur route CP");
-                switch (is_angle_inside_or_outside_bend(road_turn, angle_car_have_to_turn_at_CP_pos, 0.7, 0.0)) {
+                switch (is_angle_inside_or_outside_bend(road_turn, angle_car_have_to_turn_at_CP_pos, 0.19, 0.0)) {
                     case ANGLE_INSIDE_BEND:
-                        printf(" -> angle trop serré -> dérapage même sens\n");
+                        printf(" -> angle trop serré %d %d", nb_iter_line, nb_iter);
                         // TODO tout droit ou tourne sens opposé
-                        forecast = drift_same_direction(road_turn);
+                        if (nb_iter_line) {
+                            printf(" -> nb_iter_line : dérapage même sens\n");
+                            forecast = drift_same_direction(road_turn);
+                        }
+                        else {
+                            printf(" -> tourne sens inverse\n");
+                            forecast = turn_opposite_direction(road_turn);
+                        }
+
                         break;
                     case ANGLE_OUTSIDE_BEND:
                         printf(" -> angle trop lâche -> drift opposite \n");
@@ -698,7 +706,8 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
                     case GOOD_ANGLE:
                         printf(" -> même angle -> virage sens inverse, mais TODO\n");
                         // TODO revoir cas plus précis -> se parasite avec OUTSIDE_BEND
-                        forecast = turn_same_direction(road_turn);
+//                        forecast = turn_opposite_direction(road_turn);
+                        forecast = GO_AHEAD;
                 }
         }
     }
@@ -801,7 +810,10 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
 /*printf("nb_iter = %d\n", nb_iter); */
     return forecast;
 }
+
 static void ia_manage_drift(Keys_pressed* key, Entity* car){
+    if ((key->drift == drift_left || key->drift == drift_right) && key->down) // to release break when drifting
+        key->down = none;
 	if (key->up){
 		key->drift = none;
 		car->angle += car->angle_drift;
