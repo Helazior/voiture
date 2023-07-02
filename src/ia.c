@@ -10,12 +10,12 @@
 
 typedef enum{
 	SPEED_UP=0,
-	BREAK=1,
+    GO_AHEAD=1,
 	GO_LEFT=2,
 	GO_RIGHT=3,
-	DRIFT_LEFT=4,
-	DRIFT_RIGHT=5,
-	GO_AHEAD=6,
+	DRIFT_LEFT=8,
+	DRIFT_RIGHT=16,
+    BREAK=32,
 }Forecast;
 
 
@@ -317,6 +317,10 @@ static TurnTrajectory is_traj_in_road(Turn road_turn, Ia* ia, Entity* car, float
 }
 
 
+static Forecast break_drift_opposite_direction(Turn road_turn) {
+    return road_turn == RIGHT? DRIFT_LEFT | BREAK : DRIFT_RIGHT | BREAK;
+}
+
 static Forecast drift_same_direction(Turn road_turn) {
     return road_turn == RIGHT? DRIFT_RIGHT : DRIFT_LEFT;
 }
@@ -577,9 +581,16 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
         printf("tout droit");
         switch (is_angle_inside_or_outside_bend(road_turn, angle_car_have_to_turn_at_CP_pos, 0.2, 0.0)) {
             case ANGLE_OUTSIDE_BEND:
-                printf(" -> angle trop lâche -> tourne/dérape sens inverse TODO dérape\n");
+                printf(" -> angle trop lâche -> tourne/dérape sens inverse TODO dérape");
                 // TODO cas turnA
-                forecast = turn_opposite_direction(road_turn);
+                // TODO remplacer 20 par un truc qui marche tout le temps selon les params de la map
+                if (nb_iter < 20) {
+                    printf(" -> trop prêt du CP -> tourne même sens\n");
+                    forecast = turn_same_direction(road_turn);
+                } else {
+                    printf(" -> tourne/dérape sens inverse TODO dérape\n");
+                    forecast = turn_opposite_direction(road_turn);
+                }
                 break;
             case ANGLE_INSIDE_BEND:
                 printf(" -> angle trop serré -> tourne/dérape même sens TODO dérape\n");
@@ -620,22 +631,30 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
 //                angle_car_have_to_turn_at_CP_pos = sign(angle_car_have_to_turn_at_CP_pos) * (PI - angle_car_have_to_turn_at_CP_pos);
                 switch (is_angle_inside_or_outside_bend(road_turn, angle_car_have_to_turn_at_CP_pos, 0.2, 0.0)) {
                     case ANGLE_INSIDE_BEND:
-                        printf(" -> angle trop serré -> dérapage même sens\n");
-                        forecast = drift_same_direction(road_turn);
+                        printf(" -> angle trop serré -> virage même sens\n");
+                        forecast = turn_same_direction(road_turn);
                         break;
                     case ANGLE_OUTSIDE_BEND:
                         printf(" -> angle trop lâche -> ");
                         // TODO faire cas complémentaires
-                        if (nb_iter_line) {
+                        if (nb_iter_line > 10 && nb_iter >= 20) {
                             printf("ligne donc sens inverse\n");
                             // TODO faire drift
                             // TODO ligne droite !
-                            // simuler un cas sans et un cas avec drift de la taille de la ligne pour voir ?
+                            // TODO simuler un cas sans et un cas avec drift de la taille de la ligne pour voir ?
                             forecast = turn_opposite_direction(road_turn);
+                        } else if (nb_iter_line) {
+                            if (nb_iter < 20) {
+                                printf("petite ligne && nb_iter < 20 -> dérapage même sens\n");
+                                forecast = drift_same_direction(road_turn);
+                            } else {
+                                printf("petite ligne donc même sens\n");
+                                forecast = turn_same_direction(road_turn);
+                            }
                         } else {
                             printf("TODO si vraiment trop lâche\n");
                             //TODO voir si vraiment trop lâche
-                            forecast = turn_same_direction(road_turn);
+                            forecast = drift_same_direction(road_turn);
                         }
                         break;
                     case GOOD_ANGLE:
@@ -679,8 +698,8 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
                         printf(" -> même angle -> continue à tourner sens inverse\n");
                         forecast = turn_opposite_direction(road_turn);
                 }*/
-                printf("dérapage sens inverse\n");
-                forecast = drift_opposite_direction(road_turn);
+                printf("-> dérapage sens inverse\n");
+                forecast = break_drift_opposite_direction(road_turn);
                 break;
             case GOOD_TRAJ:
                 printf(" -> Sur route CP");
@@ -699,9 +718,14 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
 
                         break;
                     case ANGLE_OUTSIDE_BEND:
-                        printf(" -> angle trop lâche -> drift opposite \n");
-                        // TODO : se parasite avec OUTSIDE_BEND
-                        forecast = drift_opposite_direction(road_turn);
+                        if (nb_iter >= 20) {
+                            printf(" -> angle trop lâche -> drift opposite \n");
+                            // TODO : se parasite avec OUTSIDE_BEND
+                            forecast = break_drift_opposite_direction(road_turn);
+                        } else {
+                            printf(" -> angle trop lâche -> trop prêt : turn same \n");
+                            forecast = turn_same_direction(road_turn);
+                        }
                         break;
                     case GOOD_ANGLE:
                         printf(" -> même angle -> virage sens inverse, mais TODO\n");
@@ -812,8 +836,6 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
 }
 
 static void ia_manage_drift(Keys_pressed* key, Entity* car){
-    if ((key->drift == drift_left || key->drift == drift_right) && key->down) // to release break when drifting
-        key->down = none;
 	if (key->up){
 		key->drift = none;
 		car->angle += car->angle_drift;
@@ -836,7 +858,7 @@ static void ia_manage_drift(Keys_pressed* key, Entity* car){
 	/*}*/
 }
 
-void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* renderer, Camera* cam, Road* road){
+void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* renderer, Camera* cam, Road* road) {
 	/*____3: move_to_cp____*/
 	// calculate the next key combinations by simulating the trajectory in advance
 	// (4 cases)
@@ -848,8 +870,8 @@ void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* render
     calcul_car_cp_and_angle_car(ia, car);
 	key->down = False;
 	key->up = True;
-	int forecast = simu_traj(*ia, *car, *car, *key, renderer, cam, road);
-	if ((forecast == BREAK && car->speed > 10) || ((forecast == DRIFT_LEFT || forecast == DRIFT_RIGHT) && car->speed > 7)){
+	Forecast forecast = simu_traj(*ia, *car, *car, *key, renderer, cam, road);
+	if ((forecast == BREAK && car->speed > 10) || ((forecast & DRIFT_LEFT) || (forecast & DRIFT_RIGHT) && car->speed > 7)) {
 		key->down = True;
 		key->up = False;
 	}
@@ -863,11 +885,11 @@ void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* render
 		key->left = False;
 		key->right = False;
 	}
-	if (forecast == GO_LEFT || forecast == DRIFT_LEFT){
+	if (forecast == GO_LEFT || (forecast & DRIFT_LEFT)){
 		/*printf("ok -> gauche %f %f %f\n", ia->angle_car_and_angle_cp, car->angle, ia->angle_cp); */
 		key->left = True;
 		key->right = False;
-	} else if (forecast == GO_RIGHT || forecast == DRIFT_RIGHT){
+	} else if (forecast == GO_RIGHT || (forecast & DRIFT_RIGHT)){
 		/*printf("ok -> droite %f %f %f\n", ia->angle_car_and_angle_cp,car->angle, ia->angle_cp ); */
 		key->left = False;
 		key->right = True;
@@ -876,7 +898,9 @@ void ia_manage_keys(Ia* ia, Keys_pressed* key, Entity* car, SDL_Renderer* render
 		//printf("go_ahead actif\n");
 		ia->go_ahead = True;
 	}
-	if (ia->drift){	
+	if (ia->drift){
+        if (!(forecast & BREAK) && ((key->drift == drift_left || key->drift == drift_right) && key->down)) // to release break when drifting
+            key->down = none;
 		ia_manage_drift(key, car);
 	}
 //    release_the_keys(key); // to debug
