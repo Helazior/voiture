@@ -89,7 +89,7 @@ static void calcul_angle_next_cp(Road* road, Ia* ia){
 	ia->next_next_cp.y = next_cp_y;
 
 	// to have the same distance between the 3 CP
-	// TODO ça rend l'IA pire : pourquoi ?
+	// TODO ça rend l'IA pire : pourquoi ? Parce que le calcul de la pos du CP n'est plus aussi correct ?
 	if (ia->show_simu_traj){
 		float coeff = distance(ia->next_cp.x, ia->next_cp.y, prev_cp_x, prev_cp_y) / distance(ia->next_cp.x, ia->next_cp.y, ia->next_next_cp.x, ia->next_next_cp.y);
 		next_cp_x = ia->next_cp.x + (ia->next_next_cp.x - ia->next_cp.x) * coeff;
@@ -132,6 +132,13 @@ static void calcul_car_cp_and_angle_cp(Ia* ia, Entity* car){
 	ia->car_cp_and_angle_cp = (float)(fmod(ia->angle_vect_car_cp - ia->angle_cp + 3 * PI, 2 * PI) - PI);
 }
 
+/**
+ * @return if three points are listed in a counterclockwise order
+ */
+static Turn ccw(Coord* a, Coord* b, Coord* c) {
+    return (c->y - a->y) * (b->x - a->x) > (b->y - a->y) * (c->x - a->x);
+}
+
 static void calcul_coord_cp(Road* road, Ia* ia, Entity* car){
 	ia->next_cp.x = (float)road->tab_cp[ia->num_next_cp].x;
 	ia->next_cp.y = (float)road->tab_cp[ia->num_next_cp].y;
@@ -146,34 +153,41 @@ static void calcul_coord_cp(Road* road, Ia* ia, Entity* car){
 
 
 	/*____3: edge cp____*/
-#if 0
+#if 1
+    // TODO faire le vrai calcul pour avoir le vrai placement et non une approximation (en vrai ça marche bien)
 	float distx = ia->prev_cp.x - ia->next_next_cp.x;
 	float disty = ia->prev_cp.y - ia->next_next_cp.y;
 	float dist = 2 * distance(ia->prev_cp.x ,ia->prev_cp.y , ia->next_next_cp.x, ia->next_next_cp.y);
 	Coord next_cp_roadside[2];
-	next_cp_roadside[0].x = ia->next_cp.x + disty * (float)road->size / dist;
-	next_cp_roadside[0].y = ia->next_cp.y - distx * (float)road->size / dist;
-	next_cp_roadside[1].x = ia->next_cp.x - disty * (float)road->size / dist;
-	next_cp_roadside[1].y = ia->next_cp.y + distx * (float)road->size / dist;
+	next_cp_roadside[0].x = ia->next_cp.x + disty * (float)road->size/2 / dist;
+	next_cp_roadside[0].y = ia->next_cp.y - distx * (float)road->size/2 / dist;
+	next_cp_roadside[1].x = ia->next_cp.x - disty * (float)road->size/2 / dist;
+	next_cp_roadside[1].y = ia->next_cp.y + distx * (float)road->size/2 / dist;
 
 	// take the biggest angle to have the inside of the turn
-	// TODO c'est la version super basique, il faut aussi le faire avec le next, et si l'intersection arrive au milieu de la route, calculer l'intersection pour bien placer le CP.
 	// TODO mieux, selon l'angle et la vitesse de la voiture, mettre le CP à un autre endroit
-	float dist_prev0 = dist2(next_cp_roadside[0].x, next_cp_roadside[0].y,  ia->prev_cp.x, ia->prev_cp.y);
-	float dist_prev1 = dist2(next_cp_roadside[1].x, next_cp_roadside[1].y,  ia->prev_cp.x, ia->prev_cp.y);
-	float dist_next0 = dist2(next_cp_roadside[0].x, next_cp_roadside[0].y,  ia->next_next_cp.x, ia->next_next_cp.y);
-	float dist_next1 = dist2(next_cp_roadside[1].x, next_cp_roadside[1].y,  ia->next_next_cp.x, ia->next_next_cp.y);
+
 	ia->active_traj = True;
-	if (dist_prev0 < dist_prev1 && dist_next0 < dist_next1){
-		// mean (a+b)/2 = a - (a-b)/2
-		ia->next_cp.x = (float)(next_cp_roadside[0].x - (next_cp_roadside[0].x - ia->next_cp.x) / 6.);
-		ia->next_cp.y = (float)(next_cp_roadside[0].y - (next_cp_roadside[0].y - ia->next_cp.y) / 6.);
-	} else if (dist_prev0 > dist_prev1 && dist_next0 > dist_next1){
-		ia->next_cp.x = (float)(next_cp_roadside[1].x - (next_cp_roadside[1].x - ia->next_cp.x) / 6.);
-		ia->next_cp.y = (float)(next_cp_roadside[1].y - (next_cp_roadside[1].y - ia->next_cp.y) / 6.);
-	} else {
-		ia->active_traj = False;
-	}
+    Turn road_turn = ccw(&ia->prev_cp, &ia->next_cp, &ia->next_next_cp);
+    Turn edge_turn;
+    if (road_turn == RIGHT) {
+        edge_turn = ccw(&ia->prev_cp, &next_cp_roadside[0], &ia->next_next_cp);
+    } else if (road_turn == LEFT) {
+        edge_turn = ccw(&ia->prev_cp, &next_cp_roadside[1], &ia->next_next_cp);
+    }
+    if (road_turn == edge_turn && road->size > 2 * car->frame.w) {
+        if (road_turn == RIGHT) {
+            // mean (a+b)/2 = a - (a-b)/2
+            ia->next_cp.x += disty * (float)(road->size - car->frame.w - 1) / dist;
+            ia->next_cp.y -= distx * (float)(road->size - car->frame.w - 1) / dist;
+        } else if (road_turn == LEFT) {
+            ia->next_cp.x -= disty * (float)(road->size - car->frame.w - 1) / dist;
+            ia->next_cp.y += distx * (float)(road->size - car->frame.w - 1) / dist;
+        }
+    }
+    else {
+        ia->active_traj = False;
+    }
 #endif
 }
 
@@ -259,12 +273,7 @@ static Bool is_angle_negative(Ia* ia, float tolerance, Entity* car){ // car angl
 	return (ia->angle_car_and_angle_cp <= - tolerance);
 }
 
-/**
- * @return if three points are listed in a counterclockwise order
- */
-static int ccw(Coord* a, Coord* b, Coord* c) {
-    return (c->y - a->y) * (b->x - a->x) > (b->y - a->y) * (c->x - a->x);
-}
+
 
 static Bool is_car_turn_same_direction_as_road(Turn road_turn, Turn car_turn) {
 //    printf("road_turn = %d, car_turn = %d\n", road_turn, car_turn);
@@ -306,14 +315,14 @@ static TurnTrajectory is_traj_in_road(Turn road_turn, Ia* ia, Entity* car, float
     // Si non -> regarde ccw pour voir si à gauche ou à droite -> compare avec le virage -> retourne si c'est à l'intérieur ou extérieur.
     // Donc ccw des 3 cp pour road_turn, ccw de l'ancien CP, le prochain CP et la simulation pour savoir si on arrive à droite ou gauche.
     Coord pos_car = {car->posx, car->posy};
-    int car_pos_at_cp = ccw(&ia->prev_cp, &ia->next_cp, &pos_car);
+    Turn car_pos_at_cp = ccw(&ia->prev_cp, &ia->next_cp, &pos_car);
 //    printf("\nroad_turn = %d, \n");
-    if (dist2Coord(&ia->next_cp, &pos_car) < tolerance * tolerance)
-        return GOOD_TRAJ;
-    else if (road_turn == car_pos_at_cp)
+    float dist2_car_cp = dist2Coord(&ia->next_cp, &pos_car);
+    if (road_turn == car_pos_at_cp && dist2_car_cp > (float)(car->frame.w * car->frame.w / 4)) // TODO changer
         return TRAJ_INSIDE_BEND;
-    else
+    else if (road_turn != car_pos_at_cp && dist2_car_cp > tolerance * tolerance)
         return TRAJ_OUTSIDE_BEND;
+    return GOOD_TRAJ;
 }
 
 
@@ -364,6 +373,7 @@ static int sign(double a) {
     return 1 - (a <= 0) - (a < 0);
 }
 
+#if 0
 static void simu_traj_no_line(Forecast* forecast, int nb_iter, Entity* car, Camera* cam, Ia* ia, Keys_pressed* key, SDL_Renderer* renderer, float centre_x, float centre_y, int nb_iter_line, Road* road, Turn first_turn){
 	// TODO : pour optimiser on pourrait repprendre au moment de la ligne droite !
 	// TODO : ATTENTION, il ne faut pas qu'il remonte trop ! Donc limiter la remonter
@@ -372,12 +382,12 @@ static void simu_traj_no_line(Forecast* forecast, int nb_iter, Entity* car, Came
 	float car_initx = car->posx;
 	float car_inity = car->posy;
 
-	if (ia->show_simu_traj){
-		SDL_SetRenderDrawColor(renderer, RED);
-	}
+    if (ia->show_simu_traj){
+        SDL_SetRenderDrawColor(renderer, RED);
+    }
 	bool have_time_to_turn = (nb_iter - 3 * nb_iter_line < 0);
 	/*printf("nb_iter = %d | 3*nb_iter_line = %d\n\n", nb_iter, 3 * nb_iter_line); */
-	bool zero_turn = (nb_iter_line <= 1); // TODO!!! 1 or 0 ?
+    bool zero_turn = (nb_iter_line <= 1); // TODO!!! 1 or 0 ?
 	int nb_iter_second_turn = 2 * nb_iter_line;
 
 	while (nb_iter > 2 * nb_iter_line){ // while he hasn't began the straight line
@@ -488,7 +498,7 @@ static void simu_traj_no_line(Forecast* forecast, int nb_iter, Entity* car, Came
 		*forecast = GO_AHEAD;
 	}
 }
-
+#endif
 
 /**
  *
@@ -566,7 +576,7 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
     printf("angle = %f\n", angle_car_have_to_turn_at_CP_pos);
     calcul_car_cp_and_angle_car(&ia, &car_init); // re calcul the initial value
     ia.car_turn_same_direction_that_road =  is_car_turn_same_direction_as_road(road_turn, first_turn);
-    TurnTrajectory trajectory = is_traj_in_road(road_turn, &ia, &car, road->size / 2 - car.frame.w / 2);
+    TurnTrajectory trajectory = is_traj_in_road(road_turn, &ia, &car, road->size / 2);
     // 1. if the car turn the same direction that the road, or in the opposite direction or straight forward
     // TODO revoir too_close et too_far et faire interior_band && exterior_band
     if (behind_cp) {
@@ -579,7 +589,7 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
 
     } else if (fabsf(ia.car_cp_and_angle_car) < 0.1) {
         printf("tout droit");
-        switch (is_angle_inside_or_outside_bend(road_turn, angle_car_have_to_turn_at_CP_pos, 0.2, 0.0)) {
+        switch (is_angle_inside_or_outside_bend(road_turn, angle_car_have_to_turn_at_CP_pos, 0.1, 0.0)) {
             case ANGLE_OUTSIDE_BEND:
                 printf(" -> angle trop lâche -> tourne/dérape sens inverse TODO dérape");
                 // TODO cas turnA
@@ -620,7 +630,7 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
                         printf(" -> angle trop serré -> TODO : voir selon direction voiture\n");
                         forecast = turn_same_direction(road_turn);
                         break;
-                    case ANGLE_OUTSIDE_BEND:
+                    case ANGLE_OUTSIDE_BEND: // TODO: ça dépend, faire plusieurs cas
                     case GOOD_ANGLE:
                         printf(" -> angle trop lâche / même angle -> aller/déraper sens inverse\n");
                         forecast = drift_opposite_direction(road_turn);
@@ -637,15 +647,15 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
                     case ANGLE_OUTSIDE_BEND:
                         printf(" -> angle trop lâche -> ");
                         // TODO faire cas complémentaires
-                        if (nb_iter_line > 10 && nb_iter >= 20) {
+                        if (nb_iter_line > 10 && nb_iter >= 15) {
                             printf("ligne donc sens inverse\n");
                             // TODO faire drift
                             // TODO ligne droite !
                             // TODO simuler un cas sans et un cas avec drift de la taille de la ligne pour voir ?
                             forecast = turn_opposite_direction(road_turn);
                         } else if (nb_iter_line) {
-                            if (nb_iter < 20) {
-                                printf("petite ligne && nb_iter < 20 -> dérapage même sens\n");
+                            if (nb_iter < 15) {
+                                printf("petite ligne && nb_iter < 15 -> drift même sens\n");
                                 forecast = drift_same_direction(road_turn);
                             } else {
                                 printf("petite ligne donc même sens\n");
@@ -707,13 +717,13 @@ static Forecast simu_traj(Ia ia, Entity car, Entity car_init, Keys_pressed key, 
                     case ANGLE_INSIDE_BEND:
                         printf(" -> angle trop serré %d %d", nb_iter_line, nb_iter);
                         // TODO tout droit ou tourne sens opposé
-                        if (nb_iter_line) {
+                        if (nb_iter_line > 5) { // TODO à régler
                             printf(" -> nb_iter_line : dérapage même sens\n");
                             forecast = drift_same_direction(road_turn);
                         }
                         else {
-                            printf(" -> tourne sens inverse\n");
-                            forecast = turn_opposite_direction(road_turn);
+                            printf(" -> drift sens inverse\n");
+                            forecast = drift_opposite_direction(road_turn);
                         }
 
                         break;
