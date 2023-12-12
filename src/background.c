@@ -87,7 +87,7 @@ int init_toolbar(Toolbar* toolbar, SDL_Renderer *renderer, Entity* car, Road* ro
     Visible_setting null_setting = {" ", NULL, NULL, 0, 0, Empty};
     Visible_setting sub_settings[][NB_SETTINGS] = {
             {
-                    {"IA:", (int*)&ia->active, NULL, 0, 1, Checkbox},
+                    {"IA:",	(int*)&ia->active, NULL, 0, 1, Checkbox},
                     {"IA drift:", (int*)&ia->drift, NULL, 0, 1, Checkbox},
                     {"IA show simu traj:", (int*)&ia->show_simu_traj, NULL, 0, 1, Checkbox},
                     {"Cam follow car:", (int*)&cam->follow_car, NULL, 0, 1, Checkbox},
